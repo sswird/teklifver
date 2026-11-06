@@ -74,8 +74,8 @@ html[data-theme='dark'] .theme-toggle .when-light { display: none; }
 
 .topbar-login { display: inline-flex; align-items: center; font-weight: 500; color: var(--on-dark) !important; }
 .topbar-login:hover { text-decoration: underline; }
-.topbar-register { display: inline-flex; align-items: center; background: var(--accent); color: var(--accent-ink) !important; font-weight: 700; padding: 3px 12px; border-radius: var(--radius); text-decoration: none; }
-.topbar-register:hover { background: var(--accent-dark); text-decoration: none; }
+.topbar-register { display: inline-flex; align-items: center; background: var(--tile-a); color: #04211f !important; font-weight: 700; padding: 3px 12px; border-radius: 999px; text-decoration: none; }
+.topbar-register:hover { background: #2bc0bc; text-decoration: none; }
 
 .menu { position: relative; }
 .menu-button { display: inline-flex; align-items: center; gap: 4px; padding: 0; background: none; border: 0; color: var(--on-dark); font-weight: 600; font-size: 13px; cursor: pointer; }
@@ -135,8 +135,8 @@ html[data-theme='dark'] .theme-toggle .when-light { display: none; }
 .form-error { padding: 9px 12px; background: var(--err-bg); border: 1px solid var(--err-line); border-radius: var(--radius); color: var(--err-text); }
 
 /* Paneller */
-.box { margin-bottom: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
-.box-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 14px 8px; border-bottom: 1px solid var(--line); font: 600 19px/1.2 var(--font-head); }
+.box { margin-bottom: 14px; background: var(--surface); border: 0; border-radius: var(--radius); box-shadow: var(--card-shadow); }
+.box-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 11px 16px 9px; border-bottom: 1px solid var(--line-soft); font: 600 19px/1.2 var(--font-head); }
 h2.box-head { margin: 0; }
 .box-head a { font: 400 13px/1.3 var(--font); }
 .box-body { padding: 14px; }
@@ -187,7 +187,7 @@ details:not([open]) > summary.box-head { border-bottom: 0; }
 .pagination a:hover { background: var(--head); text-decoration: none; }
 
 .filter-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 14px; border-bottom: 1px solid var(--line-soft); }
-.filter-chip { padding: 2px 8px; background: var(--selected); border: 1px solid var(--selected-line); border-radius: 2px; color: var(--text); font-size: 13px; }
+.filter-chip { padding: 2px 10px; background: var(--selected); border: 1px solid var(--selected-line); border-radius: 999px; color: var(--text); font-size: 13px; }
 .filter-chip:hover { background: var(--head); border-color: var(--control-border); text-decoration: none; }
 .filter-clear { margin-left: 4px; font-size: 13px; }
 
@@ -213,12 +213,12 @@ details:not([open]) > summary.box-head { border-bottom: 0; }
 .listing-bids b { color: var(--text); font-weight: 600; }
 
 /* Bütçe: küçük bir fiyat etiketi */
-.price-tag { position: relative; display: inline-block; padding: 2px 9px 2px 17px; background: var(--tag-bg); color: var(--tag-text); clip-path: polygon(9px 0, 100% 0, 100% 100%, 9px 100%, 0 50%); font: 600 17px/1.25 var(--font-head); white-space: nowrap; }
+.price-tag { position: relative; display: inline-block; padding: 2px 12px; background: var(--tag-bg); color: var(--tag-text); border-radius: 999px; font: 600 17px/1.25 var(--font-head); white-space: nowrap; }
 .price-tag::before { content: ""; position: absolute; left: 9px; top: 50%; width: 4px; height: 4px; margin-top: -2px; background: var(--surface); border-radius: 50%; }
 .price-tag.is-open { background: none; clip-path: none; padding-left: 0; color: var(--muted); font: 400 13px/1.3 var(--font); white-space: normal; }
 .price-tag.is-open::before { display: none; }
 
-.thumb { position: relative; display: block; width: 84px; height: 63px; background: var(--head); border-radius: 2px; overflow: hidden; }
+.thumb { position: relative; display: block; width: 84px; height: 63px; background: var(--head); border-radius: var(--radius-sm); overflow: hidden; }
 .thumb img { width: 100%; height: 100%; object-fit: cover; }
 .thumb-sm { flex: none; width: 64px; height: 48px; }
 .no-photo { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding-inline: 8px; color: var(--muted); font-size: 12px; line-height: 1.15; text-align: center; }
@@ -230,7 +230,7 @@ details:not([open]) > summary.box-head { border-bottom: 0; }
 .fav:hover, .fav.is-active { color: var(--red); }
 .fav.is-active .icon { fill: currentColor; }
 
-.label { display: inline-block; margin-left: 5px; padding: 0 5px; border-radius: 2px; font-size: 11px; font-weight: 700; line-height: 16px; letter-spacing: 0.02em; color: #fff; vertical-align: 2px; }
+.label { display: inline-block; margin-left: 5px; padding: 0 7px; border-radius: 999px; font-size: 11px; font-weight: 700; line-height: 16px; letter-spacing: 0.02em; color: #fff; vertical-align: 2px; }
 .label-urgent { background: var(--urgent); }
 .label-new { background: #14713a; }
 .label-on-photo { position: absolute; left: 0; top: 0; margin: 0; border-radius: 0; }
@@ -247,23 +247,23 @@ details:not([open]) > summary.box-head { border-bottom: 0; }
 .showcase-item { display: block; color: var(--text); }
 .showcase-item:hover { text-decoration: none; }
 .showcase-item:hover .showcase-title { text-decoration: underline; }
-.showcase-photo { position: relative; aspect-ratio: 4 / 3; background: var(--head); border-radius: 2px; overflow: hidden; }
+.showcase-photo { position: relative; aspect-ratio: 4 / 3; background: var(--head); border-radius: var(--radius-sm); overflow: hidden; }
 .showcase-photo img { width: 100%; height: 100%; object-fit: cover; }
 .showcase-title { display: -webkit-box; margin-top: 6px; min-height: 37px; overflow: hidden; color: var(--link); font-size: 14px; line-height: 1.3; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .showcase-price { margin-top: 1px; font: 600 16px/1.25 var(--font-head); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Ana sayfa */
 .layout-home { display: grid; grid-template-columns: 214px minmax(0, 1fr) 252px; gap: 14px; align-items: start; }
-.composer { margin-bottom: 14px; padding: 16px 18px 13px; background: var(--accent); border-radius: var(--radius); color: var(--accent-ink); }
+.composer { margin-bottom: 14px; padding: 20px 22px 16px; background: linear-gradient(90deg, var(--mainbar) 42%, transparent 92%), var(--cini-star) right top / 56px 56px repeat, var(--mainbar); border-radius: var(--radius); color: var(--on-dark); }
 .composer h1 { margin-bottom: 10px; font-size: 30px; }
 .composer-row { display: flex; gap: 8px; }
-.composer-row .input, .composer-row .select { min-height: 42px; background: #fff; border-color: var(--accent-line); color: #1c1e21; font-size: 16px; }
+.composer-row .input, .composer-row .select { min-height: 44px; background: #fff; border-color: transparent; color: #13213c; font-size: 16px; }
 .composer-row .input { flex: 1; min-width: 0; }
-.composer-row .input::placeholder { color: #5f646b; }
+.composer-row .input::placeholder { color: #55627a; }
 .composer-row .select { flex: none; width: 128px; }
-.composer-row .btn { min-height: 42px; padding-inline: 20px; background: #1c1e21; border-color: #1c1e21; color: #fff; font-size: 15px; }
-.composer-row .btn:hover { background: #3b3f44; }
-.composer-row .input:focus, .composer-row .select:focus { outline: 2px solid #1c1e21; outline-offset: 0; border-color: #1c1e21; }
+.composer-row .btn { min-height: 44px; padding-inline: 22px; background: var(--tile-a); border-color: var(--tile-a); color: #04211f; font-size: 15px; font-weight: 700; }
+.composer-row .btn:hover { background: #2bc0bc; border-color: #2bc0bc; }
+.composer-row .input:focus, .composer-row .select:focus { outline: 3px solid var(--tile-a); outline-offset: 0; }
 .composer-note { margin-top: 9px; font-size: 14px; }
 .composer-quick { margin-top: 3px; font-size: 14px; }
 .composer a { color: inherit; text-decoration: underline; }
@@ -319,7 +319,7 @@ details:not([open]) > summary.box-head { border-bottom: 0; }
 .field-hint { color: var(--muted); font-size: 13px; }
 .field-hint.is-ok { color: var(--green); }
 .field-error { color: var(--red); font-size: 13px; }
-.input, .select, .textarea { width: 100%; min-height: 36px; padding: 6px 9px; background: var(--control-bg); border: 1px solid var(--control-border); border-radius: var(--radius); color: var(--text); font-size: 15px; }
+.input, .select, .textarea { width: 100%; min-height: 36px; padding: 6px 9px; background: var(--control-bg); border: 1px solid var(--control-border); border-radius: var(--radius-sm); color: var(--text); font-size: 15px; }
 .input:focus, .select:focus, .textarea:focus { border-color: var(--link); outline: 1px solid var(--link); outline-offset: 0; }
 .input:disabled { background: var(--head); color: var(--muted); }
 .textarea { resize: vertical; min-height: 110px; line-height: 1.4; }
@@ -707,31 +707,60 @@ label.upload-thumb:has(input:checked) .thumb-remove { background: var(--red); }
 .plan-form { display: inline-flex; gap: 4px; }
 .select-sm { min-height: 28px; padding: 2px 24px 2px 6px; font-size: 13px; }
 
-/* Fiyat panosu: sitede verilen tekliflerden, borsa tabelası gibi */
-.price-board { margin-bottom: 14px; background: var(--topbar); color: var(--on-dark); border-radius: var(--radius); overflow: hidden; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06); }
-.price-board-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 9px 12px 7px; border-bottom: 3px solid var(--accent); }
-.price-board-head h2 { color: var(--accent); font: 700 20px/1 var(--font-head); letter-spacing: 0.05em; text-transform: uppercase; }
-.price-board-head span { color: var(--on-dark-soft); font-size: 12px; }
+/* Fiyat panosu: sitede verilen tekliflerin orta aralığı */
+.price-board { margin-bottom: 14px; background: var(--surface); color: var(--text); border-radius: var(--radius); box-shadow: var(--card-shadow); overflow: hidden; }
+.price-board-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 11px 14px 8px; border-bottom: 3px solid var(--accent); background: var(--cini-strip) left bottom / 24px 6px repeat-x; }
+.price-board-head h2 { color: var(--ink); font: 700 20px/1 var(--font-head); letter-spacing: 0.04em; text-transform: uppercase; }
+.price-board-head span { color: var(--muted); font-size: 12px; }
 .price-board-rows { margin: 0; padding: 0; list-style: none; }
-.price-board-rows li { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 8px; padding: 7px 12px; border-top: 1px solid rgb(255 255 255 / 0.08); }
+.price-board-rows li { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 8px; padding: 8px 14px; border-top: 1px solid var(--line-soft); }
 .price-board-rows li:first-child { border-top: 0; }
-.price-board-rows li:hover { background: rgb(255 255 255 / 0.04); }
-.price-board-rows a { color: var(--on-dark); font-size: 14px; font-weight: 600; }
+.price-board-rows li:hover { background: var(--hover); }
+.price-board-rows a { color: var(--text); font-size: 14px; font-weight: 600; }
 .price-board-rows a::after { content: ""; position: absolute; inset: 0; }
-.price-board-rows a:hover { color: var(--on-dark); text-decoration: none; }
+.price-board-rows a:hover { color: var(--text); text-decoration: none; }
 .price-board-rows a:focus-visible { outline: none; }
 .price-board-rows a:focus-visible::after { outline: 2px solid var(--accent); outline-offset: -2px; }
-.price-board-range { grid-column: 1; color: var(--accent); font: 600 19px/1.15 var(--font-head); font-variant-numeric: tabular-nums; letter-spacing: 0.01em; }
-.price-board-count { grid-column: 2; grid-row: 1 / span 2; align-self: center; color: var(--on-dark-soft); font-size: 12px; white-space: nowrap; }
-.price-board-note { padding: 8px 12px 10px; border-top: 1px solid rgb(255 255 255 / 0.08); color: var(--on-dark-soft); font-size: 12px; }
-.price-board-note a { position: relative; z-index: 1; color: var(--on-dark); text-decoration: underline; }
-.composer-lead { margin: -4px 0 10px; font-size: 15px; }
+.price-board-range { grid-column: 1; color: var(--tag-text); font: 700 19px/1.15 var(--font-head); font-variant-numeric: tabular-nums; }
+.price-board-count { grid-column: 2; grid-row: 1 / span 2; align-self: center; padding: 1px 8px; background: var(--accent-soft); border-radius: 999px; color: var(--tag-text); font-size: 12px; white-space: nowrap; }
+.price-board-note { padding: 8px 14px 11px; border-top: 1px solid var(--line-soft); color: var(--muted); font-size: 12px; }
+.price-board-note a { position: relative; z-index: 1; color: var(--link); text-decoration: underline; }
+.composer-lead { margin: -4px 0 12px; color: var(--on-dark-soft); font-size: 15px; }
 
 .price-board-feed { display: none; }
 
 /* Altbilgi üstünde sarı-siyah iş şeridi */
 .site-footer { position: relative; }
-.site-footer::before { content: ""; position: absolute; inset: 0 0 auto; height: 6px; background: repeating-linear-gradient(-45deg, var(--accent) 0 12px, transparent 12px 24px); }
+.site-footer::before { content: ""; position: absolute; inset: 0 0 auto; height: 6px; background: var(--cini-strip) left top / 24px 6px repeat-x; }
+
+/* Çini: desenler ve küçük dokunuşlar */
+:root {
+  /* Yan yana turkuaz ve mavi baklavalar */
+  --cini-strip: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='6' viewBox='0 0 24 6'%3E%3Cpath d='M6 0l6 3-6 3-6-3z' fill='%2313a3a0'/%3E%3Cpath d='M18 0l6 3-6 3-6-3z' fill='%233f7bd6'/%3E%3C/svg%3E");
+  /* Sekiz köşeli Selçuklu yıldızı */
+  --cini-star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%2313a3a0' stroke-opacity='.4' stroke-width='1.4'%3E%3Crect x='17' y='17' width='22' height='22'/%3E%3Crect x='17' y='17' width='22' height='22' transform='rotate(45 28 28)'/%3E%3Ccircle cx='28' cy='28' r='4.5'/%3E%3Cpath d='M0 0l6 6M56 0l-6 6M0 56l6-6M56 56l-6-6'/%3E%3C/g%3E%3C/svg%3E");
+}
+.mainbar { position: relative; }
+.mainbar::after { content: ""; position: absolute; inset: auto 0 0; height: 6px; background: var(--cini-strip) left top / 24px 6px repeat-x; }
+.mainbar-inner { padding-bottom: 16px; }
+.catnav { border-bottom: 1px solid var(--line-soft); box-shadow: 0 1px 2px rgb(15 38 80 / 0.04); }
+.catnav-link.is-active { box-shadow: inset 0 -3px 0 var(--accent); }
+.searchbar input { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.searchbar button { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; background: var(--tile-a); color: #04211f; font-weight: 700; }
+.searchbar button:hover { background: #2bc0bc; }
+.btn { border-radius: var(--radius-sm); }
+.post-button { background: var(--tile-a); border-color: var(--tile-a); color: #04211f; font-weight: 700; }
+.post-button:hover { background: #2bc0bc; border-color: #2bc0bc; }
+.logo-tag { background: var(--tile-a); color: #04211f; }
+.composer h1 { color: #fff; }
+.composer { box-shadow: var(--card-shadow); }
+.composer-note { color: var(--on-dark-soft); }
+.composer-quick { color: var(--on-dark-soft); }
+.composer a { color: #fff; }
+.side-list a { border-radius: var(--radius-sm); margin-inline: 6px; padding-inline: 8px; }
+.listing-table tbody tr:hover { background: var(--hover); }
+.unread-count { border-radius: 999px; }
+.tip-box, .dropzone, .alert, .form-error, .form-note, .side-card { border-radius: var(--radius-sm); }
 
 /* Küçülen ekranlar */
 /* Kategori satırı sığmayan başlıkları bırakır; hepsi "Tümü" altında bulunur. */
@@ -759,7 +788,7 @@ label.upload-thumb:has(input:checked) .thumb-remove { background: var(--red); }
   .price-board-rail { display: none; }
   .price-board-feed { display: block; }
   .price-board-feed .price-board-rows { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; }
-  .price-board-feed .price-board-rows li { flex: 0 0 auto; min-width: 168px; scroll-snap-align: start; border-top: 0; border-left: 1px solid rgb(255 255 255 / 0.08); }
+  .price-board-feed .price-board-rows li { flex: 0 0 auto; min-width: 176px; scroll-snap-align: start; border-top: 0; border-left: 1px solid var(--line-soft); }
   .price-board-feed .price-board-rows li:first-child { border-left: 0; }
   .admin-actions { width: auto; }
   .thread-hint { display: none; }
