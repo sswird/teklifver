@@ -1,0 +1,133 @@
+/* TeklifVer teması: renkler, yazı tipleri ve ölçüler burada.
+   "Çini": lacivert üst bant, turkuaz vurgu, ferah beyaz kartlar. Turkuaz ana eylem ve markadır,
+   bağlantılar mavi, fiyatlar turkuaz zeminli yuvarlak etiketlerde durur.
+   "turkce" yazı tipi dosyaları yalnızca ğ, ş ve İ harflerini taşır, sayfa bu yüzden hızlı açılır. */
+
+@font-face { font-family: "Source Sans 3"; font-style: normal; font-weight: 200 900; font-display: swap; src: url("../fonts/source-sans-3-latin-wght-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Source Sans 3"; font-style: normal; font-weight: 200 900; font-display: swap; src: url("../fonts/source-sans-3-turkce-wght-normal.woff2") format("woff2"); unicode-range: U+011E-011F, U+0130, U+015E-015F, U+20BA; }
+@font-face { font-family: "Barlow Condensed"; font-style: normal; font-weight: 600; font-display: swap; src: url("../fonts/barlow-condensed-latin-600-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Barlow Condensed"; font-style: normal; font-weight: 600; font-display: swap; src: url("../fonts/barlow-condensed-turkce-600-normal.woff2") format("woff2"); unicode-range: U+011E-011F, U+0130, U+015E-015F, U+20BA; }
+@font-face { font-family: "Barlow Condensed"; font-style: normal; font-weight: 700; font-display: swap; src: url("../fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Barlow Condensed"; font-style: normal; font-weight: 700; font-display: swap; src: url("../fonts/barlow-condensed-turkce-700-normal.woff2") format("woff2"); unicode-range: U+011E-011F, U+0130, U+015E-015F, U+20BA; }
+
+:root {
+  --bg: #f2f5f9;
+  --surface: #fff;
+  --text: #13213c;
+  --text-soft: #2c3b58;
+  --muted: #55627a;
+  --line: #dde3ec;
+  --line-soft: #edf1f6;
+  --head: #f6f8fc;
+  --hover: #f1f8f9;
+
+  --accent: #0b7f7c;
+  --accent-dark: #096a68;
+  --accent-line: #096a68;
+  --accent-ink: #fff;
+  --accent-soft: #e2f4f3;
+  --link: #1a4fa0;
+  --ink: #0f2650;
+  --ink-hover: #1a3a72;
+  --on-ink: #fff;
+
+  --green: #14713a;
+  --amber: #8a5d00;
+  --blue: #1a4fa0;
+  --red: #c4231b;
+  --urgent: #c8381f;
+
+  --topbar: #0a1a36;
+  --mainbar: #0f2650;
+  --on-dark: #fff;
+  --on-dark-soft: #c3cfe6;
+  --footer-bg: #0a1a36;
+  --footer-line: #233a66;
+  /* Çini şeridinin iki rengi */
+  --tile-a: #13a3a0;
+  --tile-b: #3f7bd6;
+
+  --tag-bg: #e2f4f3;
+  --tag-text: #0a5654;
+
+  --control-bg: #fff;
+  --control-border: #b4bfcf;
+  --selected: #e9f1fc;
+  --selected-line: #bcd0ef;
+  --warn-bg: #fff8e1;
+  --warn-line: #ecd9a5;
+  --ok-bg: #edf7f0;
+  --ok-line: #a6d5b5;
+  --ok-text: #14592c;
+  --err-bg: #fdf0ef;
+  --err-line: #ecb9b5;
+  --err-text: #8f1d17;
+  --track: #e3e8ef;
+  --star: #e0a100;
+  --star-empty: #c5ccd6;
+  --shadow: 0 8px 24px rgb(15 38 80 / 0.16);
+  --card-shadow: 0 1px 2px rgb(15 38 80 / 0.06), 0 0 0 1px rgb(15 38 80 / 0.07);
+
+  --font: "Source Sans 3", "Segoe UI", Arial, sans-serif;
+  --font-head: "Barlow Condensed", "Arial Narrow", "Segoe UI", sans-serif;
+  --radius: 10px;
+  --radius-sm: 7px;
+  color-scheme: light;
+}
+
+/* Siyah tema: gece laciverti. Yalnızca ekranda geçerlidir, sayfa yazdırılırken beyaz kalır. */
+@media screen {
+  :root[data-theme='dark'] {
+    --bg: #0b1220;
+    --surface: #121b2e;
+    --text: #e6ebf5;
+    --text-soft: #c8d1e3;
+    --muted: #9aa6bd;
+    --line: #283550;
+    --line-soft: #1d2840;
+    --head: #172238;
+    --hover: #18253c;
+
+    --accent: #2bb3ae;
+    --accent-dark: #24a19c;
+    --accent-line: #1d8a86;
+    --accent-ink: #04211f;
+    --accent-soft: #10302f;
+    --link: #8fb6ff;
+    --ink: #e6ebf5;
+    --ink-hover: #c8d1e3;
+    --on-ink: #0b1220;
+
+    --green: #63d492;
+    --amber: #e9bc52;
+    --blue: #8fb6ff;
+    --red: #ff9b8f;
+    --urgent: #c8381f;
+
+    --topbar: #060c18;
+    --mainbar: #0a1428;
+    --footer-bg: #060c18;
+    --footer-line: #1f2d48;
+
+    --tag-bg: #10302f;
+    --tag-text: #84e3dd;
+
+    --control-bg: #0d1526;
+    --control-border: #4a5a78;
+    --selected: #172a48;
+    --selected-line: #33507f;
+    --warn-bg: #272012;
+    --warn-line: #57471d;
+    --ok-bg: #11261a;
+    --ok-line: #285c3c;
+    --ok-text: #8fe3b0;
+    --err-bg: #2a1413;
+    --err-line: #6b2f2b;
+    --err-text: #ffb4ab;
+    --track: #283550;
+    --star-empty: #4f5d78;
+    --shadow: 0 8px 24px rgb(0 0 0 / 0.6);
+    --card-shadow: 0 0 0 1px #223050;
+    color-scheme: dark;
+  }
+}
