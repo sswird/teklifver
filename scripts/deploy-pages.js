@@ -9,8 +9,11 @@ const OUT = path.join(ROOT, 'dist-pages');
 
 const git = (args, cwd) => execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }).trim();
 
-if (!fs.existsSync(path.join(OUT, 'index.html'))) {
-  console.error('Önce çıktıyı üretin: npm run pages:build');
+// Yarıda kalmış bir derleme yayınlanmasın: filtrelerin verisi ve 404 sayfası en son yazılır.
+const required = ['index.html', '404.html', path.join('data', 'site.json')];
+const missing = required.filter(file => !fs.existsSync(path.join(OUT, file)));
+if (missing.length) {
+  console.error(`Derleme eksik (${missing.join(', ')}). Önce çıktıyı yeniden üretin: npm run pages:build`);
   process.exit(1);
 }
 

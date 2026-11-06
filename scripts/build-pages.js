@@ -54,7 +54,20 @@ async function waitForSite() {
   throw new Error('Site açılmadı.');
 }
 
-const getHtml = async url => (await fetch(ORIGIN + url)).text();
+// Sunucu boşta kalan bağlantıyı kapatırsa yeniden kullanılmak istenen bağlantı kopar ("fetch failed").
+// Bu yüzden ağ hatasında birkaç kez yeniden denenir; HTTP hataları olduğu gibi döner.
+async function request(url, options = {}) {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await fetch(ORIGIN + url, options);
+    } catch (err) {
+      if (attempt >= 4) throw new Error(`${url} alınamadı: ${err.message}`);
+      await new Promise(resolve => setTimeout(resolve, 250 * attempt));
+    }
+  }
+}
+
+const getHtml = async url => (await request(url)).text();
 
 // Bağlantıları izleyerek herkese açık sayfaları toplar; yönlendirmeleri (ör. /dashboard -> /login) not eder.
 async function crawl(extraPaths) {
@@ -65,7 +78,7 @@ async function crawl(extraPaths) {
 
   while (queue.length) {
     const url = queue.shift();
-    const res = await fetch(ORIGIN + url, { redirect: 'manual' });
+    const res = await request(url, { redirect: 'manual' });
 
     if (res.status >= 300 && res.status < 400) {
       const target = new URL(res.headers.get('location'), ORIGIN).pathname;
