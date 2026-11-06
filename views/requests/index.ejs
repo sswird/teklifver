@@ -118,8 +118,8 @@
           <% } %>
         <% } %>
         <span class="view-switch">
-          <a class="<%= filters.view === 'list' ? 'is-active' : '' %>" href="<%= listUrl({ view: 'list', page }) %>"><%- icon('list', { size: 13 }) %> Liste</a>
-          <a class="<%= filters.view === 'gallery' ? 'is-active' : '' %>" href="<%= listUrl({ view: 'gallery', page }) %>"><%- icon('layout-grid', { size: 13 }) %> Galeri</a>
+          <a class="<%= filters.view === 'list' ? 'is-active' : '' %>" href="<%= listUrl({ view: 'list', page }) %>"><%- icon('layout-grid', { size: 13 }) %> Kartlar</a>
+          <a class="<%= filters.view === 'gallery' ? 'is-active' : '' %>" href="<%= listUrl({ view: 'gallery', page }) %>"><%- icon('list', { size: 13 }) %> Galeri</a>
         </span>
       </div>
 
@@ -153,7 +153,7 @@
       <% } else if (filters.view === 'gallery') { %>
         <%- include('../partials/showcase-grid', { items: requests }) %>
       <% } else { %>
-        <%- include('../partials/listing-table', { items: requests, adEvery: 8 }) %>
+        <%- include('../partials/listing-table', { items: requests, adEvery: 6 }) %>
       <% } %>
 
       <% if (totalPages > 1) { %>

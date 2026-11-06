@@ -237,7 +237,7 @@
       const ads = data.adRows;
       const start = Math.floor(Math.random() * Math.max(ads.length, 1));
       $('tbody', table).innerHTML = visible.map((item, index) => {
-        const ad = ads.length && index > 0 && index % 8 === 0 ? ads[(start + index / 8) % ads.length] : '';
+        const ad = ads.length && index > 0 && index % 6 === 0 ? ads[(start + index / 6) % ads.length] : '';
         return ad + item.row;
       }).join('');
     }

@@ -1,8 +1,43 @@
 <%- include('partials/header') %>
 
 <div class="wrap page">
+  <div class="home-hero">
+    <% if (currentUser && currentUser.role === 'company') { %>
+      <section class="composer">
+        <h1>Bugün <%= stats.todayCount %> yeni talep var</h1>
+        <div class="composer-row">
+          <a class="btn" href="/dashboard/matches">Bana uygun talepleri göster</a>
+        </div>
+        <p class="composer-note">Hizmet verdiğiniz kategorileri <a href="/profile">hesap bilgilerinizden</a> değiştirebilirsiniz.</p>
+      </section>
+    <% } else { %>
+      <section class="composer">
+        <h1>İşini yaz, firmalar yarışsın.</h1>
+        <p class="composer-lead">Yaptıracağınız işi birkaç kelimeyle yazın; o alandaki firmalar fiyat ve süre göndersin.</p>
+        <form action="/requests/new" method="GET">
+          <div class="composer-row">
+            <input class="input" type="text" name="title" maxlength="200" placeholder="Örneğin: 2+1 daire boyanacak" aria-label="Yaptıracağınız iş" autocomplete="off">
+            <select class="select" name="city" aria-label="İl">
+              <option value="">İl seçin</option>
+              <% allCities.forEach(city => { %><option value="<%= city %>"><%= city %></option><% }) %>
+            </select>
+            <button class="btn" type="submit">Teklif Al</button>
+          </div>
+        </form>
+        <p class="composer-note">Talep vermek ücretsiz. Telefon numaranız, siz bir teklifi kabul edene kadar firmalara görünmez.</p>
+        <% const quick = ['boya', 'evden eve nakliyat', 'koltuk yıkama', 'logo', 'özel ders']; %>
+        <p class="composer-quick">Çok arananlar:
+          <% quick.forEach((term, index) => { %><a href="/requests?search=<%= encodeURIComponent(term) %>"><%= term %></a><%= index < quick.length - 1 ? ', ' : '' %><% }) %>
+        </p>
+      </section>
+    <% } %>
+
+  </div>
+
   <div class="layout-home">
-    <aside class="desktop-only" aria-label="Kategoriler">
+    <aside class="home-side desktop-only" aria-label="Fiyatlar ve kategoriler">
+      <%- include('partials/price-board', { placement: 'rail' }) %>
+
       <section class="box">
         <div class="box-head">Kategoriler</div>
         <ul class="side-list">
@@ -37,42 +72,12 @@
     </aside>
 
     <div class="home-center">
-      <% if (currentUser && currentUser.role === 'company') { %>
-        <section class="composer">
-          <h1>Bugün <%= stats.todayCount %> yeni talep var</h1>
-          <div class="composer-row">
-            <a class="btn" href="/dashboard/matches">Bana uygun talepleri göster</a>
-          </div>
-          <p class="composer-note">Hizmet verdiğiniz kategorileri <a href="/profile">hesap bilgilerinizden</a> değiştirebilirsiniz.</p>
-        </section>
-      <% } else { %>
-        <section class="composer">
-          <h1>İşini yaz, firmalar yarışsın.</h1>
-          <p class="composer-lead">Yaptıracağınız işi birkaç kelimeyle yazın; o alandaki firmalar fiyat ve süre göndersin.</p>
-          <form action="/requests/new" method="GET">
-            <div class="composer-row">
-              <input class="input" type="text" name="title" maxlength="200" placeholder="Örneğin: 2+1 daire boyanacak" aria-label="Yaptıracağınız iş" autocomplete="off">
-              <select class="select" name="city" aria-label="İl">
-                <option value="">İl seçin</option>
-                <% allCities.forEach(city => { %><option value="<%= city %>"><%= city %></option><% }) %>
-              </select>
-              <button class="btn" type="submit">Teklif Al</button>
-            </div>
-          </form>
-          <p class="composer-note">Talep vermek ücretsiz. Telefon numaranız, siz bir teklifi kabul edene kadar firmalara görünmez.</p>
-          <% const quick = ['boya', 'evden eve nakliyat', 'koltuk yıkama', 'logo', 'özel ders']; %>
-          <p class="composer-quick">Çok arananlar:
-            <% quick.forEach((term, index) => { %><a href="/requests?search=<%= encodeURIComponent(term) %>"><%= term %></a><%= index < quick.length - 1 ? ', ' : '' %><% }) %>
-          </p>
-        </section>
-      <% } %>
-
       <%- include('partials/price-board', { placement: 'feed' }) %>
 
       <section class="box">
         <div class="box-head">Son Eklenen Talepler <% if (total) { %><a href="/requests">Tümü (<%= total %>)</a><% } %></div>
         <% if (latest.length) { %>
-          <%- include('partials/listing-table', { items: latest, adEvery: 5 }) %>
+          <%- include('partials/listing-table', { items: latest, adEvery: 6 }) %>
         <% } else { %>
           <div class="empty">
             <h2>Henüz talep yok</h2>
@@ -118,7 +123,6 @@
     </div>
 
     <aside class="home-right" aria-label="Fiyatlar, firmalar ve öneriler">
-      <%- include('partials/price-board', { placement: 'rail' }) %>
       <% if (!currentUser || currentUser.role === 'company') { %>
         <section class="box">
           <div class="box-head">Firmanız mı Var?</div>

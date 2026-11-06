@@ -17,7 +17,7 @@
         <td class="col-photo">
           <a class="thumb" href="/requests/<%= item._id %>" tabindex="-1" aria-hidden="true">
             <% if (item.images && item.images.length) { %>
-              <img src="<%= thumb(item.images[0]) %>" alt="" loading="lazy" decoding="async" width="120" height="90">
+              <img src="<%= thumb(item.images[0]) %>" srcset="<%= thumb(item.images[0]) %> 240w, <%= item.images[0] %> 800w" sizes="(max-width: 760px) 46vw, 300px" alt="" loading="lazy" decoding="async" width="240" height="180">
               <% if (item.images.length > 1) { %><span class="photo-count"><%- icon('camera', { size: 10 }) %><%= item.images.length %></span><% } %>
             <% } else { %>
               <span class="no-photo">Fotoğraf yok</span>
