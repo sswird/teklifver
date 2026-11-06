@@ -791,6 +791,25 @@ label.upload-thumb:has(input:checked) .thumb-remove { background: var(--red); }
 .listing-table.is-feed tbody tr.ad-row td { padding: 0 !important; }
 .box > .listing-table.is-feed:first-child tbody, .box-head + .listing-table.is-feed tbody { padding-top: 14px; }
 
+/* Firma rehberi kartları: logo, ad, uzmanlıklar; altta puan, il ve üyelik */
+.company-table.is-grid thead { display: none; }
+.company-table.is-grid, .company-table.is-grid tbody { display: block; }
+.company-table.is-grid tbody { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; padding: 14px; }
+.company-table.is-grid tbody tr { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 0 12px; min-height: 0; padding: 14px; background: var(--surface); border: 0; border-radius: var(--radius); box-shadow: var(--card-shadow); }
+.company-table.is-grid tbody tr:hover { background: var(--surface); box-shadow: 0 0 0 2px var(--accent), 0 6px 18px rgb(15 38 80 / 0.1); }
+.company-table.is-grid td { display: block; width: auto !important; padding: 0 !important; border: 0 !important; background: none !important; text-align: left !important; }
+.company-table.is-grid .col-photo { position: static; flex: 0 0 52px; }
+.company-table.is-grid td:nth-child(2) { flex: 1 1 calc(100% - 64px); min-width: 0; }
+.company-table.is-grid .listing-title::after { content: ""; position: absolute; inset: 0; border-radius: var(--radius); }
+.company-table.is-grid .tag-line { display: -webkit-box; margin-top: 3px; overflow: hidden; color: var(--muted); font-size: 13px; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.company-table.is-grid td:nth-child(n+3) { margin-top: 12px; color: var(--muted); font-size: 13px; }
+.company-table.is-grid td:nth-child(3) { flex-basis: auto; color: var(--text); }
+.company-table.is-grid td:nth-child(4)::before { content: "· "; color: var(--muted); }
+.company-table.is-grid td:nth-child(5)::before { content: "· Üyelik "; }
+
+/* Talep sayfası: geniş ekranda sağdaki sahip/teklif sütunu kaydırırken görünür kalır */
+@media (min-width: 961px) { .detail-owner { position: sticky; top: 14px; align-self: start; } }
+
 /* Ana sayfa: üstte tam genişlik slogan, solda fiyat panosu ve kategoriler, sağda kartlar */
 .home-hero .composer { padding: 28px 30px 22px; }
 .home-hero .composer h1 { font-size: 38px; }
