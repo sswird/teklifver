@@ -150,12 +150,13 @@ const idOf = path => path.split('/').pop();
   await sendForm(firm, thread, { content: '' });
   check('boş mesaj reddedilir', (await countMessages()) === beforeEmpty);
 
-  // Ana sayfa: popüler hizmetler, vitrin, nasıl işler, fiyat örnekleri ve fotoğrafsız ilan yer tutucusu
+  // Ana sayfa: kategori ağacı, vitrin, nasıl işler, canlılık bilgisi ve fotoğrafsız ilan yer tutucusu
   const home = (await get(null, "/")).text;
-  check("fotoğraflı popüler hizmetler", (home.match(/class="service-card"/g) || []).length === 8);
-  check("vitrin ve nasıl işler", home.includes("id=\"vitrinTitle\"") && (home.match(/<li><h3>/g) || []).length === 3);
+  check("kategori ağacı sayılarla", (home.match(/class="cat-tree-main"/g) || []).length >= 10 && /class="cat-tree-main"[^>]*>[\s\S]*?class="count">\(\d+\)/.test(home));
+  const vitrinItems = ((home.split('class="box vitrin-box"')[1] || '').split('</section>')[0].match(/class="showcase-item"/g) || []).length;
+  check("vitrin satırları tam", vitrinItems > 0 && vitrinItems % 5 === 0, String(vitrinItems));
+  check("nasıl işler üç adım", /class="how-steps"(?:[\s\S]*?<li>){3}/.test(home));
   check("son teklif zamanı gerçek kayıttan", /son teklif <strong>[^<]*(önce|dün)[^<]*<\/strong>/.test(home));
-  check("fiyat örnekleri gerçek tekliflerden", home.includes("Hangi iş kaça yapılıyor?") && /class="price-rows"[\s\S]*?\d TL/.test(home));
   check("fotoğrafsız ilan kategori adını taşır", /class="no-photo is-placeholder" data-cat="[^"]+"/.test(home));
 
   console.log(`${passed} geçti, ${failures} hata`);

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#16181b">
   <% const pageDescription = metaDescription || 'Hizmet talebi verin, firmalardan teklif alın. Tadilat, nakliye, temizlik, yazılım ve daha fazlası.'; %>
   <meta name="description" content="<%= pageDescription %>">
   <meta property="og:site_name" content="TeklifVer">
@@ -21,8 +21,9 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <script src="/js/theme.js?v=<%= assetVersion %>"></script>
-  <link rel="preload" href="/fonts/figtree-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/figtree-latin-ext-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/source-sans-3-turkce-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link href="/css/theme.css?v=<%= assetVersion %>" rel="stylesheet">
   <link href="/css/style.css?v=<%= assetVersion %>" rel="stylesheet">
   <script src="/js/main.js?v=<%= assetVersion %>" defer></script>
@@ -36,6 +37,7 @@
       <form action="/email/resend" method="POST"><button class="btn btn-sm" type="submit">Bağlantıyı Tekrar Gönder</button></form>
     </div>
   <% } %>
+  <div class="site-head">
   <nav class="topbar" aria-label="Üst menü">
     <div class="wrap topbar-inner">
       <div class="topbar-left">
@@ -46,16 +48,16 @@
         <a href="/reklam">Reklam Ver</a>
       </div>
       <button class="theme-toggle" type="button" data-theme-toggle>
-        <span class="when-light"><%- icon('moon', { size: 14 }) %>Siyah Tema</span>
-        <span class="when-dark"><%- icon('sun', { size: 14 }) %>Beyaz Tema</span>
+        <span class="when-light"><%- icon('moon', { size: 14 }) %><span class="theme-label">Siyah Tema</span></span>
+        <span class="when-dark"><%- icon('sun', { size: 14 }) %><span class="theme-label">Beyaz Tema</span></span>
       </button>
       <% if (currentUser) { %>
-        <a href="/notifications">Bildirimler <span class="unread-count" data-count="notifications" <%= unreadNotifications ? '' : 'hidden' %>><%= unreadNotifications %></span></a>
+        <a class="topbar-bell" href="/notifications"><%- icon('bell', { size: 20 }) %>Bildirimler <span class="unread-count" data-count="notifications" <%= unreadNotifications ? '' : 'hidden' %>><%= unreadNotifications %></span></a>
         <a href="/messages">Mesajlarım <span class="unread-count" data-count="messages" <%= unreadMessages ? '' : 'hidden' %>><%= unreadMessages %></span></a>
         <a href="/dashboard/favorites">Favorilerim (<span id="favCount"><%= favoriteIds.length %></span>)</a>
         <div class="menu">
           <button class="menu-button" type="button" aria-expanded="false">
-            <%= currentUser.companyName || currentUser.name %> <%- icon('chevron-down', { size: 12 }) %>
+            <span class="menu-name"><%= currentUser.companyName || currentUser.name %></span> <%- icon('chevron-down', { size: 12 }) %>
           </button>
           <div class="menu-panel" hidden>
             <a class="menu-item" href="/dashboard"><%= currentUser.role === 'company' ? 'Tekliflerim' : 'Taleplerim' %></a>
@@ -76,7 +78,7 @@
     </div>
   </nav>
 
-  <header class="mainbar">
+  <header class="mainbar<%= currentPath === '/' ? ' is-home' : '' %>">
     <div class="wrap mainbar-inner">
       <a class="logo" href="/" aria-label="TeklifVer ana sayfa">teklif<span class="logo-tag">ver</span></a>
       <form class="searchbar" action="/requests" method="GET" role="search">
@@ -95,6 +97,7 @@
       <% } %>
     </div>
   </header>
+  </div>
 
   <nav class="catnav" aria-label="Hizmet kategorileri">
     <ul class="wrap catnav-inner">

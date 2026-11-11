@@ -9,7 +9,7 @@
     const root = document.documentElement;
     const meta = $('meta[name="theme-color"]');
     const paintBar = () => {
-      if (meta) meta.content = root.dataset.theme === 'dark' ? '#18191c' : '#ffffff';
+      if (meta) meta.content = root.dataset.theme === 'dark' ? '#0b0b0b' : '#16181b';
     };
 
     paintBar();
@@ -450,6 +450,28 @@
       }
       setTimeout(() => { label.textContent = 'Bağlantıyı Kopyala'; }, 1800);
     });
+  }
+
+  /* Paylaş menüsü: dışarı tıklayınca kapanır; telefonda cihazın kendi paylaşım penceresi açılır */
+  function initShareMenu() {
+    const menu = $('.share-menu');
+    if (!menu) return;
+    const summary = $('summary', menu);
+    summary.addEventListener('click', event => {
+      if (menu.open || !navigator.share || !window.matchMedia('(pointer: coarse)').matches) return;
+      event.preventDefault();
+      navigator.share({ title: menu.dataset.shareTitle || document.title, url: location.href })
+        .catch(error => { if (error.name !== 'AbortError') menu.open = true; });
+    });
+    document.addEventListener('click', event => {
+      if (menu.open && !menu.contains(event.target)) menu.open = false;
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && menu.open) { menu.open = false; summary.focus(); }
+    });
+    $$('.share-item', menu).forEach(item => item.addEventListener('click', () => {
+      if (!item.hasAttribute('data-copy-link')) menu.open = false;
+    }));
   }
 
   /* Konuşma: en alttan başlar, sayfa açıkken yeni mesajları alır */
@@ -962,6 +984,7 @@
     initPortfolio();
     initCategoryGuess();
     initCopyLink();
+    initShareMenu();
     initThread();
     initDemoLogin();
     initCookieBanner();

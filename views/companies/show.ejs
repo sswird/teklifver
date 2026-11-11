@@ -1,13 +1,17 @@
 <%- include('../partials/header') %>
 
-<% const companyTitle = company.companyName || company.name; %>
+<% const companyTitle = company.companyName || company.name;
+   const firstCategory = allCategories.find(item => (company.categories || []).includes(item.name));
+   // Kapak: firmanın ilk iş örneği, yoksa ilk kategorisinin fotoğrafı
+   const cover = (company.portfolio && company.portfolio[0]) || (firstCategory && firstCategory.image) || ''; %>
 
 <div class="wrap page">
   <div class="crumbs">
     <a href="/">Ana Sayfa</a> &rsaquo; <a href="/companies">Firma Rehberi</a> &rsaquo; <span><%= companyTitle %></span>
   </div>
 
-  <section class="box">
+  <section class="box company-hero">
+    <% if (cover) { %><div class="company-cover"><img src="<%= cover %>" alt="" width="1200" height="300" fetchpriority="high"></div><% } %>
     <div class="company-head">
       <%- include('../partials/company-mark', { company }) %>
       <div>

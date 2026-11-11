@@ -69,7 +69,7 @@
       <% if (companies.length === 0) { %>
         <div class="empty"><h2>Firma bulunamadı</h2><a class="btn" href="/companies">Tüm Firmalar</a></div>
       <% } else { %>
-        <table class="listing-table company-table is-grid">
+        <table class="listing-table company-table">
           <thead>
             <tr>
               <th><span class="visually-hidden">Logo</span></th>
@@ -82,7 +82,7 @@
           <tbody>
             <% companies.forEach(company => { const name = company.companyName || company.name; %>
               <tr>
-                <td class="col-photo"><%- include('../partials/company-mark', { company }) %></td>
+                <td class="col-photo" style="width:58px"><%- include('../partials/company-mark', { company }) %></td>
                 <td>
                   <a class="listing-title" href="/companies/<%= company._id %>"><%= name %></a>
                   <% if (company.verified) { %><%- include('../partials/verified') %><% } %>

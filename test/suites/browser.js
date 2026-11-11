@@ -182,16 +182,16 @@ const logout = async page => page.clickAndWait('form[action="/logout"] button');
     await page.evaluate(`localStorage.setItem('theme', 'light')`);
     await page.goto('/');
     const lightBackground = await background();
-    check('beyaz tema arka planı açık', lightBackground === 'rgb(246, 246, 243)', lightBackground);
+    check('beyaz tema arka planı açık', lightBackground === 'rgb(241, 242, 244)', lightBackground);
     check('düğme siyah temayı önerir', (await page.text()).includes('Siyah Tema'));
     await page.click('[data-theme-toggle]');
     await sleep(500);
-    check('düğmeyle siyah tema açılır', (await themeOf()) === 'dark' && (await background()) === 'rgb(16, 17, 19)');
+    check('düğmeyle siyah tema açılır', (await themeOf()) === 'dark' && (await background()) === 'rgb(15, 16, 18)');
     check('düğme beyaz temayı önerir', (await page.text()).includes('Beyaz Tema'));
-    check('tarayıcı çubuğu rengi değişir', (await page.evaluate(`document.querySelector('meta[name="theme-color"]').content`)) === '#18191c');
+    check('tarayıcı çubuğu rengi değişir', (await page.evaluate(`document.querySelector('meta[name="theme-color"]').content`)) === '#0b0b0b');
     await page.goto('/requests');
-    check('siyah tema sayfalar arasında kalır', (await themeOf()) === 'dark' && (await background()) === 'rgb(16, 17, 19)');
-    check('kutular koyu', (await page.evaluate(`getComputedStyle(document.querySelector('.box')).backgroundColor`)) === 'rgb(24, 25, 28)');
+    check('siyah tema sayfalar arasında kalır', (await themeOf()) === 'dark' && (await background()) === 'rgb(15, 16, 18)');
+    check('kutular koyu', (await page.evaluate(`getComputedStyle(document.querySelector('.box')).backgroundColor`)) === 'rgb(23, 25, 28)');
     await page.send('Emulation.setEmulatedMedia', { media: 'print' });
     check('yazdırırken beyaz kalır', (await page.evaluate(`getComputedStyle(document.querySelector('.box')).backgroundColor`)) === 'rgb(255, 255, 255)');
     await page.send('Emulation.setEmulatedMedia', { media: '' });
@@ -302,9 +302,9 @@ const logout = async page => page.clickAndWait('form[action="/logout"] button');
 
     // Ziyaretçi talep kutusunu doldurunca girişe yönlenir, yazdığı kaybolmaz
     await page.goto('/');
-    await page.fill('.hero2-search input[name="title"]', 'Balkon boyanacak');
-    await page.fill('.hero2-search select[name="city"]', 'Ankara');
-    await page.clickAndWait('.hero2-search button[type="submit"]');
+    await page.fill('.composer input[name="title"]', 'Balkon boyanacak');
+    await page.fill('.composer select[name="city"]', 'Ankara');
+    await page.clickAndWait('.composer button[type="submit"]');
     const composerUrl = decodeURIComponent(await page.url());
     check('talep kutusu formu hesap istemeden açar', composerUrl.startsWith('/requests/new') && (await page.evaluate("document.querySelector('#title').value")) === 'Balkon boyanacak' && (await page.evaluate("document.querySelector('#city').value")) === 'Ankara', composerUrl);
 
@@ -328,9 +328,9 @@ const logout = async page => page.clickAndWait('form[action="/logout"] button');
     check('kayıt formu çalışır', (await page.url()) === '/dashboard', `${await page.url()} ${await page.title()}`);
 
     await page.goto('/');
-    await page.fill('.hero2-search input[name="title"]', 'Balkon boyanacak');
-    await page.fill('.hero2-search select[name="city"]', 'Ankara');
-    await page.clickAndWait('.hero2-search button[type="submit"]');
+    await page.fill('.composer input[name="title"]', 'Balkon boyanacak');
+    await page.fill('.composer select[name="city"]', 'Ankara');
+    await page.clickAndWait('.composer button[type="submit"]');
     check('talep kutusu formu doldurur', (await page.evaluate("document.getElementById('title').value")) === 'Balkon boyanacak' && (await page.evaluate("document.getElementById('city').value")) === 'Ankara');
 
     const fieldValue = id => page.evaluate(`document.getElementById('${id}').value`);

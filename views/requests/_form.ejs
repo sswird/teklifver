@@ -1,4 +1,6 @@
 <% const priceHints = locals.priceHints || {}; %>
+<fieldset class="form-step">
+<legend class="form-step-head"><span class="form-step-no" aria-hidden="true">1</span>İşinizi anlatın</legend>
 <div class="field <%= errors.category ? 'has-error' : '' %>">
   <label class="field-label" for="category">Kategori</label>
   <select class="select" id="category" name="category" data-guessed="<%= locals.guessedCategory || '' %>" required>
@@ -27,10 +29,11 @@
   <p class="field-hint">Ölçü, malzeme ve zaman gibi ayrıntıları yazarsanız teklifler daha isabetli olur. Telefon numaranızı buraya yazmayın; teklifi kabul edince firma görür.</p>
   <% if (errors.description) { %><p class="field-error"><%= errors.description %></p><% } %>
 </div>
+</fieldset>
 
-<fieldset class="form-optional">
-<legend>İsterseniz ekleyin</legend>
-<div class="field-row">
+<fieldset class="form-step">
+<legend class="form-step-head"><span class="form-step-no" aria-hidden="true">2</span>Nerede, ne zaman? <span class="optional">İsteğe bağlı</span></legend>
+<div class="field-row is-pair">
   <div class="field <%= errors.city ? 'has-error' : '' %>">
     <label class="field-label" for="city">İl</label>
     <select class="select" id="city" name="city">
@@ -47,30 +50,9 @@
   </div>
 </div>
 
-<div class="field <%= errors.budget ? 'has-error' : '' %>">
-  <div class="field-row">
-    <div class="field">
-      <label class="field-label" for="budgetMin">En az bütçe</label>
-      <div class="input-wrap input-wrap-suffix">
-        <span class="input-suffix">TL</span>
-        <input class="input" type="number" id="budgetMin" name="budgetMin" min="0" step="1" inputmode="numeric" value="<%= form.budgetMin %>">
-      </div>
-    </div>
-    <div class="field">
-      <label class="field-label" for="budgetMax">En fazla bütçe</label>
-      <div class="input-wrap input-wrap-suffix">
-        <span class="input-suffix">TL</span>
-        <input class="input" type="number" id="budgetMax" name="budgetMax" min="0" step="1" inputmode="numeric" value="<%= form.budgetMax %>">
-      </div>
-    </div>
-  </div>
-  <p class="field-hint" id="categoryPrice" hidden></p>
-  <% if (errors.budget) { %><p class="field-error"><%= errors.budget %></p><% } %>
-</div>
-
 <div class="field-row">
-  <div class="field <%= errors.deadline ? 'has-error' : '' %>" style="max-width:220px">
-    <label class="field-label" for="deadline">Son tarih <span class="optional">İsteğe bağlı</span></label>
+  <div class="field <%= errors.deadline ? 'has-error' : '' %>">
+    <label class="field-label" for="deadline">Son tarih</label>
     <input class="input" type="date" id="deadline" name="deadline" min="<%= dateInput() %>" value="<%= form.deadline %>">
     <% if (errors.deadline) { %><p class="field-error"><%= errors.deadline %></p><% } %>
   </div>
@@ -91,6 +73,29 @@
   <span><strong>Acil iş.</strong> Birkaç gün içinde başlanması gerekiyor; talebinizde ACİL etiketi görünür.</span>
 </label>
 </fieldset>
+
+<fieldset class="form-step">
+<legend class="form-step-head"><span class="form-step-no" aria-hidden="true">3</span>Bütçe ve fotoğraf <span class="optional">İsteğe bağlı</span></legend>
+<div class="field <%= errors.budget ? 'has-error' : '' %>">
+  <div class="field-row is-pair">
+    <div class="field">
+      <label class="field-label" for="budgetMin">En az bütçe</label>
+      <div class="input-wrap input-wrap-suffix">
+        <span class="input-suffix">TL</span>
+        <input class="input" type="number" id="budgetMin" name="budgetMin" min="0" step="1" inputmode="numeric" value="<%= form.budgetMin %>">
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label" for="budgetMax">En fazla bütçe</label>
+      <div class="input-wrap input-wrap-suffix">
+        <span class="input-suffix">TL</span>
+        <input class="input" type="number" id="budgetMax" name="budgetMax" min="0" step="1" inputmode="numeric" value="<%= form.budgetMax %>">
+      </div>
+    </div>
+  </div>
+  <p class="field-hint" id="categoryPrice" hidden></p>
+  <% if (errors.budget) { %><p class="field-error"><%= errors.budget %></p><% } %>
+</div>
 
 <% if (locals.existingImages && existingImages.length) { %>
   <div class="field">
@@ -115,10 +120,11 @@
   <span class="field-label">Fotoğraf</span>
   <label class="dropzone">
     <input class="visually-hidden" type="file" id="images" name="images" multiple accept="image/jpeg,image/png,image/gif,image/webp" data-max="<%= maxImages %>">
-    <span class="dropzone-title">Fotoğraf seçin</span>
+    <span class="dropzone-title"><%- icon('camera', { size: 22 }) %>Fotoğraf seçin</span>
     <span class="muted small">ya da buraya sürükleyin. En fazla <%= maxImages %> fotoğraf, her biri 5 MB olabilir.</span>
   </label>
   <div class="thumbs" id="imagePreviews"></div>
   <p class="field-error" id="imagesError" <%= errors.images ? '' : 'hidden' %>><%= errors.images || '' %></p>
 </div>
 <% } %>
+</fieldset>

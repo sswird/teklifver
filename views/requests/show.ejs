@@ -42,10 +42,15 @@
       <% } else { %>
         <a class="link-button" href="/login?next=<%= encodeURIComponent(currentUrl) %>"><%- icon('heart', { size: 13 }) %>Favorilerime Ekle</a>
       <% } %>
-      <button class="link-button" type="button" data-copy-link><%- icon('link', { size: 13 }) %><span>Bağlantıyı Kopyala</span></button>
-      <a class="link-button" target="_blank" rel="noopener" href="https://wa.me/?text=<%= encodeURIComponent(request.title + ' ' + pageUrl) %>"><%- icon('message-circle', { size: 13 }) %>WhatsApp</a>
-      <a class="link-button" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=<%= encodeURIComponent(request.title) %>&url=<%= encodeURIComponent(pageUrl) %>"><%- icon('send', { size: 13 }) %>X</a>
-      <a class="link-button" href="mailto:?subject=<%= encodeURIComponent(request.title) %>&body=<%= encodeURIComponent(pageUrl) %>"><%- icon('mail', { size: 13 }) %>E-posta</a>
+      <details class="share-menu" data-share-title="<%= request.title %>">
+        <summary class="link-button"><%- icon('send', { size: 13 }) %>Paylaş <%- icon('chevron-down', { size: 11 }) %></summary>
+        <div class="share-panel">
+          <button class="share-item" type="button" data-copy-link><%- icon('link', { size: 15 }) %><span>Bağlantıyı Kopyala</span></button>
+          <a class="share-item" target="_blank" rel="noopener" href="https://wa.me/?text=<%= encodeURIComponent(request.title + ' ' + pageUrl) %>"><%- icon('message-circle', { size: 15 }) %>WhatsApp</a>
+          <a class="share-item" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=<%= encodeURIComponent(request.title) %>&url=<%= encodeURIComponent(pageUrl) %>"><%- icon('send', { size: 15 }) %>X</a>
+          <a class="share-item" href="mailto:?subject=<%= encodeURIComponent(request.title) %>&body=<%= encodeURIComponent(pageUrl) %>"><%- icon('mail', { size: 15 }) %>E-posta</a>
+        </div>
+      </details>
       <button class="link-button" type="button" data-print><%- icon('printer', { size: 13 }) %>Yazdır</button>
     </div>
   </div>
