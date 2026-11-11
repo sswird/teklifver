@@ -229,7 +229,7 @@ const writePage = (url, html) => {
 // Yayına çıkmaması gerekenleri son kez arar; bulursa çıktıyı yayınlatmaz.
 function checkOutput(files) {
   const problems = [];
-  const leftover = new RegExp(`\\b(?:href|src|action|data-full)="/(?!/)(?!${BASE.slice(1)}/)`);
+  const leftover = new RegExp(`\\b(?:href|src|srcset|action|data-full)="/(?!/)(?!${BASE.slice(1)}/)`);
   for (const [name, text] of files) {
     const emails = text.match(/[\w.+-]+@[\w-]+\.[\w.-]+/g);
     if (emails) problems.push(`${name}: e-posta adresi: ${[...new Set(emails)].join(', ')}`);
