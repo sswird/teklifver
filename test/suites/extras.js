@@ -152,7 +152,7 @@ const idOf = path => path.split('/').pop();
 
   // Ana sayfa: kategori ağacı, vitrin, nasıl işler, canlılık bilgisi ve fotoğrafsız ilan yer tutucusu
   const home = (await get(null, "/")).text;
-  check("kategori ağacı sayılarla", (home.match(/class="cat-tree-main"/g) || []).length >= 10 && /class="cat-tree-main"[^>]*>[\s\S]*?class="count">\(\d+\)/.test(home));
+  check("kategori ağacı sayılarla", (home.match(/class="cat-tree-main"/g) || []).length >= 10 && /class="cat-tree-main"[^>]*>[\s\S]*?class="count">\d+</.test(home));
   const vitrinItems = ((home.split('class="box vitrin-box"')[1] || '').split('</section>')[0].match(/class="showcase-item"/g) || []).length;
   check("vitrin satırları tam", vitrinItems > 0 && vitrinItems % 5 === 0, String(vitrinItems));
   check("nasıl işler üç adım", /class="how-steps"(?:[\s\S]*?<li>){3}/.test(home));

@@ -12,7 +12,7 @@
         <ul class="cat-tree">
           <% allCategories.forEach(category => { %>
             <li>
-              <a class="cat-tree-main" href="<%= categoryUrl(category.name) %>"><span><%= category.name %></span> <span class="count">(<%= counts[category.name] || 0 %>)</span></a>
+              <a class="cat-tree-main" href="<%= categoryUrl(category.name) %>"><%- include('partials/cat-icon', { category }) %><span><%= category.name %></span> <span class="count"><%= counts[category.name] || 0 %></span></a>
               <% if (category.subs && category.subs.length) { %>
                 <ul class="cat-tree-subs">
                   <% category.subs.slice(0, 4).forEach(([label, term]) => { %>

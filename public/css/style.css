@@ -874,6 +874,19 @@ label.upload-thumb:has(input:checked) .thumb-remove { background: var(--red); }
 .vitrin-box .showcase-title { font-size: 13.5px; }
 .vitrin-box .showcase-price { font-size: 15px; }
 
+/* Kategori ikonları: her kategorinin kendi rengi, açık zemin üstünde */
+.cat-icon { --c: var(--muted); flex: none; display: inline-grid; place-items: center; width: 26px; height: 26px; background: color-mix(in srgb, var(--c) 13%, transparent); border-radius: 6px; color: var(--c); }
+.cat-icon .icon { width: 16px; height: 16px; }
+html[data-theme='dark'] .cat-icon { background: color-mix(in srgb, var(--c) 24%, transparent); color: color-mix(in srgb, var(--c) 50%, #fff); }
+.cat-tree-main { align-items: center; gap: 8px; }
+.cat-tree-main .count { margin-left: -3px; }
+.cat-tree-main .count::before { content: "("; }
+.cat-tree-main .count::after { content: ")"; }
+.cat-tree-subs { margin-top: 3px; }
+.cat-tree-subs a { padding-left: 34px; }
+.category-card-head { align-items: center; gap: 9px; }
+.category-card-head .cat-icon { width: 30px; height: 30px; }
+
 /* Başlık: masaüstünde koyu iki kat; telefonda logo ile hesap düğmeleri aynı satırda */
 .topbar-bell .icon { display: none; }
 .menu-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -963,7 +976,11 @@ label.upload-thumb:has(input:checked) .thumb-remove { background: var(--red); }
   .cat-tree > li { padding: 9px 12px; border-top: 1px solid var(--line-soft); }
   .cat-tree > li:nth-child(2) { border-top: 0; }
   .cat-tree > li:nth-child(odd) { border-right: 1px solid var(--line-soft); }
-  .cat-tree-main { flex-wrap: wrap; font-size: 14px; }
+  .cat-tree-main { display: grid; grid-template-columns: 26px minmax(0, 1fr); align-items: center; gap: 0 8px; font-size: 14px; line-height: 1.25; }
+  .cat-tree-main .cat-icon { grid-row: span 2; }
+  .cat-tree-main .count { grid-column: 2; margin: 1px 0 0; font-size: 12px; }
+  .cat-tree-main .count::before { content: none; }
+  .cat-tree-main .count::after { content: " talep"; }
   .cat-tree-subs { display: none; }
   .composer-stats { gap: 2px 14px; font-size: 13.5px; }
   .vitrin-box .showcase-item:nth-child(n + 7) { display: none; }
