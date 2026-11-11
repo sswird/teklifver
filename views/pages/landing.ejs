@@ -127,7 +127,7 @@
         <div class="box">
           <h2 class="box-head"><%= city ? city + ' Hizmetleri' : 'Diğer Hizmetler' %></h2>
           <ul class="side-list">
-            <% categoryLinks.forEach(item => { %><li><a href="<%= item.url %>"><%= item.name %><% if (item.total) { %> <span class="count"><%= item.total %></span><% } %></a></li><% }) %>
+            <% categoryLinks.forEach(item => { const linked = allCategories.find(entry => entry.name === item.name); %><li><a href="<%= item.url %>"><% if (linked) { %><%- include('../partials/cat-icon', { category: linked }) %><% } %><%= item.name %><% if (item.total) { %> <span class="count"><%= item.total %></span><% } %></a></li><% }) %>
           </ul>
         </div>
       <% } %>

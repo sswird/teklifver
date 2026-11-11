@@ -884,6 +884,10 @@ html[data-theme='dark'] .cat-icon { background: color-mix(in srgb, var(--c) 24%,
 .cat-tree-main .count::after { content: ")"; }
 .cat-tree-subs { margin-top: 3px; }
 .cat-tree-subs a { padding-left: 34px; }
+.side-list a:has(.cat-icon) { align-items: center; padding-block: 3px; }
+.side-list .cat-icon { width: 22px; height: 22px; border-radius: 5px; }
+.side-list .cat-icon .icon { width: 14px; height: 14px; }
+.side-list .side-subs { padding-left: 44px; }
 .category-card-head { align-items: center; gap: 9px; }
 .category-card-head .cat-icon { width: 30px; height: 30px; }
 

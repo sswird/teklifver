@@ -82,7 +82,7 @@
     <div class="wrap mainbar-inner">
       <a class="logo" href="/" aria-label="TeklifVer ana sayfa">teklif<span class="logo-tag">ver</span></a>
       <form class="searchbar" action="/requests" method="GET" role="search">
-        <input type="search" name="search" id="siteSearch" value="<%= locals.filters ? filters.search : '' %>" placeholder="Hangi işi arıyorsunuz?" aria-label="Ara" autocomplete="off" aria-controls="searchSuggest">
+        <input type="search" name="search" id="siteSearch" value="<%= locals.filters ? filters.search : '' %>" placeholder="Kelime veya talep no ile arayın" aria-label="Ara" autocomplete="off" aria-controls="searchSuggest">
         <select name="city" aria-label="İl">
           <option value="">Tüm iller</option>
           <% allCities.forEach(city => { %><option value="<%= city %>" <%= locals.filters && filters.city === city ? 'selected' : '' %>><%= city %></option><% }) %>
