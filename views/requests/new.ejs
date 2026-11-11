@@ -11,8 +11,14 @@
           <span>Yarım kalan taslağınız geri yüklendi.</span>
           <button class="btn btn-sm" type="button" id="draftClear">Taslağı Sil</button>
         </div>
+        <% if (locals.guest) { %>
+          <p class="form-note">Önce işinizi yazın. Hesap açmak son adımda, yarım dakikanızı alır ve ücretsizdir.</p>
+        <% } else if (locals.restored) { %>
+          <p class="form-note">Yazdığınız talep burada. Göz atın, isterseniz fotoğraf ekleyin ve yayınlayın.</p>
+        <% } %>
         <form class="form" action="/requests" method="POST" enctype="multipart/form-data" data-draft="request-draft">
           <%- include('_form', {
+            guest: Boolean(locals.guest),
             form: {
               title: values.title || '',
               description: values.description || '',
@@ -21,11 +27,13 @@
               budgetMax: values.budgetMax || '',
               deadline: values.deadline || '',
               city: values.city || '',
-              location: values.location || ''
+              location: values.location || '',
+              discoveryTime: values.discoveryTime || '',
+              isUrgent: Boolean(values.isUrgent)
             }
           }) %>
           <div class="form-actions">
-            <button class="btn btn-primary" type="submit">Talebi Yayınla</button>
+            <button class="btn btn-primary" type="submit"><%= locals.guest ? 'Devam Et' : 'Talebi Yayınla' %></button>
             <a class="btn" href="/requests">Vazgeç</a>
           </div>
         </form>

@@ -39,7 +39,7 @@ function client() {
     check(`GET ${path}`, r.status === 200, String(r.status));
   }
   check('404 sayfası', (await guest('/yok')).status === 404);
-  check('korumalı sayfa girişe yönlendirir', (await guest('/requests/new')).location === '/login?next=%2Frequests%2Fnew');
+  check('korumalı sayfa girişe yönlendirir', (await guest('/dashboard')).location === '/login?next=%2Fdashboard');
 
   // Kayıt doğrulaması
   let r = await customer('/register', { method: 'POST', form: { terms: 'on', role: 'customer', name: '', email: 'x', password: '123' } });

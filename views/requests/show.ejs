@@ -23,7 +23,7 @@
     ];
   %>
     <ol class="request-steps" aria-label="Talebin durumu">
-      <% steps.forEach(([label, done]) => { %><li class="<%= done ? 'is-done' : '' %>"><%= label %></li><% }) %>
+      <% steps.forEach(([label, done], index) => { %><li class="<%= done ? 'is-done' : '' %>"><% if (index === 1 && bids.length) { %><a href="#teklifler"><%= label %></a><% } else { %><%= label %><% } %></li><% }) %>
     </ol>
   <% } %>
   <div class="detail-title">

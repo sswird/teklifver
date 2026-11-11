@@ -63,6 +63,20 @@ const idOf = path => path.split('/').pop();
   check('keşif zamanı görünür', detail.includes('Hafta sonu herhangi bir saat'));
   check('vitrin işareti formdan alınmaz', !detail.includes('VİTRİN') && !(await get(null, '/requests')).text.includes('VİTRİN'));
 
+  // Ziyaretçi talebini hesap açmadan yazar; hesap son adımda istenir
+  const guestForm = await get(null, "/requests/new?title=" + encodeURIComponent("2+1 daire boyanacak"));
+  check("ziyaretçi talep formunu açar", guestForm.status === 200 && guestForm.text.includes("Önce işinizi yazın") && guestForm.text.includes(">Devam Et<"));
+  check("ziyaretçiye fotoğraf alanı sonra gelir", !guestForm.text.includes("id=\"images\""));
+  const guestPost = await fetch(BASE + "/requests", { method: "POST", redirect: "manual", body: (() => { const f = new FormData(); Object.entries({ title: `Ziyaretçi talebi ${stamp}`, description: FILLER, category: "Temizlik", city: "Ankara" }).forEach(([k, v]) => f.append(k, v)); return f; })() });
+  const guestCookie = cookieOf(guestPost);
+  check("ziyaretçi talebi kayda yönlenir", guestPost.status === 302 && guestPost.headers.get("location") === "/register?next=%2Frequests%2Fnew");
+  check("ziyaretçi talebi yayına girmez", (await get(null, `/requests?search=${encodeURIComponent("Ziyaretçi talebi " + stamp)}`)).text.includes("Bu aramada talep çıkmadı"));
+  const joined = await fetch(BASE + "/register", { method: "POST", redirect: "manual", headers: { ...formHeaders, cookie: guestCookie }, body: encode({ role: "customer", name: "Yeni Müşteri", email: `ekz${stamp}@test.local`, password: pw, terms: "on", next: "/requests/new" }) });
+  check("kayıt sonrası forma döner", joined.status === 302 && joined.headers.get("location") === "/requests/new");
+  const restored = await get(cookieOf(joined), "/requests/new");
+  check("yazdığı talep hazır gelir", restored.text.includes(`value="Ziyaretçi talebi ${stamp}"`) && restored.text.includes("Yazdığınız talep burada") && restored.text.includes(">Talebi Yayınla<"));
+  check("firma talep formunu açamaz", (await get(firm, "/requests/new")).location === "/requests");
+
   // Kaldırılan sahte uçlar
   check('sahte fiyat tahmini ucu yok', (await post(null, '/ai/price-estimate', { category: 'Temizlik' })).status === 404);
   check('bedava paket yükseltme ucu yok', (await post(firm, '/plan/upgrade', { plan: 'enterprise' })).status === 404);

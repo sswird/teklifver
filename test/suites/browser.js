@@ -306,7 +306,7 @@ const logout = async page => page.clickAndWait('form[action="/logout"] button');
     await page.fill('.composer select[name="city"]', 'Ankara');
     await page.clickAndWait('.composer button[type="submit"]');
     const composerUrl = decodeURIComponent(await page.url());
-    check('talep kutusu girişe yönlendirir', composerUrl.startsWith('/login') && composerUrl.includes('title=Balkon'), composerUrl);
+    check('talep kutusu formu hesap istemeden açar', composerUrl.startsWith('/requests/new') && (await page.evaluate("document.querySelector('#title').value")) === 'Balkon boyanacak' && (await page.evaluate("document.querySelector('#city').value")) === 'Ankara', composerUrl);
 
     // Örnek hesapla tek tıkla giriş
     await page.goto('/login');

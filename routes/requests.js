@@ -174,30 +174,47 @@ router.get('/suggest', suggestLimiter, async (req, res, next) => {
   }
 });
 
+// Talep formunu ziyaretçi de açar: önce işini yazar, hesap en son adımda istenir.
+// Firma hesabı talep veremez; giriş yapmış müşteride e-posta doğrulaması aranır.
+function customerOrGuest(req, res, next) {
+  if (!req.session.user) return next();
+  if (req.session.user.role !== 'customer') {
+    req.flash('error', 'Bu işlem yalnızca müşteri hesapları içindir.');
+    return res.redirect('/requests');
+  }
+  requireVerifiedEmail(req, res, next);
+}
+const whenLoggedIn = middleware => (req, res, next) => (req.session.user ? middleware(req, res, next) : next());
+
 // Yeni talep formu
-router.get('/new', isCustomer, requireVerifiedEmail, (req, res, next) => {
+router.get('/new', customerOrGuest, (req, res, next) => {
   // Ana sayfadaki kutudan veya hizmet sayfasından gelen bilgiler form hazır gelsin.
   const formTitle = str(req.query.title).slice(0, 200);
   const city = str(req.query.city);
   const category = str(req.query.category);
   const chosen = categories.names.includes(category);
   const guessed = chosen ? '' : categories.guess(formTitle);
+  // Ziyaretçiyken yazıp hesap açan kullanıcı taslağını hazır bulur.
+  const pending = req.session.user && !formTitle ? req.session.pendingRequest : null;
   priceGuide()
     .then(priceHints => res.render('requests/new', {
       title: 'Talep Ver',
       categories,
       maxImages: MAX_IMAGES,
       priceHints,
-      guessedCategory: guessed,
-      values: { title: formTitle, city: cities.includes(city) ? city : '', category: chosen ? category : guessed }
+      guest: !req.session.user,
+      restored: Boolean(pending),
+      guessedCategory: pending ? '' : guessed,
+      values: pending || { title: formTitle, city: cities.includes(city) ? city : '', category: chosen ? category : guessed }
     }))
     .catch(next);
 });
 
 // Yeni talep oluştur
-router.post('/', isCustomer, requireVerifiedEmail, limits.newRequest, uploadImages, async (req, res, next) => {
+router.post('/', customerOrGuest, whenLoggedIn(limits.newRequest), uploadImages, async (req, res, next) => {
   try {
     const { values, errors, data } = parseRequestForm(req);
+    const guest = !req.session.user;
 
     if (Object.keys(errors).length) {
       deleteImages(uploadedPaths(req));
@@ -205,10 +222,20 @@ router.post('/', isCustomer, requireVerifiedEmail, limits.newRequest, uploadImag
         title: 'Talep Ver',
         categories,
         maxImages: MAX_IMAGES,
+        guest,
         values,
         errors
       });
     }
+
+    // Ziyaretçinin talebi oturumda bekler; hesap açınca form dolu gelir ve tek tıkla yayınlanır.
+    if (guest) {
+      deleteImages(uploadedPaths(req));
+      req.session.pendingRequest = values;
+      req.flash('success', 'Talebiniz hazır. Yayınlamak için ücretsiz hesap açın ya da giriş yapın.');
+      return res.redirect('/register?next=' + encodeURIComponent('/requests/new'));
+    }
+    delete req.session.pendingRequest;
 
     const created = await Request.create({
       ...data,

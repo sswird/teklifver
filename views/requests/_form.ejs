@@ -4,7 +4,7 @@
   <select class="select" id="category" name="category" data-guessed="<%= locals.guessedCategory || '' %>" required>
     <option value="" disabled <%= form.category ? '' : 'selected' %>>Seçiniz</option>
     <% categories.forEach(category => { %>
-      <option value="<%= category.name %>" data-tip="<%= requestTips[category.name] || '' %>" data-keywords="<%= category.keywords %>" data-example-title="<%= categoryContent[category.name] ? categoryContent[category.name].example.title : '' %>" data-example-text="<%= categoryContent[category.name] ? categoryContent[category.name].example.text : '' %>" data-price="<%= priceHints[category.name] && priceHints[category.name].total >= 3 ? budgetLabel({ min: priceHints[category.name].lowest, max: priceHints[category.name].highest }) : '' %>" <%= form.category === category.name ? 'selected' : '' %>><%= category.name %></option>
+      <option value="<%= category.name %>" data-tip="<%= requestTips[category.name] || '' %>" data-keywords="<%= category.keywords %>" data-example-title="<%= categoryContent[category.name] ? categoryContent[category.name].example.title : '' %>" data-example-text="<%= categoryContent[category.name] ? categoryContent[category.name].example.text : '' %>" data-price="<%= priceHints[category.name] && priceHints[category.name].total >= 4 ? budgetLabel({ min: priceHints[category.name].typicalLow, max: priceHints[category.name].typicalHigh }) : '' %>" <%= form.category === category.name ? 'selected' : '' %>><%= category.name %></option>
     <% }) %>
   </select>
   <p class="field-hint" id="categoryGuess" <%= locals.guessedCategory ? '' : 'hidden' %>>Yazdığınıza göre seçtik, uymuyorsa değiştirin.</p>
@@ -108,6 +108,9 @@
   </div>
 <% } %>
 
+<% if (locals.guest) { %>
+  <p class="field-hint">Fotoğrafları hesabınızı açtıktan sonra, yayınlamadan önce ekleyebilirsiniz.</p>
+<% } else { %>
 <div class="field <%= errors.images ? 'has-error' : '' %>">
   <span class="field-label">Fotoğraf</span>
   <label class="dropzone">
@@ -118,3 +121,4 @@
   <div class="thumbs" id="imagePreviews"></div>
   <p class="field-error" id="imagesError" <%= errors.images ? '' : 'hidden' %>><%= errors.images || '' %></p>
 </div>
+<% } %>

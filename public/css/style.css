@@ -810,6 +810,8 @@ label.upload-thumb:has(input:checked) .thumb-remove { background: var(--red); }
 /* Talep sayfası: geniş ekranda sağdaki sahip/teklif sütunu kaydırırken görünür kalır */
 @media (min-width: 961px) { .detail-owner { position: sticky; top: 14px; align-self: start; } }
 
+.request-steps a { color: inherit; text-decoration: underline; }
+
 /* Ana sayfa: üstte tam genişlik slogan, solda fiyat panosu ve kategoriler, sağda kartlar */
 .home-hero .composer { padding: 28px 30px 22px; }
 .home-hero .composer h1 { font-size: 38px; }
@@ -843,6 +845,14 @@ label.upload-thumb:has(input:checked) .thumb-remove { background: var(--red); }
 @media (max-width: 760px) {
   body { padding-bottom: 56px; }
   .plan-grid { grid-template-columns: minmax(0, 1fr); }
+  /* Telefonda alt menü zaten var: üst çubukta yalnız bildirimler kalır, panel menüsü yatay şerit olur */
+  .topbar-inner > a[href="/messages"], .topbar-inner > a[href="/dashboard/favorites"] { display: none; }
+  .panel-menu { margin-bottom: 10px; }
+  .panel-menu .box-head { display: none; }
+  .panel-menu .side-list { display: flex; gap: 6px; margin: 0; padding: 8px; overflow-x: auto; scrollbar-width: none; }
+  .panel-menu .side-list li { flex: none; }
+  .panel-menu .side-list a { margin: 0; padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px; white-space: nowrap; }
+  .panel-menu .side-list a.is-active { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
   .listing-table.is-feed tbody { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 10px; }
   .listing-table.is-feed td:nth-child(2) { padding-inline: 9px !important; }
   .listing-table.is-feed .listing-snippet { display: none; }
