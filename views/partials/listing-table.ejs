@@ -20,7 +20,7 @@
               <img src="<%= thumb(item.images[0]) %>" alt="" loading="lazy" decoding="async" width="240" height="180">
               <% if (item.images.length > 1) { %><span class="photo-count"><%- icon('camera', { size: 10 }) %><%= item.images.length %></span><% } %>
             <% } else { %>
-              <span class="no-photo">Fotoğraf yok</span>
+              <span class="no-photo is-placeholder" data-cat="<%= item.category %>">Fotoğraf yok</span>
             <% } %>
           </a>
         </td>

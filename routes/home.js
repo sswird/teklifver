@@ -6,7 +6,10 @@ const Bid = require('../models/Bid');
 const Review = require('../models/Review');
 const { openCountsByCategory, uniqueByPhoto } = require('../lib/stats');
 const { liveFilter } = require('../lib/listing');
+const allCategories = require('../config/categories');
 const { priceBoard } = require('../lib/price-board');
+const { recentActivity } = require('../lib/activity');
+const { isUrgent } = require('../lib/helpers');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -15,7 +18,7 @@ router.get('/', async (req, res, next) => {
     const now = new Date();
     const open = liveFilter();
 
-    const [showcase, latest, closing, counts, topCompanies, cityRows, todayCount, companyCount, bidCount, completedCount, reviews] =
+    const [showcase, latest, closing, counts, topCompanies, cityRows, todayCount, companyCount, bidCount, completedCount, reviews, freshWithPhotos, urgentRaw] =
       await Promise.all([
         // Vitrin: fotoğraflı ve en çok bakılan açık talepler
         Request.find({ ...open, 'images.0': { $exists: true } }).sort({ viewCount: -1 }).limit(60).lean(),
@@ -42,8 +45,18 @@ router.get('/', async (req, res, next) => {
           .populate('company', 'name companyName')
           .sort({ createdAt: -1 })
           .limit(8)
+          .lean(),
+        // Vitrin sekmeleri: fotoğraflı yeni gelenler ve acil işler
+        Request.find({ ...open, 'images.0': { $exists: true } }).sort({ createdAt: -1 }).limit(30).lean(),
+        Request.find({ ...open, $or: [{ isUrgent: true }, { deadline: { $gte: now, $lte: new Date(now.getTime() + 7 * DAY_MS) } }] })
+          .sort({ deadline: 1, createdAt: -1 })
+          .limit(30)
           .lean()
       ]);
+    const latestReviews = reviews.filter(review => review.customer && review.company);
+    const activity = await recentActivity({ latest, reviews: latestReviews });
+    // Kategoriler en hareketliden başlar; kart sayısı altıya bölünsün diye son karo "Tüm kategoriler"dir.
+    const categoryTiles = [...allCategories].sort((a, b) => (counts[b.name] || 0) - (counts[a.name] || 0)).slice(0, 11);
 
     const board = await priceBoard();
     res.render('home', {
@@ -72,6 +85,14 @@ router.get('/', async (req, res, next) => {
         }
       ],
       showcase: uniqueByPhoto(showcase, 20),
+      vitrin: {
+        featured: uniqueByPhoto(showcase, 10),
+        urgent: urgentRaw.filter(isUrgent).slice(0, 10),
+        fresh: uniqueByPhoto(freshWithPhotos, 10)
+      },
+      categoryTiles,
+      activity: activity.events,
+      lastBidAt: activity.lastBidAt,
       latest,
       closing: uniqueByPhoto(closing, 8),
       counts,
@@ -84,7 +105,7 @@ router.get('/', async (req, res, next) => {
       cityRows,
       total: Object.values(counts).reduce((sum, count) => sum + count, 0),
       stats: { todayCount, companyCount, bidCount, completedCount },
-      latestReviews: reviews.filter(review => review.customer && review.company).slice(0, 4)
+      latestReviews: latestReviews.slice(0, 4)
     });
   } catch (err) {
     next(err);

@@ -31,53 +31,85 @@
         </p>
       </section>
     <% } %>
-
+    <% if (stats.todayCount || lastBidAt) { %>
+      <p class="pulse-line">
+        <span class="pulse-dot" aria-hidden="true"></span>
+        <span class="pulse-text"><% if (stats.todayCount) { %>Son 24 saatte <strong><%= stats.todayCount %></strong> yeni talep<% } %><% if (stats.todayCount && lastBidAt) { %>, <% } %><% if (lastBidAt) { %>son teklif <strong><%= timeAgo(lastBidAt) %></strong> geldi<% } %>.</span>
+        <a href="/requests?period=1">Yeni talepleri gör</a>
+      </p>
+    <% } %>
   </div>
 
-  <div class="layout-home">
-    <aside class="home-side desktop-only" aria-label="Fiyatlar ve kategoriler">
-      <%- include('partials/price-board', { placement: 'rail' }) %>
+  <section class="cat-tiles" aria-labelledby="catTilesTitle">
+    <div class="section-head">
+      <h2 id="catTilesTitle">Ne yaptırmak istiyorsunuz?</h2>
+      <a href="/kategoriler">Tüm kategoriler</a>
+    </div>
+    <ul class="cat-tile-list">
+      <% categoryTiles.forEach(category => { %>
+        <li>
+          <a class="cat-tile" href="<%= categoryUrl(category.name) %>">
+            <img src="<%= thumb(category.image) %>" alt="" loading="lazy" decoding="async" width="240" height="180">
+            <span class="cat-tile-label">
+              <b><%= category.name %></b>
+              <span><%= counts[category.name] ? counts[category.name] + ' açık talep' : 'Talep verin' %></span>
+            </span>
+          </a>
+        </li>
+      <% }) %>
+      <li>
+        <a class="cat-tile cat-tile-all" href="/kategoriler">
+          <span class="cat-tile-label"><b>Tüm kategoriler</b><span><%= allCategories.length %> alan, <%= total %> açık talep</span></span>
+        </a>
+      </li>
+    </ul>
+  </section>
 
-      <section class="box">
-        <div class="box-head">Kategoriler</div>
-        <ul class="side-list">
-          <% allCategories.forEach(category => { %>
-            <li><a href="<%= categoryUrl(category.name) %>"><%= category.name %> <% if (counts[category.name]) { %><span class="count"><%= counts[category.name] %></span><% } %></a></li>
-          <% }) %>
-        </ul>
-      </section>
-
-      <section class="box">
-        <div class="box-head">Kısayollar</div>
-        <ul class="side-list">
-          <li><a href="/requests?period=1">Son 24 saat <% if (stats.todayCount) { %><span class="count"><%= stats.todayCount %></span><% } %></a></li>
-          <li><a href="/requests?noBids=on">Teklif almamış talepler</a></li>
-          <li><a href="/requests?photos=on">Fotoğraflı talepler</a></li>
-          <li><a href="/requests?sort=deadline">Süresi yaklaşanlar</a></li>
-          <li><a href="/fiyat-rehberi">Fiyat rehberi</a></li>
-          <li><a href="/companies">Firma rehberi</a></li>
-        </ul>
-      </section>
-
-      <% if (cityRows.length) { %>
-        <section class="box">
-          <div class="box-head">İllere Göre <a href="/iller">Tümü</a></div>
-          <ul class="side-list">
-            <% cityRows.slice(0, 10).forEach(row => { %>
-              <li><a href="<%= cityUrl(row._id) %>"><%= row._id %> <span class="count"><%= row.total %></span></a></li>
-            <% }) %>
-          </ul>
-        </section>
+  <% if (vitrin.featured.length) { %>
+    <section class="box vitrin" aria-labelledby="vitrinTitle">
+      <div class="box-head vitrin-head">
+        <span id="vitrinTitle">Vitrin</span>
+        <div class="vitrin-tabs" role="tablist" aria-label="Vitrin" data-tabset>
+          <button class="vitrin-tab" type="button" role="tab" id="vitrinTabFeatured" aria-controls="vitrinFeatured" aria-selected="true">Çok bakılanlar</button>
+          <% if (vitrin.urgent.length) { %><button class="vitrin-tab" type="button" role="tab" id="vitrinTabUrgent" aria-controls="vitrinUrgent" aria-selected="false" tabindex="-1">Acil işler <span class="tab-count"><%= vitrin.urgent.length %></span></button><% } %>
+          <% if (vitrin.fresh.length) { %><button class="vitrin-tab" type="button" role="tab" id="vitrinTabFresh" aria-controls="vitrinFresh" aria-selected="false" tabindex="-1">Yeni gelenler</button><% } %>
+        </div>
+        <a href="/requests?photos=on&sort=views">Tümünü Gör</a>
+      </div>
+      <div class="vitrin-panel" id="vitrinFeatured" role="tabpanel" aria-labelledby="vitrinTabFeatured">
+        <%- include('partials/showcase-grid', { items: vitrin.featured }) %>
+      </div>
+      <% if (vitrin.urgent.length) { %>
+        <div class="vitrin-panel" id="vitrinUrgent" role="tabpanel" aria-labelledby="vitrinTabUrgent" hidden>
+          <%- include('partials/showcase-grid', { items: vitrin.urgent }) %>
+        </div>
       <% } %>
-    </aside>
+      <% if (vitrin.fresh.length) { %>
+        <div class="vitrin-panel" id="vitrinFresh" role="tabpanel" aria-labelledby="vitrinTabFresh" hidden>
+          <%- include('partials/showcase-grid', { items: vitrin.fresh }) %>
+        </div>
+      <% } %>
+    </section>
+  <% } %>
 
+  <div class="layout-home">
     <div class="home-center">
       <%- include('partials/price-board', { placement: 'feed' }) %>
+
+      <nav class="quick-filters" aria-label="Hızlı filtreler">
+        <a class="quick-chip" href="/requests?period=1">Son 24 saat<% if (stats.todayCount) { %> <b><%= stats.todayCount %></b><% } %></a>
+        <a class="quick-chip" href="/requests?noBids=on">Teklif bekleyenler</a>
+        <a class="quick-chip" href="/requests?photos=on">Fotoğraflı</a>
+        <a class="quick-chip" href="/requests?sort=deadline">Süresi yaklaşan</a>
+        <a class="quick-chip" href="/requests?sort=budget_high">Bütçesi yüksek</a>
+        <a class="quick-chip" href="/fiyat-rehberi">Fiyat rehberi</a>
+      </nav>
 
       <section class="box">
         <div class="box-head">Son Eklenen Talepler <% if (total) { %><a href="/requests">Tümü (<%= total %>)</a><% } %></div>
         <% if (latest.length) { %>
           <%- include('partials/listing-table', { items: latest, adEvery: 6 }) %>
+          <div class="feed-more"><a class="btn btn-block" href="/requests">Tüm talepleri gör<% if (total) { %> (<%= total %>)<% } %></a></div>
         <% } else { %>
           <div class="empty">
             <h2>Henüz talep yok</h2>
@@ -86,13 +118,6 @@
           </div>
         <% } %>
       </section>
-
-      <% if (showcase.length) { %>
-        <section class="box">
-          <div class="box-head">Vitrin <a href="/requests?photos=on&sort=views">Tümünü Gör</a></div>
-          <%- include('partials/showcase-grid', { items: showcase.slice(0, 4), columns: 4 }) %>
-        </section>
-      <% } %>
 
       <section class="box" id="recentBox" hidden>
         <div class="box-head">Son Baktıklarınız</div>
@@ -122,7 +147,24 @@
       </section>
     </div>
 
-    <aside class="home-right" aria-label="Fiyatlar, firmalar ve öneriler">
+    <aside class="home-right" aria-label="Fiyatlar, hareketler ve firmalar">
+      <%- include('partials/price-board', { placement: 'rail' }) %>
+
+      <% if (activity.length) { %>
+        <section class="box activity">
+          <div class="box-head">Şu an TeklifVer'de</div>
+          <ol class="activity-list">
+            <% activity.forEach(item => { %>
+              <li class="activity-item is-<%= item.type %>">
+                <span class="activity-who"><strong><%= item.who %></strong> <%= item.verb %></span>
+                <a href="<%= item.url %>"><%= truncate(item.title, 58) %></a>
+                <time datetime="<%= new Date(item.at).toISOString() %>"><%= timeAgo(item.at) %></time>
+              </li>
+            <% }) %>
+          </ol>
+        </section>
+      <% } %>
+
       <% if (!currentUser || currentUser.role === 'company') { %>
         <section class="box">
           <div class="box-head">Firmanız mı Var?</div>
@@ -163,6 +205,17 @@
                 <a href="/companies/<%= company._id %>"><%= company.companyName || company.name %></a>
                 <span><%- icon('star', { size: 11, class: 'star' }) %> <%= ratingLabel(company.rating) %> (<%= company.ratingCount %> yorum)</span>
               </li>
+            <% }) %>
+          </ul>
+        </section>
+      <% } %>
+
+      <% if (cityRows.length) { %>
+        <section class="box">
+          <div class="box-head">İllere Göre <a href="/iller">Tümü</a></div>
+          <ul class="side-list city-list">
+            <% cityRows.slice(0, 10).forEach(row => { %>
+              <li><a href="<%= cityUrl(row._id) %>"><%= row._id %> <span class="count"><%= row.total %></span></a></li>
             <% }) %>
           </ul>
         </section>

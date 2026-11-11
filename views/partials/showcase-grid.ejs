@@ -5,7 +5,7 @@
         <% if (item.images && item.images.length) { %>
           <img src="<%= thumb(item.images[0]) %>" alt="<%= item.title %>" loading="lazy" decoding="async" width="240" height="180">
         <% } else { %>
-          <span class="no-photo">Fotoğraf yok</span>
+          <span class="no-photo is-placeholder" data-cat="<%= item.category %>">Fotoğraf yok</span>
         <% } %>
         <% if (isUrgent(item)) { %><span class="label label-urgent label-on-photo">ACİL</span><% } %>
       </div>

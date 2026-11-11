@@ -150,6 +150,16 @@ const idOf = path => path.split('/').pop();
   await sendForm(firm, thread, { content: '' });
   check('boş mesaj reddedilir', (await countMessages()) === beforeEmpty);
 
+  // Ana sayfa: kategori karoları, vitrin sekmeleri, canlı akış ve fotoğrafsız ilan yer tutucusu
+  const home = (await get(null, "/")).text;
+  check("fotoğraflı kategori karoları", (home.match(/class="cat-tile"/g) || []).length === 11 && home.includes("cat-tile-all"));
+  check("vitrin sekmeleri", home.includes("role=\"tablist\"") && home.includes("aria-controls=\"vitrinFeatured\""));
+  check("canlı akış gerçek teklifleri gösterir", home.includes("Şu an TeklifVer") && home.includes("teklif verdi"));
+  check("son 24 saat satırı", home.includes("class=\"pulse-line\"") && home.includes("yeni talep"));
+  check("fotoğrafsız ilan kategori adını taşır", /class="no-photo is-placeholder" data-cat="[^"]+"/.test(home));
+  const activityBlock = home.slice(home.indexOf('class="activity-list"'), home.indexOf('</ol>', home.indexOf('class="activity-list"')));
+  check("canlı akışta teklif tutarı yok", activityBlock.length > 0 && !/\d TL/.test(activityBlock.replace(/<a [^>]*>[^<]*<\/a>/g, '')));
+
   console.log(`${passed} geçti, ${failures} hata`);
   process.exit(failures ? 1 : 0);
 })().catch(err => {

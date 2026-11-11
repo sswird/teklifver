@@ -326,6 +326,33 @@
     });
   }
 
+  /* Sekme grupları (ana sayfa vitrini): oklarla da gezilir */
+  function initTabsets() {
+    $$('[data-tabset]').forEach(list => {
+      const tabs = $$('[role="tab"]', list);
+      const select = tab => {
+        tabs.forEach(other => {
+          const active = other === tab;
+          other.setAttribute('aria-selected', String(active));
+          other.tabIndex = active ? 0 : -1;
+          const panel = document.getElementById(other.getAttribute('aria-controls'));
+          if (panel) panel.hidden = !active;
+        });
+      };
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => select(tab));
+        tab.addEventListener('keydown', event => {
+          const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+          if (!step) return;
+          event.preventDefault();
+          const next = tabs[(index + step + tabs.length) % tabs.length];
+          select(next);
+          next.focus();
+        });
+      });
+    });
+  }
+
   /* Talep galerisi */
   function initGallery() {
     const frame = $('a.gallery-main');
@@ -947,6 +974,7 @@
     initSuggest();
     initSmallActions();
     initAttach();
+    initTabsets();
     initDeadlines();
   });
 })();

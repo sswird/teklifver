@@ -253,7 +253,7 @@ details:not([open]) > summary.box-head { border-bottom: 0; }
 .showcase-price { margin-top: 1px; font: 600 16px/1.25 var(--font-head); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Ana sayfa */
-.layout-home { display: grid; grid-template-columns: 252px minmax(0, 1fr); gap: 16px; align-items: start; }
+.layout-home { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
 .composer { margin-bottom: 14px; padding: 16px 18px 13px; background: var(--accent); border-radius: var(--radius); color: var(--accent-ink); }
 .composer h1 { margin-bottom: 10px; font-size: 30px; }
 .composer-row { display: flex; gap: 8px; }
@@ -798,16 +798,76 @@ label.upload-thumb:has(input:checked) .thumb-remove { background: var(--red); }
 
 .request-steps a { color: inherit; text-decoration: underline; }
 
+/* Fotoğrafsız ilan: boş gri kutu yerine koyu zemin üstünde sarı kategori adı */
+.no-photo.is-placeholder { flex-direction: column; gap: 3px; background: repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.035) 0 10px, transparent 10px 20px), var(--topbar); color: var(--on-dark-soft); font-size: 12px; font-weight: 400; }
+.no-photo.is-placeholder::before { content: attr(data-cat); color: var(--accent); font: 600 17px/1.15 var(--font-head); letter-spacing: 0.02em; }
+.listing-table.is-feed .no-photo.is-placeholder { background: repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.035) 0 10px, transparent 10px 20px), var(--topbar); color: var(--on-dark-soft); font-size: 12.5px; font-weight: 400; }
+.listing-table.is-feed .no-photo.is-placeholder::before { font-size: 19px; }
+
+/* Ana sayfa: kullanıcıyı gezdiren bölümler */
+.pulse-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: -4px 0 18px; padding: 9px 14px; background: var(--surface); border-radius: 0 0 var(--radius) var(--radius); box-shadow: var(--card-shadow); color: var(--text-soft); font-size: 14px; }
+.pulse-text { flex: 1 1 0; min-width: 0; }
+.pulse-line a { margin-left: auto; font-weight: 600; }
+.pulse-dot { width: 9px; height: 9px; background: #1f9d55; border-radius: 50%; box-shadow: 0 0 0 3px rgb(31 157 85 / 0.18); }
+.home-hero .composer { margin-bottom: 0; border-radius: var(--radius) var(--radius) 0 0; }
+.home-hero .composer:last-child { margin-bottom: 18px; border-radius: var(--radius); }
+
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.section-head h2 { font-size: 23px; }
+.section-head a { font-size: 14px; font-weight: 600; }
+.cat-tiles { margin-bottom: 18px; }
+.cat-tile-list { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.cat-tile { position: relative; display: block; aspect-ratio: 4 / 3; overflow: hidden; background: var(--topbar); border-radius: var(--radius); box-shadow: var(--card-shadow); color: var(--on-dark); }
+.cat-tile:hover { text-decoration: none; color: var(--on-dark); }
+.cat-tile img { width: 100%; height: 100%; object-fit: cover; }
+.cat-tile-label { position: absolute; left: 8px; bottom: 8px; max-width: calc(100% - 16px); display: flex; flex-direction: column; padding: 5px 10px 6px; background: var(--topbar); border-radius: 3px; line-height: 1.2; }
+.cat-tile-label b { overflow: hidden; font: 600 16px/1.15 var(--font-head); text-overflow: ellipsis; white-space: nowrap; }
+.cat-tile-label span { color: var(--accent); font-size: 12.5px; font-weight: 600; }
+.cat-tile-all { display: flex; align-items: center; justify-content: center; background: var(--accent); color: var(--accent-ink); }
+.cat-tile-all:hover { color: var(--accent-ink); }
+.cat-tile-all .cat-tile-label { position: static; max-width: none; background: none; text-align: center; }
+.cat-tile-all .cat-tile-label b { font-size: 20px; white-space: normal; }
+.cat-tile-all .cat-tile-label span { color: var(--accent-ink); font-weight: 400; }
+.cat-tile:focus-visible { outline: 3px solid var(--link); outline-offset: 2px; }
+
+.vitrin-head { flex-wrap: wrap; }
+.vitrin-tabs { display: flex; gap: 4px; margin-right: auto; margin-left: 10px; font: 400 14px/1.3 var(--font); }
+.vitrin-tab { padding: 5px 12px; background: none; border: 1px solid transparent; border-radius: 999px; color: var(--muted); font-weight: 600; cursor: pointer; }
+.vitrin-tab:hover { color: var(--text); background: var(--head); }
+.vitrin-tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
+.vitrin-tab:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+.tab-count { display: inline-block; min-width: 18px; margin-left: 3px; padding: 0 5px; background: var(--urgent); border-radius: 999px; color: #fff; font-size: 11px; line-height: 16px; text-align: center; }
+
+.quick-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.quick-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; background: var(--surface); border-radius: 999px; box-shadow: var(--card-shadow); color: var(--text); font-size: 14px; font-weight: 600; white-space: nowrap; }
+.quick-chip:hover { background: var(--tag-bg); color: var(--tag-text); text-decoration: none; }
+.quick-chip b { padding: 0 6px; background: var(--accent); border-radius: 999px; color: var(--accent-ink); font-size: 12px; }
+.feed-more { padding: 0 14px 14px; }
+
+.activity-list { margin: 0; padding: 4px 0; list-style: none; }
+.activity-item { position: relative; display: grid; gap: 1px; padding: 8px 14px 8px 30px; border-bottom: 1px solid var(--line-soft); font-size: 13.5px; line-height: 1.3; }
+.activity-item:last-child { border-bottom: 0; }
+.activity-item::before { content: ""; position: absolute; left: 14px; top: 13px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-dark); }
+.activity-item.is-request::before { background: var(--link); }
+.activity-item.is-review::before { background: #1f9d55; }
+.activity-who { color: var(--text-soft); }
+.activity-item a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.activity-item time { color: var(--muted); font-size: 12px; }
+.city-list { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 12px 12px; }
+.city-list li a { margin: 0; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; font-size: 13px; }
+.city-list .count { margin-left: 2px; }
+
+@media screen and (prefers-reduced-motion: no-preference) and (hover: hover) {
+  .cat-tile img { transition: transform 0.25s ease-out; }
+  .cat-tile:hover img { transform: scale(1.05); }
+}
+
 /* Ana sayfa: üstte tam genişlik slogan, solda fiyat panosu ve kategoriler, sağda kartlar */
 .home-hero .composer { padding: 28px 30px 22px; }
 .home-hero .composer h1 { font-size: 38px; }
 .home-hero .composer-row .input, .home-hero .composer-row .select, .home-hero .composer-row .btn { min-height: 50px; }
 .home-hero .composer-row .select { width: 160px; }
 @media (min-width: 761px) {
-  .layout-home { grid-template-areas: "side main" "rail main"; grid-template-rows: auto 1fr; }
-  .home-side { grid-area: side; }
-  .home-center { grid-area: main; }
-  .home-right { grid-area: rail; }
 }
 
 /* Küçülen ekranlar */
@@ -816,9 +876,10 @@ label.upload-thumb:has(input:checked) .thumb-remove { background: var(--red); }
 @media (min-width: 761px) and (max-width: 1020px) { .catnav-item:nth-child(8) { display: none; } }
 @media (min-width: 761px) and (max-width: 890px) { .catnav-item:nth-child(7) { display: none; } }
 @media (max-width: 1080px) {
-  .layout-home { grid-template-columns: 220px minmax(0, 1fr); }
+  .layout-home { grid-template-columns: minmax(0, 1fr) 260px; }
 }
 @media (max-width: 960px) {
+  .cat-tile-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .detail-main { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .detail-owner { grid-column: 1 / -1; }
   .showcase-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -831,6 +892,16 @@ label.upload-thumb:has(input:checked) .thumb-remove { background: var(--red); }
 @media (max-width: 760px) {
   body { padding-bottom: 56px; }
   .plan-grid { grid-template-columns: minmax(0, 1fr); }
+  .cat-tile-list { display: flex; gap: 10px; margin-inline: -12px; padding: 0 12px 4px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .cat-tile-list li { flex: 0 0 40%; scroll-snap-align: start; }
+  .section-head h2 { font-size: 20px; }
+  .vitrin-tabs { order: 3; width: 100%; margin: 8px 0 0; overflow-x: auto; scrollbar-width: none; }
+  .vitrin .showcase-grid { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .vitrin .showcase-item { flex: 0 0 42%; scroll-snap-align: start; }
+  .quick-filters { flex-wrap: nowrap; margin-inline: -12px; padding: 2px 12px 6px; overflow-x: auto; scrollbar-width: none; }
+  .pulse-line { align-items: flex-start; }
+  .pulse-dot { margin-top: 5px; }
+  .pulse-line a { flex-basis: 100%; margin-left: 15px; }
   /* Telefonda alt menü zaten var: üst çubukta yalnız bildirimler kalır, panel menüsü yatay şerit olur */
   .topbar-inner > a[href="/messages"], .topbar-inner > a[href="/dashboard/favorites"] { display: none; }
   .panel-menu { margin-bottom: 10px; }
