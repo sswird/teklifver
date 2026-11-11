@@ -1,6 +1,6 @@
 /* TeklifVer teması: renkler, yazı tipleri ve ölçüler burada.
-   "Çini": lacivert üst bant, turkuaz vurgu, ferah beyaz kartlar. Turkuaz ana eylem ve markadır,
-   bağlantılar mavi, fiyatlar turkuaz zeminli yuvarlak etiketlerde durur.
+   Lacivert güven verir; turuncu düğme, fiyat ve şeritlerde dikkat çeker ve sitede gezinmeyi artırır
+   (Bonnardel ve ark. 2011). Zemin göz yormasın diye saf beyaz değil, hafif sıcak kırık beyazdır.
    "turkce" yazı tipi dosyaları yalnızca ğ, ş ve İ harflerini taşır, sayfa bu yüzden hızlı açılır. */
 
 @font-face { font-family: "Source Sans 3"; font-style: normal; font-weight: 200 900; font-display: swap; src: url("../fonts/source-sans-3-latin-wght-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
@@ -11,21 +11,21 @@
 @font-face { font-family: "Barlow Condensed"; font-style: normal; font-weight: 700; font-display: swap; src: url("../fonts/barlow-condensed-turkce-700-normal.woff2") format("woff2"); unicode-range: U+011E-011F, U+0130, U+015E-015F, U+20BA; }
 
 :root {
-  --bg: #f2f5f9;
+  --bg: #f6f5f2;
   --surface: #fff;
-  --text: #13213c;
+  --text: #18213a;
   --text-soft: #2c3b58;
   --muted: #55627a;
   --line: #dde3ec;
   --line-soft: #edf1f6;
   --head: #f6f8fc;
-  --hover: #f1f8f9;
+  --hover: #fbf6f1;
 
-  --accent: #0b7f7c;
-  --accent-dark: #096a68;
-  --accent-line: #096a68;
+  --accent: #c2410c;
+  --accent-dark: #a3360a;
+  --accent-line: #a3360a;
   --accent-ink: #fff;
-  --accent-soft: #e2f4f3;
+  --accent-soft: #fdeee3;
   --link: #1a4fa0;
   --ink: #0f2650;
   --ink-hover: #1a3a72;
@@ -44,11 +44,11 @@
   --footer-bg: #0a1a36;
   --footer-line: #233a66;
   /* Çini şeridinin iki rengi */
-  --tile-a: #13a3a0;
+  --tile-a: #f97316;
   --tile-b: #3f7bd6;
 
-  --tag-bg: #e2f4f3;
-  --tag-text: #0a5654;
+  --tag-bg: #fdeee3;
+  --tag-text: #9a3412;
 
   --control-bg: #fff;
   --control-border: #b4bfcf;
@@ -88,11 +88,11 @@
     --head: #172238;
     --hover: #18253c;
 
-    --accent: #2bb3ae;
-    --accent-dark: #24a19c;
-    --accent-line: #1d8a86;
-    --accent-ink: #04211f;
-    --accent-soft: #10302f;
+    --accent: #fb923c;
+    --accent-dark: #f97316;
+    --accent-line: #c2410c;
+    --accent-ink: #2a1205;
+    --accent-soft: #3a2212;
     --link: #8fb6ff;
     --ink: #e6ebf5;
     --ink-hover: #c8d1e3;
@@ -109,8 +109,8 @@
     --footer-bg: #060c18;
     --footer-line: #1f2d48;
 
-    --tag-bg: #10302f;
-    --tag-text: #84e3dd;
+    --tag-bg: #3a2212;
+    --tag-text: #fdba74;
 
     --control-bg: #0d1526;
     --control-border: #4a5a78;

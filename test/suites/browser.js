@@ -182,7 +182,7 @@ const logout = async page => page.clickAndWait('form[action="/logout"] button');
     await page.evaluate(`localStorage.setItem('theme', 'light')`);
     await page.goto('/');
     const lightBackground = await background();
-    check('beyaz tema arka planı açık', lightBackground === 'rgb(242, 245, 249)', lightBackground);
+    check('beyaz tema arka planı açık', lightBackground === 'rgb(246, 245, 242)', lightBackground);
     check('düğme siyah temayı önerir', (await page.text()).includes('Siyah Tema'));
     await page.click('[data-theme-toggle]');
     await sleep(500);
