@@ -1,17 +1,29 @@
-<% const adEvery = locals.adEvery || 0; %>
-<table class="listing-table is-feed">
-  <thead class="visually-hidden">
+<%
+  // Klasik ilan tablosu: Başlık | Bütçe | Teklif | Tarih | İl / İlçe.
+  // compact: dar sütunda (ana sayfa) tarih ve yer başlığın altındaki satıra geçer.
+  // Statik ön izleme satırları buradan alır: <tr> ile col-photo hücresi bitişik kalmalı.
+  const adEvery = locals.adEvery || 0;
+  const compact = Boolean(locals.compact);
+  const columns = compact ? 5 : 7;
+%>
+<table class="listing-table is-classic <%= compact ? 'is-compact' : '' %>">
+  <thead>
     <tr>
-      <th>Fotoğraf</th>
-      <th>Talep</th>
-      <th>Bütçe ve teklif sayısı</th>
-      <th>Favori</th>
+      <th class="col-photo"><span class="visually-hidden">Fotoğraf</span></th>
+      <th>Talep Başlığı</th>
+      <th class="col-budget">Bütçe</th>
+      <th class="col-bids">Teklif</th>
+      <% if (!compact) { %>
+        <th class="col-date">Tarih</th>
+        <th class="col-place">İl / İlçe</th>
+      <% } %>
+      <th class="col-fav"><span class="visually-hidden">Favori</span></th>
     </tr>
   </thead>
   <tbody>
     <% items.forEach((item, index) => { const budget = budgetLabel(item.budget); %>
       <% if (adEvery && index > 0 && index % adEvery === 0) { %>
-        <tr class="ad-row"><td colspan="4"><%- include('ad', { format: 'inline' }) %></td></tr>
+        <tr class="ad-row"><td colspan="<%= columns %>"><%- include('ad', { format: 'inline' }) %></td></tr>
       <% } %>
       <tr>
         <td class="col-photo">
@@ -24,25 +36,28 @@
             <% } %>
           </a>
         </td>
-        <td>
+        <td class="col-main">
           <a class="listing-title" href="/requests/<%= item._id %>"><%= truncate(item.title, 90) %></a>
           <% if (isUrgent(item)) { %><span class="label label-urgent">ACİL</span><% } %>
           <% if (isFresh(item)) { %><span class="label label-new">YENİ</span><% } %>
-          <% if (item.description) { %><p class="listing-snippet"><%= truncate(item.description.replace(/\s+/g, ' '), 170) %></p><% } %>
-          <div class="listing-meta">
-            <span class="listing-place"><%= placeLabel(item) %></span>
-            <span title="<%= formatDate(item.createdAt) %>"><%= timeAgo(item.createdAt) %></span>
+          <% if (item.description) { %><p class="listing-snippet"><%= truncate(item.description.replace(/\s+/g, ' '), 140) %></p><% } %>
+          <div class="listing-sub">
             <span><%= item.category %></span>
+            <% if (compact) { %><span class="listing-place"><%= placeLabel(item) %></span><span title="<%= formatDate(item.createdAt) %>"><%= timeAgo(item.createdAt) %></span><% } %>
           </div>
         </td>
         <td class="col-budget">
           <% if (budget === 'Belirtilmemiş') { %>
-            <span class="price-tag is-open">Bütçe belirtilmemiş</span>
+            <span class="price-tag is-open">Belirtilmemiş</span>
           <% } else { %>
             <span class="price-tag"><%= budget %></span>
           <% } %>
-          <span class="listing-bids"><b><%= item.bidCount %></b> teklif</span>
         </td>
+        <td class="col-bids"><span class="listing-bids"><b><%= item.bidCount %></b> <span class="bids-word">teklif</span></span></td>
+        <% if (!compact) { %>
+          <td class="col-date" title="<%= formatDate(item.createdAt) %>"><%= timeAgo(item.createdAt) %></td>
+          <td class="col-place"><span class="listing-place"><%= placeLabel(item) %></span></td>
+        <% } %>
         <td class="col-fav"><%- include('favorite', { item }) %></td>
       </tr>
     <% }) %>

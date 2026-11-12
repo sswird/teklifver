@@ -110,7 +110,7 @@
       <section class="box">
         <div class="box-head">Son Eklenen Talepler <% if (total) { %><a href="/requests">Tümü (<%= total %>)</a><% } %></div>
         <% if (latest.length) { %>
-          <%- include('partials/listing-table', { items: latest, adEvery: 6 }) %>
+          <%- include('partials/listing-table', { items: latest, adEvery: 6, compact: true }) %>
         <% } else { %>
           <div class="empty">
             <h2>Henüz talep yok</h2>

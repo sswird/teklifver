@@ -90,7 +90,7 @@
     if (filters.urgent && !item.urgent) return false;
     if (filters.search) {
       const byNumber = /^\d{6,}$/.test(filters.search) && String(item.no) === filters.search;
-      if (!byNumber && !window.TeklifverSearch.matchesText(filters.search, [item.title, item.description, item.category])) return false;
+      if (!byNumber && !window.TeklifverSearch.matchesText(filters.search, [item.title, item.description, item.category, item.location, item.city])) return false;
     }
     return true;
   }

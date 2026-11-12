@@ -141,7 +141,7 @@ async function collectData(parts, rewrite) {
 
   const [requests, companies] = await Promise.all([
     Request.find(liveFilter())
-      .select('no title description category city budget images bidCount viewCount createdAt deadline isUrgent status')
+      .select('no title description category city location budget images bidCount viewCount createdAt deadline isUrgent status')
       .lean(),
     User.find({ role: 'company', suspended: { $ne: true } })
       .select('companyName name address serviceCities specialties categories rating ratingCount verified createdAt')
@@ -181,6 +181,7 @@ async function collectData(parts, rewrite) {
         description: item.description,
         category: item.category,
         city: item.city || '',
+        location: item.location || '',
         min: (item.budget && item.budget.min) || 0,
         max: (item.budget && item.budget.max) || 0,
         created: time(item.createdAt),

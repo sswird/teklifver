@@ -97,6 +97,9 @@
         <% } else { %>
           <%= request.location || 'Konum belirtilmemiş' %>
         <% } %>
+        <% if (request.city || request.location) { %>
+          <a class="map-link" href="https://www.google.com/maps/search/?api=1&amp;query=<%= encodeURIComponent([request.location, request.city, 'Türkiye'].filter(Boolean).join(', ')) %>" target="_blank" rel="noopener"><%- icon('map-pin', { size: 12 }) %>Haritada göster</a>
+        <% } %>
       </div>
       <p class="prose detail-desc"><%= request.description %></p>
 

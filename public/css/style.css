@@ -914,7 +914,7 @@ html[data-theme='dark'] .cat-icon { background: color-mix(in srgb, var(--c) 24%,
 
 /* Talep listesi: hızlı filtreler */
 .quick-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 9px 14px; border-bottom: 1px solid var(--line-soft); }
-.quick-label { margin-right: 2px; color: var(--muted); font-size: 13px; }
+.quick-label { margin-right: 2px; color: var(--muted); font-size: 13px; white-space: nowrap; }
 .quick-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 11px; background: var(--surface); border: 1px solid var(--control-border); border-radius: 999px; color: var(--text); font-size: 13px; white-space: nowrap; }
 .quick-chip:hover { background: var(--head); text-decoration: none; }
 .quick-chip.is-active { background: var(--ink); border-color: var(--ink); color: var(--on-ink); font-weight: 600; }
@@ -1102,6 +1102,57 @@ h2 { font: 700 17px/1.3 var(--font); letter-spacing: 0; }
 .mobile-filter { display: none; }
 @media (max-width: 760px) {
   .mobile-filter { display: inline-flex; }
+}
+
+/* Klasik ilan tablosu: başlık satırı görünür, sütunlar ince çizgiyle ayrılır */
+.listing-table.is-classic { width: 100%; }
+.listing-table.is-classic td { padding: 9px 10px; vertical-align: middle; }
+.listing-table.is-classic th { padding: 7px 10px; }
+.listing-table.is-classic .col-photo { width: 104px; padding-left: 12px !important; }
+.listing-table.is-classic .thumb { width: 88px; height: 66px; }
+.listing-table.is-classic .col-main { min-width: 0; }
+.listing-table.is-classic .listing-title { font-size: 14.5px; }
+.listing-table.is-classic .listing-snippet { margin-top: 2px; color: var(--muted); font-size: 12.5px; -webkit-line-clamp: 1; }
+.listing-table.is-classic .listing-sub { display: flex; flex-wrap: wrap; gap: 0 6px; margin-top: 2px; font-size: 12.5px; }
+.listing-table.is-classic .listing-sub span + span::before { content: "·"; margin-right: 6px; }
+.listing-table.is-classic .col-budget { width: 150px; white-space: nowrap; }
+.listing-table.is-classic .col-budget .price-tag { font-size: 14px; }
+.listing-table.is-classic .col-budget .price-tag.is-open { font-size: 12.5px; }
+.listing-table.is-classic .col-bids { width: 56px; }
+.listing-table.is-classic .listing-bids { display: inline; margin: 0; color: var(--text); font-size: 14px; }
+.listing-table.is-classic .bids-word { display: none; }
+.listing-table.is-classic .col-date { width: 96px; color: var(--text-soft); font-size: 12.5px; }
+.listing-table.is-classic .col-place { width: 128px; color: var(--text-soft); font-size: 12.5px; }
+.listing-table.is-classic .col-fav { width: 36px; }
+.listing-table.is-compact .col-budget { width: 132px; }
+.listing-table.is-compact .listing-sub .listing-place { font-size: inherit; }
+.place-line .map-link { display: inline-flex; align-items: center; gap: 3px; margin-left: 8px; font-size: 13px; }
+/* Tablet ve telefonda sütunlar sığmaz: her satır karta döner, tarih ve yer altta tek satırda */
+@media (max-width: 1080px) {
+  .listing-table.is-classic thead { display: none; }
+  .listing-table.is-classic, .listing-table.is-classic tbody { display: block; }
+  .listing-table.is-classic tbody tr { position: relative; display: block; min-height: 90px; padding: 10px 40px 10px 114px; border-bottom: 1px solid var(--line-soft); }
+  .listing-table.is-classic tbody tr:last-child { border-bottom: 0; }
+  .listing-table.is-classic tbody tr:hover { background: var(--hover); }
+  .listing-table.is-classic tbody tr:hover td { background: transparent; }
+  .listing-table.is-classic td { display: block; width: auto !important; padding: 0 !important; border: 0 !important; text-align: left !important; }
+  .listing-table.is-classic .col-photo { position: absolute; left: 12px; top: 10px; width: auto; padding: 0 !important; }
+  .listing-table.is-classic .col-fav { position: absolute; right: 8px; top: 10px; width: auto; }
+  .listing-table.is-classic td.col-budget { margin-top: 4px; white-space: normal; }
+  .listing-table.is-classic td.col-bids::after { content: none; }
+  .listing-table.is-classic td.col-bids, .listing-table.is-classic td.col-date, .listing-table.is-classic td.col-place { display: inline; margin: 0; color: var(--muted); font-size: 12.5px; }
+  .listing-table.is-classic td.col-date::before, .listing-table.is-classic td.col-place::before { content: " · "; }
+  .listing-table.is-classic .listing-bids { font-size: 12.5px; color: var(--muted); }
+  .listing-table.is-classic .bids-word { display: inline; }
+  .listing-table.is-classic tbody tr.ad-row { min-height: 0; padding: 0; }
+}
+@media (max-width: 760px) {
+  .listing-table.is-classic tbody tr { padding: 10px 32px 10px 92px; }
+  .listing-table.is-classic .col-photo { left: 10px; }
+  .listing-table.is-classic .col-fav { right: 6px; top: 8px; }
+  .listing-table.is-classic .thumb { width: 72px; height: 54px; }
+  .listing-table.is-classic .listing-snippet { display: none; }
+  .place-line .map-link { margin-left: 6px; }
 }
 
 /* Fiyat: süslü etiket yerine kalın yazı */
