@@ -878,6 +878,20 @@
     update();
   }
 
+  /* Telefonda "Filtrele": kapalı Detaylı Arama kutusunu açar ve oraya götürür */
+  function initFilterButton() {
+    const button = $('[data-open-filters]');
+    const box = $('#detayli-arama');
+    if (!button || !box) return;
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      box.open = true;
+      box.scrollIntoView({ block: 'start' });
+      const first = $('input, select', box);
+      if (first) first.focus({ preventScroll: true });
+    });
+  }
+
   /* Talep taslağı: yalnızca tercih çerezine onay verildiyse tarayıcıda saklanır */
   function initDraft() {
     const form = $('form[data-draft]');
@@ -1033,6 +1047,7 @@
     initCategoryGuess();
     initCategoryPicker();
     initCompare();
+    initFilterButton();
     initCopyLink();
     initShareMenu();
     initThread();

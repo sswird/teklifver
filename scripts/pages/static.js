@@ -214,6 +214,13 @@
     if (chips.length > 1) box.append(element('a', { className: 'filter-clear', href: `${BASE}/requests/`, textContent: 'Tümünü temizle' }));
   }
 
+  function renderFilterButton(filters) {
+    const button = $('[data-open-filters]');
+    if (!button || !button.lastChild) return;
+    const active = [filters.search, filters.city, filters.budgetMin, filters.budgetMax, filters.period, filters.photos, filters.noBids, filters.urgent].filter(Boolean).length;
+    button.lastChild.textContent = ' Filtrele' + (active ? ` (${active})` : '');
+  }
+
   function renderQuickFilters(filters) {
     $$('[data-quick]').forEach(link => {
       const kind = link.dataset.quick;
@@ -269,6 +276,7 @@
 
     renderChips(filters);
     renderQuickFilters(filters);
+    renderFilterButton(filters);
 
     if (filters.category !== 'all') {
       document.title = `${filters.category} - TeklifVer`;

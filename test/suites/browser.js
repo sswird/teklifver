@@ -459,6 +459,11 @@ const logout = async page => page.clickAndWait('form[action="/logout"] button');
     await page.goto('/');
     check('mobil alt menü görünür', await page.evaluate(`getComputedStyle(document.querySelector('.bottom-nav')).display !== 'none'`));
     check('mobilde yatay taşma yok', await page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'));
+    await page.goto('/requests?urgent=on');
+    check('telefonda detaylı arama kapalı başlar', await page.evaluate(`!document.getElementById('detayli-arama').open`));
+    check('telefonda Filtrele düğmesi etkin filtreyi sayar', await page.evaluate(`getComputedStyle(document.querySelector('.mobile-filter')).display !== 'none' && document.querySelector('.mobile-filter').textContent.includes('(1)')`));
+    await page.click('.mobile-filter');
+    check('Filtrele düğmesi detaylı aramayı açar', await page.evaluate(`document.getElementById('detayli-arama').open`));
     await page.goto('/profile');
     check('mobil profilde taşma yok', await page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'));
 

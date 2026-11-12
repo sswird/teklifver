@@ -40,7 +40,7 @@
     <aside>
       <%- include('../partials/category-menu', { active: filters.category }) %>
 
-      <details class="box" open data-collapse-mobile>
+      <details class="box" id="detayli-arama" open data-collapse-mobile>
         <summary class="box-head">Detaylı Arama <%- icon('chevron-down', { size: 14 }) %></summary>
         <form action="/requests" method="GET">
           <% if (filters.category !== 'all') { %><input type="hidden" name="category" value="<%= filters.category %>"><% } %>
@@ -91,6 +91,8 @@
 
     <section class="box">
       <div class="result-bar">
+        <% const activeFilters = [filters.search, filters.city, filters.budgetMin, filters.budgetMax, filters.period, filters.photos, filters.noBids, filters.urgent].filter(Boolean).length; %>
+        <a class="btn btn-sm mobile-filter" href="#detayli-arama" data-open-filters><%- icon('list', { size: 13 }) %> Filtrele<%= activeFilters ? ` (${activeFilters})` : '' %></a>
         <span class="result-count">
           <% if (filters.search) { %>&quot;<%= filters.search %>&quot; aramanızda <% } %>
           <strong><%= total %></strong> talep bulundu

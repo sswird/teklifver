@@ -2,8 +2,8 @@
 
 <% const companyTitle = company.companyName || company.name;
    const firstCategory = allCategories.find(item => (company.categories || []).includes(item.name));
-   // Kapak: firmanın ilk iş örneği, yoksa ilk kategorisinin fotoğrafı
-   const cover = (company.portfolio && company.portfolio[0]) || (firstCategory && firstCategory.image) || ''; %>
+   // Kapak yalnızca firmanın kendi yüklediği iş örneğinden gelir; hazır fotoğraf firmanınmış gibi gösterilmez.
+   const cover = (company.portfolio && company.portfolio[0]) || ''; %>
 
 <div class="wrap page">
   <div class="crumbs">
@@ -60,6 +60,16 @@
         <% company.portfolio.forEach(image => { %>
           <a href="<%= image %>" target="_blank" rel="noopener"><img src="<%= thumb(image) %>" alt="<%= companyTitle %> iş örneği" loading="lazy" decoding="async" width="240" height="180"></a>
         <% }) %>
+      </div>
+    </section>
+  <% } %>
+
+  <% if (!inviteOptions.length && !isOwnPage && !(currentUser && currentUser.role === 'company')) { %>
+    <section class="box">
+      <div class="box-head">Bu Firmadan Teklif Alın</div>
+      <div class="box-body">
+        <p>Yaptıracağınız işi yazın; <%= companyTitle %> ve aynı alandaki diğer firmalar fiyat ve süre göndersin. Talep verdikten sonra bu sayfadan firmayı talebinize davet edebilirsiniz.</p>
+        <a class="btn btn-primary" style="margin-top:10px" href="/requests/new<%= firstCategory ? '?category=' + encodeURIComponent(firstCategory.name) : '' %>">Ücretsiz Talep Ver</a>
       </div>
     </section>
   <% } %>

@@ -11,8 +11,7 @@
     <% } %>
   </nav>
 
-  <section class="landing-head <%= category && category.image ? 'has-photo' : '' %>">
-    <% if (category && category.image) { %><img class="landing-photo" src="<%= category.image %>" alt="" width="1200" height="400" fetchpriority="high"><% } %>
+  <section class="landing-head">
     <div class="landing-copy">
       <h1><%= heading %></h1>
       <p><%= intro %></p>

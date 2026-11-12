@@ -30,6 +30,8 @@
     <div class="detail-heading">
       <h1><%= request.title %></h1>
       <% if (isUrgent(request)) { %><span class="label label-urgent">ACİL</span><% } %>
+      <% const questionCount = (request.questions || []).length; %>
+      <p class="detail-meta">Talep No <strong><%= request.no %></strong> · <a href="#teklifler"><%= bids.length %> teklif</a><% if (questionCount || (isOpen && !isExpired(request))) { %> · <a href="#soru-cevap"><%= questionCount %> soru</a><% } %> · <%= request.viewCount %> görüntülenme<% if (similar.length) { %> · <a href="#benzer">benzer talepler</a><% } %></p>
     </div>
     <div class="detail-actions">
       <% if (currentUser) { %>
@@ -249,6 +251,16 @@
       <% } else if (isOpen && !isExpired(request) && !currentUser) { %>
         <a class="btn btn-primary btn-block" href="/login?next=<%= encodeURIComponent('/requests/' + request._id + '#teklif-ver') %>">Teklif Ver</a>
         <p class="small muted" style="margin:5px 0 10px">Teklif vermek için firma hesabıyla giriş yapmalısınız.</p>
+      <% } %>
+
+      <% if (!isOwner && !(currentUser && currentUser.role === 'company')) { %>
+        <div class="side-card">
+          <div class="side-card-head">Benzer bir iş mi yaptıracaksınız?</div>
+          <div class="side-card-body small">
+            <p>Talebinizi yazın, <%= request.category %> firmaları size de fiyat göndersin.</p>
+            <a class="btn btn-block" href="/requests/new?<%= new URLSearchParams({ category: request.category, ...(request.city ? { city: request.city } : {}) }).toString() %>">Benzer Talep Ver</a>
+          </div>
+        </div>
       <% } %>
 
       <div class="side-card side-card-warn">
@@ -519,7 +531,7 @@
   <%- include('../partials/ad', { format: 'leaderboard' }) %>
 
   <% if (similar.length) { %>
-    <section class="box">
+    <section class="box" id="benzer">
       <div class="box-head">Benzer Talepler <a href="<%= categoryUrl(request.category) %>">Tümü</a></div>
       <%- include('../partials/listing-table', { items: similar.slice(0, 5) }) %>
     </section>
