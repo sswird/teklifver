@@ -17,6 +17,7 @@
     if (state.urgent) params.set('urgent', 'on');
     if (state.sort !== 'newest') params.set('sort', state.sort);
     if (state.view !== 'list') params.set('view', state.view);
+    if (state.perPage && state.perPage !== 20) params.set('perPage', state.perPage);
     if (state.page > 1) params.set('page', state.page);
     const query = params.toString();
     return '/requests' + (query ? '?' + query : '');
@@ -47,6 +48,7 @@
           <% if (filters.category !== 'all') { %><input type="hidden" name="category" value="<%= filters.category %>"><% } %>
           <% if (filters.sort !== 'newest') { %><input type="hidden" name="sort" value="<%= filters.sort %>"><% } %>
           <% if (filters.view !== 'list') { %><input type="hidden" name="view" value="<%= filters.view %>"><% } %>
+          <% if (filters.perPage !== 20) { %><input type="hidden" name="perPage" value="<%= filters.perPage %>"><% } %>
 
           <div class="filter-group">
             <label class="filter-title" for="filterSearch">Kelime</label>
@@ -109,7 +111,7 @@
           <strong><%= total %></strong> talep bulundu
         </span>
         <form action="/requests" method="GET">
-          <% Object.entries({ search: filters.search, category: filters.category === 'all' ? '' : filters.category, city: filters.city, district: filters.district, budgetMin: filters.budgetMin || '', budgetMax: filters.budgetMax || '', period: filters.period, photos: filters.photos ? 'on' : '', noBids: filters.noBids ? 'on' : '', urgent: filters.urgent ? 'on' : '', view: filters.view === 'list' ? '' : filters.view }).forEach(([key, value]) => { if (value) { %>
+          <% Object.entries({ search: filters.search, category: filters.category === 'all' ? '' : filters.category, city: filters.city, district: filters.district, budgetMin: filters.budgetMin || '', budgetMax: filters.budgetMax || '', period: filters.period, photos: filters.photos ? 'on' : '', noBids: filters.noBids ? 'on' : '', urgent: filters.urgent ? 'on' : '', view: filters.view === 'list' ? '' : filters.view, perPage: filters.perPage === 20 ? '' : filters.perPage }).forEach(([key, value]) => { if (value) { %>
             <input type="hidden" name="<%= key %>" value="<%= value %>">
           <% } }) %>
           <select class="select" name="sort" aria-label="Sırala" data-autosubmit>
@@ -214,6 +216,11 @@
           <% }) %>
           <% if (page < totalPages) { %><a href="<%= listUrl({ page: page + 1 }) %>">Sonraki &rsaquo;</a><% } %>
         </nav>
+      <% } %>
+      <% if (total > 20) { %>
+        <p class="per-page" data-per-page-box>Sayfada
+          <% [20, 50].forEach(size => { const on = filters.perPage === size; %><a class="<%= on ? 'is-current' : '' %>" href="<%= listUrl({ perPage: size }) %>" data-per-page="<%= size %>"<% if (on) { %> aria-current="true"<% } %>><%= size %></a> <% }) %>talep
+        </p>
       <% } %>
     </section>
   </div>

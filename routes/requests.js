@@ -25,7 +25,6 @@ const { notify, notifyMany } = require('../lib/notify');
 const mongoose = require('mongoose');
 const { REPORT_REASONS } = Report;
 
-const PAGE_SIZE = 20;
 const MAX_BUDGET = 10000000000;
 const MAX_DESCRIPTION = 5000;
 // "ghgfn" gibi denemeler yayına girmesin.
@@ -124,13 +123,13 @@ router.get('/', async (req, res, next) => {
         : null,
       loadDistricts()
     ]);
-    const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1);
+    const totalPages = Math.max(Math.ceil(total / filters.perPage), 1);
     const page = Math.min(requestedPage, totalPages);
 
     const requests = await Request.find(filter)
       .sort(SORT_OPTIONS[filters.sort])
-      .skip((page - 1) * PAGE_SIZE)
-      .limit(PAGE_SIZE)
+      .skip((page - 1) * filters.perPage)
+      .limit(filters.perPage)
       .lean();
     // Sonuç çıkmazsa sayfa boş kalmasın: uygun kategori önerisi ve son eklenen talepler
     const suggestion = !requests.length && filters.search ? categories.guess(filters.search) : '';
@@ -145,7 +144,7 @@ router.get('/', async (req, res, next) => {
       filters,
       canonicalUrl: `${res.locals.siteBase}${filters.category === 'all' ? '/requests' : categoryUrl(filters.category)}`,
       // Filtreli sonuçlar aramalarda çıkmaz; asıl içerik hizmet ve il sayfalarındadır.
-      noIndex: Boolean(filtersToQuery(filters) && !(filters.category !== 'all' && filtersToQuery(filters).split('&').length === 1)) || filters.sort !== 'newest' || filters.view !== 'list' || page > 1,
+      noIndex: Boolean(filtersToQuery(filters) && !(filters.category !== 'all' && filtersToQuery(filters).split('&').length === 1)) || filters.sort !== 'newest' || filters.view !== 'list' || filters.perPage !== 20 || page > 1,
       savedQuery: filtersToQuery(filters),
       counts,
       menuCounts: menuRows ? Object.fromEntries(menuRows.map(row => [row._id, row.total])) : null,

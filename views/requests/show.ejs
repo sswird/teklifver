@@ -125,7 +125,7 @@
         <tr><td>Teklif Sayısı</td><td><%= bids.length %></td></tr>
         <tr><td>Görüntülenme</td><td><%= request.viewCount %></td></tr>
         <% if (averages) { %>
-          <tr><td>Kategori Ort. Teklif</td><td><%= money(averages.amount) %> <span class="muted small">(<%= averages.days %> gün, <%= averages.total %> teklif)</span></td></tr>
+          <tr><td>Kategori Ort. Teklif</td><td><%= money(averages.amount) %> <span class="muted small">(<%= averages.days %> gün, <%= averages.total %> teklif)</span><% if (averages.total >= 5) { %> <a class="small" href="/fiyat-rehberi#dagilim-<%= categoryUrl(request.category).split('/').pop() %>">Teklif dağılımı</a><% } %></td></tr>
         <% } %>
       </table>
     </div>

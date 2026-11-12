@@ -76,6 +76,7 @@
       urgent: query.get('urgent') === 'on',
       sort: Object.hasOwn(REQUEST_SORTS, sort) ? sort : 'newest',
       view: query.get('view') === 'gallery' ? 'gallery' : 'list',
+      perPage: query.get('perPage') === '50' ? 50 : PAGE_SIZE,
       page: Math.max(parseInt(query.get('page'), 10) || 1, 1)
     };
   }
@@ -112,6 +113,7 @@
     if (state.urgent) params.set('urgent', 'on');
     if (state.sort !== 'newest') params.set('sort', state.sort);
     if (state.view !== 'list') params.set('view', state.view);
+    if (state.perPage && state.perPage !== PAGE_SIZE) params.set('perPage', state.perPage);
     if (state.page > 1) params.set('page', state.page);
     const text = params.toString();
     return `${BASE}/requests/${text ? `?${text}` : ''}`;
@@ -192,6 +194,7 @@
       setHidden(form, 'category', filters.category === 'all' ? '' : filters.category);
       setHidden(form, 'sort', filters.sort === 'newest' ? '' : filters.sort);
       setHidden(form, 'view', filters.view === 'list' ? '' : filters.view);
+      setHidden(form, 'perPage', filters.perPage === PAGE_SIZE ? '' : filters.perPage);
       form.elements.search.value = filters.search;
       form.elements.city.value = filters.city;
       const districtSelect = form.elements.district;
@@ -235,6 +238,7 @@
       setHidden(sortForm, 'noBids', filters.noBids ? 'on' : '');
       setHidden(sortForm, 'urgent', filters.urgent ? 'on' : '');
       setHidden(sortForm, 'view', filters.view === 'list' ? '' : filters.view);
+      setHidden(sortForm, 'perPage', filters.perPage === PAGE_SIZE ? '' : filters.perPage);
     }
 
     const search = $('#siteSearch');
@@ -307,9 +311,9 @@
     const matched = data.requests
       .filter(item => matchesRequest(item, filters, data.builtAt))
       .sort(REQUEST_SORTS[filters.sort]);
-    const totalPages = Math.max(Math.ceil(matched.length / PAGE_SIZE), 1);
+    const totalPages = Math.max(Math.ceil(matched.length / filters.perPage), 1);
     const page = Math.min(filters.page, totalPages);
-    const visible = matched.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+    const visible = matched.slice((page - 1) * filters.perPage, page * filters.perPage);
 
     const section = $('.result-bar').parentElement;
     const table = $('.listing-table', section);
@@ -376,6 +380,19 @@
     renderQuickFilters(filters);
     renderFilterButton(filters);
     renderSortHeads(filters);
+    const perPageBox = $('[data-per-page-box]');
+    if (perPageBox) {
+      perPageBox.hidden = matched.length <= PAGE_SIZE;
+      $$('[data-per-page]', perPageBox).forEach(link => {
+        const size = Number(link.dataset.perPage);
+        link.href = requestUrl(filters, { perPage: size });
+        link.classList.toggle('is-current', size === filters.perPage);
+        link.toggleAttribute('aria-current', size === filters.perPage);
+      });
+      // Sayfa numaraları kutunun üstünde kalsın
+      const pager = $('.pagination', section);
+      if (pager) pager.after(perPageBox);
+    }
 
     if (filters.category !== 'all') {
       document.title = `${filters.category} - TeklifVer`;
@@ -432,6 +449,19 @@
     form.elements.minRating.value = minRating;
     form.elements.verified.checked = verified;
     form.elements.sort.value = sort;
+
+    // Başlıkla sıralama: Puan ve Üyelik
+    $$('[data-company-sort]').forEach(link => {
+      const key = link.dataset.companySort;
+      const params = new URLSearchParams();
+      Object.entries({ search, category, city, minRating, verified: verified ? 'on' : '', sort: key === 'rating' ? '' : key })
+        .forEach(([name, value]) => { if (value) params.set(name, value); });
+      link.href = `${BASE}/companies/${params.toString() ? '?' + params : ''}`;
+      link.classList.toggle('is-descending', key === sort);
+      const th = link.closest('th');
+      if (key === sort) th.setAttribute('aria-sort', 'descending');
+      else th.removeAttribute('aria-sort');
+    });
 
     const sortForm = $('.result-bar form');
     sortForm.elements.sort.value = sort;

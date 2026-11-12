@@ -74,9 +74,19 @@
             <tr>
               <th><span class="visually-hidden">Logo</span></th>
               <th>Firma</th>
-              <th class="col-date">Puan</th>
+              <%
+                // Başlıkla sıralama: filtreler korunur, varsayılan sıralama (puan) adreste yazılmaz.
+                const companySortUrl = key => {
+                  const params = new URLSearchParams();
+                  Object.entries({ search, category, city, minRating, verified: verified ? 'on' : '', sort: key === 'rating' ? '' : key })
+                    .forEach(([name, value]) => { if (value) params.set(name, value); });
+                  const text = params.toString();
+                  return '/companies' + (text ? '?' + text : '');
+                };
+              %>
+              <th class="col-date"<% if (sort === 'rating') { %> aria-sort="descending"<% } %>><a class="sort-head <%= sort === 'rating' ? 'is-descending' : '' %>" href="<%= companySortUrl('rating') %>" data-company-sort="rating">Puan</a></th>
               <th class="col-date">İl</th>
-              <th class="col-date">Üyelik</th>
+              <th class="col-date"<% if (sort === 'newest') { %> aria-sort="descending"<% } %>><a class="sort-head <%= sort === 'newest' ? 'is-descending' : '' %>" href="<%= companySortUrl('newest') %>" data-company-sort="newest">Üyelik</a></th>
             </tr>
           </thead>
           <tbody>
