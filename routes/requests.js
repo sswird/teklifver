@@ -11,7 +11,7 @@ const { badgesFor } = require('../lib/badges');
 const cities = require('../config/cities');
 const { isCustomer, isCompany, isLoggedIn, requireVerifiedEmail } = require('../middleware/auth');
 const { limits } = require('../lib/limits');
-const { categoryUrl } = require('../lib/slug');
+const { categoryUrl, categoryCityUrl } = require('../lib/slug');
 const { alertSavedSearches } = require('../lib/search-alerts');
 const { parseDateInput, isExpired, discoveryTimes } = require('../lib/helpers');
 const { bidAllowance } = require('../lib/plans');
@@ -304,7 +304,9 @@ router.post('/', customerOrGuest, whenLoggedIn(limits.newRequest), uploadImages,
     alertSavedSearches(created, { except: firms.map(firm => firm._id) })
       .catch(err => console.error('Arama bildirimi gönderilemedi:', err.message));
 
-    req.flash('success', `Talebiniz yayınlandı. Talep No: ${created.no}`);
+    req.flash('success', firms.length
+      ? `Talebiniz yayınlandı (Talep No: ${created.no}). Bu alanda hizmet veren ${firms.length} firmaya haber verdik; teklif geldikçe size bildirim gelecek.`
+      : `Talebiniz yayınlandı (Talep No: ${created.no}). Bu alandaki firmalar talebinizi talepler listesinde görecek.`);
     res.redirect('/requests/' + created._id);
   } catch (err) {
     next(err);
@@ -528,7 +530,7 @@ router.get('/:id', async (req, res, next) => {
       return { _id: bid._id, status: bid.status, createdAt: bid.createdAt, company, hidden: true };
     });
 
-    const [similarAll, ownerOpenCount, averages, review, alreadyReported, lastBid, bidder] = await Promise.all([
+    const [similarAll, ownerOpenCount, averages, review, alreadyReported, lastBid, bidder, newerRequest, olderRequest] = await Promise.all([
       Request.find({ ...liveFilter(), category: request.category, _id: { $ne: request._id } })
         .sort({ createdAt: -1 })
         .limit(20)
@@ -541,7 +543,10 @@ router.get('/:id', async (req, res, next) => {
       viewer && viewer.role === 'company' && !userBid
         ? Bid.findOne({ company: viewer.id }).sort({ createdAt: -1 }).select('description').lean()
         : null,
-      viewer && viewer.role === 'company' && !userBid ? User.findById(viewer.id).select('plan bidUsage').lean() : null
+      viewer && viewer.role === 'company' && !userBid ? User.findById(viewer.id).select('plan bidUsage').lean() : null,
+      // Önceki / sonraki talep: aynı kategoride, listedeki sırayla (en yeni başta)
+      Request.findOne({ ...liveFilter(), category: request.category, createdAt: { $gt: request.createdAt } }).sort({ createdAt: 1 }).select('title').lean(),
+      Request.findOne({ ...liveFilter(), category: request.category, createdAt: { $lt: request.createdAt } }).sort({ createdAt: -1 }).select('title').lean()
     ]);
 
     const bidBadges = await badgesFor(allBids.map(bid => bid.company));
@@ -558,10 +563,14 @@ router.get('/:id', async (req, res, next) => {
         '@context': 'https://schema.org',
         '@type': 'BreadcrumbList',
         itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Talepler', item: `${res.locals.siteBase}/requests` },
-          { '@type': 'ListItem', position: 2, name: request.category, item: `${res.locals.siteBase}${categoryUrl(request.category)}` },
-          { '@type': 'ListItem', position: 3, name: request.title }
-        ]
+          { name: 'Talepler', item: `${res.locals.siteBase}/requests` },
+          { name: request.category, item: `${res.locals.siteBase}${categoryUrl(request.category)}` },
+          ...(request.city ? [{ name: request.city, item: `${res.locals.siteBase}${categoryCityUrl(request.category, request.city)}` }] : []),
+          ...(request.city && request.location
+            ? [{ name: request.location, item: `${res.locals.siteBase}/requests?${new URLSearchParams({ category: request.category, city: request.city, district: request.location })}` }]
+            : []),
+          { name: request.title }
+        ].map((crumb, index) => ({ '@type': 'ListItem', position: index + 1, ...crumb }))
       },
       request,
       bids,
@@ -578,6 +587,8 @@ router.get('/:id', async (req, res, next) => {
         5
       ),
       ownerOpenCount,
+      newerRequest,
+      olderRequest,
       canSeeBids,
       lowestAmount: canSeeBids && pendingAmounts.length > 1 ? Math.min(...pendingAmounts) : null,
       bidSummary,

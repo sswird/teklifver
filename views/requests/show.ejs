@@ -6,12 +6,20 @@
 %>
 
 <div class="wrap page">
+  <div class="detail-top">
   <div class="crumbs">
     <a href="/">Ana Sayfa</a> &rsaquo;
     <a href="/requests">Talepler</a> &rsaquo;
     <a href="<%= categoryUrl(request.category) %>"><%= request.category %></a>
     <% if (request.city) { %>&rsaquo; <a href="<%= categoryCityUrl(request.category, request.city) %>"><%= request.city %></a><% } %>
     <% if (request.city && request.location) { %>&rsaquo; <a href="/requests?<%= new URLSearchParams({ category: request.category, city: request.city, district: request.location }).toString() %>"><%= request.location %></a><% } %>
+  </div>
+  <% if (newerRequest || olderRequest) { %>
+    <nav class="detail-pager" aria-label="<%= request.category %> kategorisindeki diğer talepler">
+      <% if (newerRequest) { %><a href="/requests/<%= newerRequest._id %>" title="<%= newerRequest.title %>">&lsaquo; Önceki talep</a><% } %>
+      <% if (olderRequest) { %><a href="/requests/<%= olderRequest._id %>" title="<%= olderRequest.title %>">Sonraki talep &rsaquo;</a><% } %>
+    </nav>
+  <% } %>
   </div>
 
   <% if (isOwner && ['open', 'in_progress', 'completed'].includes(request.status)) {

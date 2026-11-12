@@ -1205,6 +1205,12 @@ h2 { font: 700 17px/1.3 var(--font); letter-spacing: 0; }
   .similar-firms li:first-child { border-top: 0; }
 }
 
+/* Talep sayfası: yol satırı solda, önceki / sonraki talep sağda */
+.detail-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 16px; margin-bottom: 10px; }
+.detail-top .crumbs { margin-bottom: 0; }
+.detail-pager { display: flex; gap: 16px; font-size: 13.5px; white-space: nowrap; }
+@media (max-width: 760px) { .detail-pager { width: 100%; justify-content: space-between; } }
+
 /* Fiyat: süslü etiket yerine kalın yazı */
 .price-tag, .listing-table.is-feed .price-tag { padding: 0; background: none; clip-path: none; color: var(--text); font: 700 15px/1.3 var(--font); }
 .price-tag::before { display: none; }
