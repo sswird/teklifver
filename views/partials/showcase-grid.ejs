@@ -10,7 +10,8 @@
         <% if (isUrgent(item)) { %><span class="label label-urgent label-on-photo">ACİL</span><% } %>
       </div>
       <div class="showcase-title"><%= item.title %></div>
-      <div class="showcase-price"><%= budgetLabel(item.budget) %></div>
+      <%# Dar sütunda tutar ikinci satıra geçebilir; "TL" tutardan ayrılmasın %>
+      <div class="showcase-price"><%= budgetLabel(item.budget).replace(/ TL$/, ' TL') %></div>
     </a>
   <% }) %>
 </div>

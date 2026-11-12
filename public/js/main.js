@@ -9,7 +9,7 @@
     const root = document.documentElement;
     const meta = $('meta[name="theme-color"]');
     const paintBar = () => {
-      if (meta) meta.content = root.dataset.theme === 'dark' ? '#141414' : '#ffd200';
+      if (meta) meta.content = root.dataset.theme === 'dark' ? '#0b0b0b' : '#16181b';
     };
 
     paintBar();

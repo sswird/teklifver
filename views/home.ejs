@@ -3,84 +3,100 @@
 <%
   // Vitrin satırları yarım kalmasın: beşin katı kadar fotoğraflı talep gösterilir.
   const vitrinCount = showcase.length >= 15 ? 15 : showcase.length >= 10 ? 10 : Math.min(showcase.length, 5);
-  const urgentItems = vitrin.urgent.slice(0, 6);
 %>
-<div class="wrap page home-sari">
-  <% if (currentUser && currentUser.role === 'company') { %>
-    <section class="hero-sari hero-firm composer">
-      <div>
-        <h1>Bugün <%= stats.todayCount %> yeni talep var</h1>
-        <p class="hero-lead">Hizmet verdiğiniz kategorilerdeki talepleri görün, fiyatınızı yazın. Kategorilerinizi <a href="/profile">hesap bilgilerinizden</a> değiştirebilirsiniz.</p>
-        <div class="composer-row">
-          <a class="btn" href="/dashboard/matches">Bana uygun talepleri göster</a>
-        </div>
-      </div>
-      <aside class="hero-side" aria-label="Sitede şu an">
-        <div class="hero-stat"><b><%= total %></b><span>açık talep</span></div>
-        <div class="hero-stat"><b><%= stats.companyCount %></b><span>firma</span></div>
-        <div class="hero-stat"><b><%= stats.bidCount %></b><span>teklif verildi</span></div>
-        <% if (lastBidAt) { %><p class="hero-live"><span class="live-dot" aria-hidden="true"></span>son teklif <strong><%= timeAgo(lastBidAt) %></strong></p><% } %>
-      </aside>
-    </section>
-  <% } else { %>
-    <section class="hero-sari composer">
-      <div>
-        <h1>İşini yaz, firmalar <span class="squiggle">yarışsın.</span></h1>
-        <p class="hero-lead">Ne yaptıracağınızı birkaç kelimeyle yazın; o alandaki firmalar fiyat ve süre göndersin. Ücretsiz, telefonunuz siz seçene kadar gizli.</p>
-        <form action="/requests/new" method="GET">
+<div class="wrap page">
+  <div class="layout-home">
+    <aside class="home-left" aria-label="Kategoriler">
+      <section class="box cat-box">
+        <div class="box-head">Kategoriler <a href="/kategoriler">Tümü</a></div>
+        <ul class="cat-tree">
+          <% allCategories.forEach(category => { %>
+            <li>
+              <a class="cat-tree-main" href="<%= categoryUrl(category.name) %>"><%- include('partials/cat-icon', { category }) %><span><%= category.name %></span> <span class="count"><%= counts[category.name] || 0 %></span></a>
+              <% if (category.subs && category.subs.length) { %>
+                <ul class="cat-tree-subs">
+                  <% category.subs.slice(0, 4).forEach(([label, term]) => { %>
+                    <li><a href="/requests?category=<%= encodeURIComponent(category.name) %>&search=<%= encodeURIComponent(term.trim()) %>"><%= label %></a></li>
+                  <% }) %>
+                </ul>
+              <% } %>
+            </li>
+          <% }) %>
+        </ul>
+      </section>
+
+      <section class="box desktop-only">
+        <div class="box-head">Kısayollar</div>
+        <ul class="side-list">
+          <li><a href="/requests?period=1">Son 24 saat <% if (stats.todayCount) { %><span class="count"><%= stats.todayCount %></span><% } %></a></li>
+          <li><a href="/requests?noBids=on">Teklif almamış talepler</a></li>
+          <li><a href="/requests?photos=on">Fotoğraflı talepler</a></li>
+          <li><a href="/requests?sort=deadline">Süresi yaklaşanlar</a></li>
+          <li><a href="/fiyat-rehberi">Fiyat rehberi</a></li>
+          <li><a href="/companies">Firma rehberi</a></li>
+        </ul>
+      </section>
+
+      <% if (cityRows.length) { %>
+        <section class="box desktop-only">
+          <div class="box-head">İllere Göre <a href="/iller">Tümü</a></div>
+          <ul class="side-list">
+            <% cityRows.slice(0, 10).forEach(row => { %>
+              <li><a href="<%= cityUrl(row._id) %>"><%= row._id %> <span class="count"><%= row.total %></span></a></li>
+            <% }) %>
+          </ul>
+        </section>
+      <% } %>
+    </aside>
+
+    <div class="home-center">
+      <% if (currentUser && currentUser.role === 'company') { %>
+        <section class="composer">
+          <h1 class="composer-title">Bugün <%= stats.todayCount %> yeni talep var</h1>
           <div class="composer-row">
-            <input class="input" type="text" name="title" maxlength="200" placeholder="Ne yaptırmak istiyorsunuz? Örneğin: 2+1 daire boyanacak" aria-label="Yaptıracağınız iş" autocomplete="off">
-            <select class="select" name="city" aria-label="İl">
-              <option value="">İl seçin</option>
-              <% allCities.forEach(city => { %><option value="<%= city %>"><%= city %></option><% }) %>
-            </select>
-            <button class="btn" type="submit">Teklif Al</button>
+            <a class="btn" href="/dashboard/matches">Bana uygun talepleri göster</a>
           </div>
-        </form>
-        <% const quick = ['boya badana', 'evden eve nakliyat', 'koltuk yıkama', 'logo', 'özel ders']; %>
-        <p class="hero-chips"><span>Çok arananlar:</span>
-          <% quick.forEach(term => { %><a href="/requests?search=<%= encodeURIComponent(term) %>"><%= term %></a><% }) %>
-        </p>
-      </div>
-      <aside class="hero-side" aria-label="Sitede şu an">
-        <div class="hero-stat"><b><%= total %></b><span>açık talep</span></div>
-        <div class="hero-stat"><b><%= stats.companyCount %></b><span>firma</span></div>
-        <div class="hero-stat"><b><%= stats.bidCount %></b><span>teklif verildi</span></div>
-        <% if (lastBidAt) { %><p class="hero-live"><span class="live-dot" aria-hidden="true"></span>son teklif <strong><%= timeAgo(lastBidAt) %></strong></p><% } %>
-      </aside>
-    </section>
-  <% } %>
+          <p class="composer-note">Hizmet verdiğiniz kategorileri <a href="/profile">hesap bilgilerinizden</a> değiştirebilirsiniz.</p>
+        </section>
+      <% } else { %>
+        <section class="composer">
+          <h1 class="composer-title">Ücretsiz talep verin, firmalar size teklif göndersin</h1>
+          <form action="/requests/new" method="GET">
+            <div class="composer-row">
+              <input class="input" type="text" name="title" maxlength="200" placeholder="Ne yaptırmak istiyorsunuz? Örneğin: 2+1 daire boyanacak" aria-label="Yaptıracağınız iş" autocomplete="off">
+              <select class="select" name="city" aria-label="İl">
+                <option value="">İl seçin</option>
+                <% allCities.forEach(city => { %><option value="<%= city %>"><%= city %></option><% }) %>
+              </select>
+              <button class="btn" type="submit">Teklif Al</button>
+            </div>
+          </form>
+          <% const quick = ['boya badana', 'evden eve nakliyat', 'koltuk yıkama', 'logo', 'özel ders']; %>
+          <p class="composer-quick">Çok arananlar:
+            <% quick.forEach((term, index) => { %><a href="/requests?search=<%= encodeURIComponent(term) %>"><%= term %></a><%= index < quick.length - 1 ? ', ' : '' %><% }) %>
+          </p>
+          <p class="composer-meta">Sitede <%= total %> açık talep ve <%= stats.companyCount %> firma var<% if (lastBidAt) { %>; son teklif <strong><%= timeAgo(lastBidAt) %></strong> verildi<% } %>.</p>
+        </section>
+      <% } %>
 
-  <section class="box cat-box">
-    <h2 class="box-head">Ne yaptırmak istiyorsunuz? <a href="/kategoriler">Tüm kategoriler</a></h2>
-    <ul class="cat-tiles">
-      <% allCategories.forEach(category => { %>
-        <li><a class="cat-tile" href="<%= categoryUrl(category.name) %>"><%- include('partials/cat-icon', { category }) %><b><%= category.name %></b><small><span class="count"><%= counts[category.name] || 0 %></span> açık talep</small></a></li>
-      <% }) %>
-      <li><a class="cat-tile is-all" href="/requests"><span class="cat-icon" aria-hidden="true"><%- icon('list', { size: 16 }) %></span><b>Tüm talepler</b><small><%= total %> açık talep</small></a></li>
-    </ul>
-  </section>
-
-  <div class="layout-sari">
-    <div class="home-main">
       <% if (vitrinCount) { %>
         <section class="box vitrin-box">
-          <h2 class="box-head">Anasayfa Vitrini <a href="/requests?photos=on&sort=views">Tüm vitrin talepleri</a></h2>
+          <div class="box-head">Anasayfa Vitrini <a href="/requests?photos=on&sort=views">Tüm vitrin talepleri</a></div>
           <%- include('partials/showcase-grid', { items: showcase.slice(0, vitrinCount) }) %>
         </section>
       <% } %>
 
+      <% const urgentItems = vitrin.urgent.slice(0, 6); %>
       <% if (urgentItems.length >= 3) { %>
         <section class="box urgent-box">
-          <h2 class="box-head"><span class="urgent-title"><span class="urgent-pulse" aria-hidden="true"></span>Acil İşler</span> <a href="/requests?urgent=on">Tüm acil işler</a></h2>
+          <div class="box-head">Acil İşler <a href="/requests?urgent=on">Tüm acil işler</a></div>
           <ul class="urgent-list">
-            <% urgentItems.forEach(item => { const left = item.deadline ? daysLeft(item.deadline) : null; %>
+            <% urgentItems.forEach(item => { const left = item.deadline ? daysLeft(item.deadline) : null; const budget = budgetLabel(item.budget); %>
               <li>
                 <a class="urgent-item" href="/requests/<%= item._id %>">
-                  <span class="urgent-when"><%= left === null ? 'Acil iş' : left <= 1 ? 'Bugün bitiyor' : left + ' gün kaldı' %></span>
+                  <span class="urgent-when"><%= left === null ? 'ACİL' : left <= 1 ? 'Bugün bitiyor' : left + ' gün kaldı' %></span>
                   <b><%= item.title %></b>
                   <span class="urgent-meta"><%= placeLabel(item) %> · <%= item.category %></span>
-                  <% const budget = budgetLabel(item.budget); %>
                   <% if (budget !== 'Belirtilmemiş') { %><span class="price-tag"><%= budget %></span><% } %>
                 </a>
               </li>
@@ -92,7 +108,7 @@
       <%- include('partials/price-board', { placement: 'feed' }) %>
 
       <section class="box">
-        <h2 class="box-head">Son Eklenen Talepler <% if (total) { %><a href="/requests">Tümü (<%= total %>)</a><% } %></h2>
+        <div class="box-head">Son Eklenen Talepler <% if (total) { %><a href="/requests">Tümü (<%= total %>)</a><% } %></div>
         <% if (latest.length) { %>
           <%- include('partials/listing-table', { items: latest, adEvery: 6 }) %>
         <% } else { %>
@@ -105,16 +121,42 @@
       </section>
 
       <section class="box" id="recentBox" hidden>
-        <h2 class="box-head">Son Baktıklarınız</h2>
+        <div class="box-head">Son Baktıklarınız</div>
         <div class="showcase-grid" id="recentGrid"></div>
+      </section>
+
+      <% if (latestReviews.length) { %>
+        <section class="box">
+          <div class="box-head">Son Yorumlar <a href="/companies">Firma rehberi</a></div>
+          <div class="review-grid">
+            <% latestReviews.forEach(review => { %>
+              <figure class="review-card">
+                <div class="review-stars" role="img" aria-label="<%= review.rating %> üzerinden 5 puan">
+                  <% for (let n = 1; n <= 5; n += 1) { %><%- icon('star', { size: 12, class: n <= review.rating ? 'star' : 'star-empty' }) %><% } %>
+                </div>
+                <blockquote><%= truncate(review.comment, 160) %></blockquote>
+                <figcaption><%= shortName(review.customer.name) %>, <a href="/companies/<%= review.company._id %>"><%= review.company.companyName || review.company.name %></a> hakkında</figcaption>
+              </figure>
+            <% }) %>
+          </div>
+        </section>
+      <% } %>
+
+      <section class="box">
+        <div class="box-head">Nasıl İşliyor?</div>
+        <ol class="how-steps">
+          <li><b>İşinizi yazın.</b> Ne, nerede, ne zaman? İsterseniz fotoğraf ve bütçe ekleyin.</li>
+          <li><b>Teklifleri karşılaştırın.</b> Firmalar fiyat ve süre yazar; puan ve yorumları yan yana görürsünüz.</li>
+          <li><b>Seçin, anlaşın.</b> Birini seçince telefonlar karşılıklı açılır. Ödemede dikkat edeceklerinizi <a href="/guvenli-hizmet">burada anlattık</a>.</li>
+        </ol>
       </section>
     </div>
 
-    <aside class="home-rail" aria-label="Fiyatlar, firmalar ve öneriler">
+    <aside class="home-right" aria-label="Fiyatlar, firmalar ve öneriler">
       <%- include('partials/price-board', { placement: 'rail' }) %>
       <% if (!currentUser || currentUser.role === 'company') { %>
         <section class="box">
-          <h2 class="box-head">Firmanız mı Var?</h2>
+          <div class="box-head">Firmanız mı Var?</div>
           <div class="rail-note">
             <% if (currentUser) { %>
               <p>Sayfanızı doldurun, müşteriler sizi firma rehberinde bulsun.</p>
@@ -127,9 +169,11 @@
         </section>
       <% } %>
 
+      <%- include('partials/ad', { format: 'side' }) %>
+
       <% if (topCompanies.length) { %>
         <section class="box">
-          <h2 class="box-head">Puanı Yüksek Firmalar <a href="/companies">Rehber</a></h2>
+          <div class="box-head">Puanı Yüksek Firmalar <a href="/companies">Rehber</a></div>
           <ul class="company-mini">
             <% topCompanies.forEach(company => { %>
               <li>
@@ -144,47 +188,8 @@
       <% } %>
 
       <%- include('partials/ad', { format: 'side' }) %>
-
-      <% if (cityRows.length) { %>
-        <section class="box">
-          <h2 class="box-head">İllere Göre <a href="/iller">Tümü</a></h2>
-          <ul class="side-list">
-            <% cityRows.slice(0, 8).forEach(row => { %>
-              <li><a href="<%= cityUrl(row._id) %>"><%= row._id %> <span class="count"><%= row.total %></span></a></li>
-            <% }) %>
-          </ul>
-        </section>
-      <% } %>
-
-      <%- include('partials/ad', { format: 'side' }) %>
     </aside>
   </div>
-
-  <% if (latestReviews.length) { %>
-    <section class="box">
-      <h2 class="box-head">Son Yorumlar <a href="/companies">Firma rehberi</a></h2>
-      <div class="review-grid">
-        <% latestReviews.forEach(review => { %>
-          <figure class="review-card">
-            <div class="review-stars" role="img" aria-label="<%= review.rating %> üzerinden 5 puan">
-              <% for (let n = 1; n <= 5; n += 1) { %><%- icon('star', { size: 12, class: n <= review.rating ? 'star' : 'star-empty' }) %><% } %>
-            </div>
-            <blockquote><%= truncate(review.comment, 160) %></blockquote>
-            <figcaption><%= shortName(review.customer.name) %>, <a href="/companies/<%= review.company._id %>"><%= review.company.companyName || review.company.name %></a> hakkında</figcaption>
-          </figure>
-        <% }) %>
-      </div>
-    </section>
-  <% } %>
-
-  <section class="box">
-    <h2 class="box-head">Nasıl İşliyor?</h2>
-    <ol class="how-row how-steps">
-      <li><b>İşinizi yazın.</b> Ne, nerede, ne zaman? İsterseniz fotoğraf ve bütçe ekleyin.</li>
-      <li><b>Teklifleri karşılaştırın.</b> Firmalar fiyat ve süre yazar; puan ve yorumları yan yana görürsünüz.</li>
-      <li><b>Seçin, anlaşın.</b> Birini seçince telefonlar karşılıklı açılır. Ödemede dikkat edeceklerinizi <a href="/guvenli-hizmet">burada anlattık</a>.</li>
-    </ol>
-  </section>
 </div>
 
 <%- include('partials/footer') %>

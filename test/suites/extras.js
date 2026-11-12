@@ -152,11 +152,12 @@ const idOf = path => path.split('/').pop();
 
   // Ana sayfa: kategori kutuları, vitrin, acil işler, nasıl işler, canlılık bilgisi ve fotoğrafsız ilan yer tutucusu
   const home = (await get(null, "/")).text;
-  check("kategori kutuları sayılarla", (home.match(/class="cat-tile"/g) || []).length >= 10 && /class="cat-tile"[^>]*>[\s\S]*?class="count">\d+</.test(home));
+  check("kategori ağacı sayılarla", (home.match(/class="cat-tree-main"/g) || []).length >= 10 && /class="cat-tree-main"[^>]*>[\s\S]*?class="count">\d+</.test(home));
   const vitrinItems = ((home.split('class="box vitrin-box"')[1] || '').split('</section>')[0].match(/class="showcase-item"/g) || []).length;
   check("vitrin satırları tam", vitrinItems > 0 && vitrinItems % 5 === 0, String(vitrinItems));
   check("acil işler bölümü acil talepleri gösterir", /class="box urgent-box"[\s\S]*?href="\/requests\?urgent=on"/.test(home) && (home.match(/class="urgent-item"/g) || []).length >= 3);
-  check("nasıl işler üç adım", /class="how-row[^"]*"(?:[\s\S]*?<li>){3}/.test(home));
+  check("nasıl işler üç adım", /class="how-steps"(?:[\s\S]*?<li>){3}/.test(home));
+  check("ana sayfada süs yok: slogan dalgası ve sayaç kutusu", !home.includes('class="squiggle"') && !home.includes('composer-stats'));
   const priceGuidePage = (await get(null, "/fiyat-rehberi")).text;
   const charts = priceGuidePage.match(/<svg class="dist-chart"[\s\S]*?<\/svg>/g) || [];
   check("fiyat rehberinde teklif dağılımı grafikleri", charts.length >= 3 && charts.every(svg => (svg.match(/class="dist-bar/g) || []).length === 8 && /dist-bar is-mid/.test(svg) && /aria-label="[^"]+ arasında"/.test(svg)), String(charts.length));
