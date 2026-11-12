@@ -10,6 +10,7 @@ const allCategories = require('../config/categories');
 const { priceBoard } = require('../lib/price-board');
 const { recentActivity } = require('../lib/activity');
 const { isUrgent } = require('../lib/helpers');
+const { badgesFor } = require('../lib/badges');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -26,7 +27,7 @@ router.get('/', async (req, res, next) => {
         Request.find({ status: 'open', deadline: { $gte: now } }).sort({ deadline: 1 }).limit(24).lean(),
         openCountsByCategory(),
         User.find({ role: 'company', ratingCount: { $gt: 0 }, suspended: { $ne: true } })
-          .select('name companyName rating ratingCount verified')
+          .select('name companyName rating ratingCount verified createdAt')
           .sort({ rating: -1, ratingCount: -1 })
           .limit(30)
           .lean(),
@@ -59,6 +60,13 @@ router.get('/', async (req, res, next) => {
     const categoryTiles = [...allCategories].sort((a, b) => (counts[b.name] || 0) - (counts[a.name] || 0)).slice(0, 11);
 
     const board = await priceBoard();
+    // Tek yorumla 5 puan alan firma, çok yorumlu 4,8'in önüne geçmesin.
+    const leaders = topCompanies
+      .map(company => ({ company, score: (company.rating * company.ratingCount + 4 * 3) / (company.ratingCount + 3) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map(({ company }) => company);
+    const leaderBadges = await badgesFor(leaders);
     res.render('home', {
       board,
       title: '',
@@ -96,12 +104,8 @@ router.get('/', async (req, res, next) => {
       latest,
       closing: uniqueByPhoto(closing, 8),
       counts,
-      // Tek yorumla 5 puan alan firma, çok yorumlu 4,8'in önüne geçmesin.
-      topCompanies: topCompanies
-        .map(company => ({ company, score: (company.rating * company.ratingCount + 4 * 3) / (company.ratingCount + 3) }))
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 5)
-        .map(({ company }) => company),
+      topCompanies: leaders,
+      leaderBadges,
       cityRows,
       total: Object.values(counts).reduce((sum, count) => sum + count, 0),
       stats: { todayCount, companyCount, bidCount, completedCount },

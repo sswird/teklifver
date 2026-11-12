@@ -72,6 +72,7 @@
       period: ['1', '7', '30'].includes(period) ? period : '',
       photos: query.get('photos') === 'on',
       noBids: query.get('noBids') === 'on',
+      urgent: query.get('urgent') === 'on',
       sort: Object.hasOwn(REQUEST_SORTS, sort) ? sort : 'newest',
       view: query.get('view') === 'gallery' ? 'gallery' : 'list',
       page: Math.max(parseInt(query.get('page'), 10) || 1, 1)
@@ -86,6 +87,7 @@
     if (filters.period && item.created < builtAt - Number(filters.period) * DAY_MS) return false;
     if (filters.photos && !item.photos) return false;
     if (filters.noBids && item.bids > 0) return false;
+    if (filters.urgent && !item.urgent) return false;
     if (filters.search) {
       const byNumber = /^\d{6,}$/.test(filters.search) && String(item.no) === filters.search;
       if (!byNumber && !window.TeklifverSearch.matchesText(filters.search, [item.title, item.description, item.category])) return false;
@@ -104,6 +106,7 @@
     if (state.period) params.set('period', state.period);
     if (state.photos) params.set('photos', 'on');
     if (state.noBids) params.set('noBids', 'on');
+    if (state.urgent) params.set('urgent', 'on');
     if (state.sort !== 'newest') params.set('sort', state.sort);
     if (state.view !== 'list') params.set('view', state.view);
     if (state.page > 1) params.set('page', state.page);
@@ -155,9 +158,10 @@
       form.elements.period.value = filters.period;
       form.elements.photos.checked = filters.photos;
       form.elements.noBids.checked = filters.noBids;
+      if (form.elements.urgent) form.elements.urgent.checked = filters.urgent;
 
       const hasFilters = filters.search || filters.category !== 'all' || filters.city || filters.budgetMin ||
-        filters.budgetMax || filters.period || filters.photos || filters.noBids;
+        filters.budgetMax || filters.period || filters.photos || filters.noBids || filters.urgent;
       if (hasFilters) {
         const clear = element('a', { className: 'small', href: `${BASE}/requests/`, textContent: 'Filtreleri temizle' });
         const holder = element('div', {}, [clear]);
@@ -177,6 +181,7 @@
       setHidden(sortForm, 'period', filters.period);
       setHidden(sortForm, 'photos', filters.photos ? 'on' : '');
       setHidden(sortForm, 'noBids', filters.noBids ? 'on' : '');
+      setHidden(sortForm, 'urgent', filters.urgent ? 'on' : '');
       setHidden(sortForm, 'view', filters.view === 'list' ? '' : filters.view);
     }
 
@@ -199,6 +204,7 @@
     if (filters.period) chips.push([filters.period === '1' ? 'Son 24 saat' : `Son ${filters.period} gün`, { period: '' }]);
     if (filters.photos) chips.push(['Fotoğraflı', { photos: false }]);
     if (filters.noBids) chips.push(['Teklif almamış', { noBids: false }]);
+    if (filters.urgent) chips.push(['Acil', { urgent: false }]);
     box.hidden = chips.length === 0;
     box.replaceChildren(...chips.map(([label, overrides]) => element('a', {
       className: 'filter-chip',
@@ -329,6 +335,33 @@
     setHidden(sortForm, 'verified', verified ? 'on' : '');
   }
 
+  /* Firma karşılaştırma: seçilen firmaların sunucuda üretilmiş sütunları birleştirilir */
+  function markBest(root) {
+    $$('tr[data-better]', root).forEach(row => {
+      const cells = $$('td[data-value]', row);
+      const numbers = cells.map(cell => (cell.dataset.value === '' ? null : Number(cell.dataset.value)));
+      const valid = numbers.filter(value => value !== null);
+      const top = valid.length >= 2 && new Set(valid).size > 1
+        ? (row.dataset.better === 'low' ? Math.min(...valid) : Math.max(...valid))
+        : null;
+      cells.forEach((cell, index) => cell.classList.toggle('is-best', top !== null && numbers[index] === top));
+    });
+  }
+
+  function renderCompare(data) {
+    const ids = (new URLSearchParams(location.search).get('ids') || '').split(',').filter(Boolean).slice(0, 3);
+    const firms = [...new Set(ids)].map(id => data.companies.find(item => item.id === id)).filter(item => item && item.compare.length);
+    const holder = $('[data-compare-page]');
+    if (!holder || firms.length < 2 || !data.compareRows.length) return;
+    const head = '<tr><th scope="col"><span class="visually-hidden">Özellik</span></th>' + firms.map(firm => firm.compare[0]).join('') + '</tr>';
+    const body = data.compareRows.map((row, index) =>
+      '<tr' + (row.better ? ' data-better="' + row.better + '"' : '') + '>' + row.head + firms.map(firm => firm.compare[index + 1] || '<td></td>').join('') + '</tr>'
+    ).join('');
+    holder.innerHTML = '<div class="compare-scroll"><table class="compare-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
+      '<p class="box-note">Her satırda en iyi değer sarıyla işaretlidir. Sayılar sitedeki teklif ve işlerden hesaplanır.</p>';
+    markBest(holder);
+  }
+
   /* Arama önerileri: main.js sunucuya sorar, burada yerel veriden yanıtlanır */
   window.fetch = (url, options) => {
     if (typeof url !== 'string' || !url.startsWith('/requests/suggest')) return nativeFetch(url, options);
@@ -395,7 +428,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     closeAccountForms();
 
-    const render = { '/requests/': renderRequests, '/companies/': renderCompanies }[route];
+    const render = { '/requests/': renderRequests, '/companies/': renderCompanies, '/companies/karsilastir/': renderCompare }[route];
     if (!render) return;
     loadData()
       .then(render)
@@ -403,7 +436,7 @@
       .finally(() => document.documentElement.classList.remove('static-loading'));
   });
 
-  if (location.search && (route === '/requests/' || route === '/companies/')) {
+  if (location.search && (route === '/requests/' || route === '/companies/' || route === '/companies/karsilastir/')) {
     document.documentElement.classList.add('static-loading');
   }
 })();

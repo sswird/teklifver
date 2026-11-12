@@ -24,6 +24,7 @@
           · Üyelik: <%= memberSince(company.createdAt) %>
           <% if (stats.lastBidAt) { %>· Son teklif: <%= timeAgo(stats.lastBidAt) %><% } %>
         </div>
+        <% if (badges && badges.length) { %><div class="firm-badges"><%- include('../partials/firm-badges', { badges }) %></div><% } %>
       </div>
     </div>
     <div class="summary">

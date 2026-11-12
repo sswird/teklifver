@@ -1,0 +1,1 @@
+<% (locals.badges || []).forEach(key => { const info = firmBadgeInfo[key]; if (!info) return; %><span class="firm-badge firm-badge-<%= key %>" title="<%= info.hint %>"><%- icon(info.icon, { size: 12 }) %><%= info.label %></span><% }) %>

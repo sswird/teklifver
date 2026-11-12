@@ -150,12 +150,28 @@ const idOf = path => path.split('/').pop();
   await sendForm(firm, thread, { content: '' });
   check('boş mesaj reddedilir', (await countMessages()) === beforeEmpty);
 
-  // Ana sayfa: kategori ağacı, vitrin, nasıl işler, canlılık bilgisi ve fotoğrafsız ilan yer tutucusu
+  // Ana sayfa: kategori kutuları, vitrin, acil işler, nasıl işler, canlılık bilgisi ve fotoğrafsız ilan yer tutucusu
   const home = (await get(null, "/")).text;
-  check("kategori ağacı sayılarla", (home.match(/class="cat-tree-main"/g) || []).length >= 10 && /class="cat-tree-main"[^>]*>[\s\S]*?class="count">\d+</.test(home));
+  check("kategori kutuları sayılarla", (home.match(/class="cat-tile"/g) || []).length >= 10 && /class="cat-tile"[^>]*>[\s\S]*?class="count">\d+</.test(home));
   const vitrinItems = ((home.split('class="box vitrin-box"')[1] || '').split('</section>')[0].match(/class="showcase-item"/g) || []).length;
   check("vitrin satırları tam", vitrinItems > 0 && vitrinItems % 5 === 0, String(vitrinItems));
-  check("nasıl işler üç adım", /class="how-steps"(?:[\s\S]*?<li>){3}/.test(home));
+  check("acil işler bölümü acil talepleri gösterir", /class="box urgent-box"[\s\S]*?href="\/requests\?urgent=on"/.test(home) && (home.match(/class="urgent-item"/g) || []).length >= 3);
+  check("nasıl işler üç adım", /class="how-row[^"]*"(?:[\s\S]*?<li>){3}/.test(home));
+  const priceGuidePage = (await get(null, "/fiyat-rehberi")).text;
+  const charts = priceGuidePage.match(/<svg class="dist-chart"[\s\S]*?<\/svg>/g) || [];
+  check("fiyat rehberinde teklif dağılımı grafikleri", charts.length >= 3 && charts.every(svg => (svg.match(/class="dist-bar/g) || []).length === 8 && /dist-bar is-mid/.test(svg) && /aria-label="[^"]+ arasında"/.test(svg)), String(charts.length));
+  const firmPage = (await get(null, `/companies/${firmId}`)).text;
+  check("yeni firma rozeti üyelik tarihinden gelir", /class="firm-badge firm-badge-newcomer"/.test(firmPage) && !/firm-badge-favorite/.test(firmPage));
+  const guide = (await get(null, "/companies")).text;
+  check("rehberde rozetler görünür", /class="firm-badge firm-badge-(favorite|fast)"/.test(guide));
+  const guideIds = [...new Set([...guide.matchAll(/data-compare value="([a-f0-9]{24})"/g)].map(m => m[1]))];
+  const compare = (await get(null, `/companies/karsilastir?ids=${guideIds.slice(0, 2).join(",")}`)).text;
+  check("karşılaştırma iki firmayı yan yana gösterir", guideIds.length >= 5 && (compare.match(/<th scope="col" data-firm=/g) || []).length === 2 && compare.includes("Ortalama teslim süresi"));
+  check("karşılaştırma seçim olmadan yol gösterir", (await get(null, "/companies/karsilastir")).text.includes("en az iki firma seçin"));
+  check("karşılaştırma en fazla üç firma alır", ((await get(null, `/companies/karsilastir?ids=${guideIds.slice(0, 5).join(",")}`)).text.match(/<th scope="col" data-firm=/g) || []).length === 3);
+  const urgentList = (await get(null, "/requests?urgent=on")).text;
+  const urgentRows = (urgentList.match(/class="listing-title"/g) || []).length;
+  check("acil filtresi yalnız acil talepleri listeler", urgentRows > 0 && urgentRows === (urgentList.match(/class="label label-urgent"/g) || []).length && /class="quick-chip is-active" data-quick="urgent"/.test(urgentList), String(urgentRows));
   check("son teklif zamanı gerçek kayıttan", /son teklif <strong>[^<]*(önce|dün)[^<]*<\/strong>/.test(home));
   check("fotoğrafsız ilan kategori adını taşır", /class="no-photo is-placeholder" data-cat="[^"]+"/.test(home));
 

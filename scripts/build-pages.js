@@ -137,16 +137,36 @@ async function collectData(parts, rewrite) {
   const User = require(path.join(ROOT, 'models', 'User'));
   const categories = require(path.join(ROOT, 'config', 'categories'));
   const { liveFilter } = require(path.join(ROOT, 'lib', 'listing'));
+  const { isUrgent } = require(path.join(ROOT, 'lib', 'helpers'));
 
   const [requests, companies] = await Promise.all([
     Request.find(liveFilter())
-      .select('no title description category city budget images bidCount viewCount createdAt deadline')
+      .select('no title description category city budget images bidCount viewCount createdAt deadline isUrgent status')
       .lean(),
     User.find({ role: 'company', suspended: { $ne: true } })
       .select('companyName name address serviceCities specialties categories rating ratingCount verified createdAt')
       .lean()
   ]);
   const time = value => (value ? new Date(value).getTime() : 0);
+
+  // Karşılaştırma: her firmanın sütunu sunucunun ürettiği sayfadan alınır, ön izlemede seçilenler birleştirilir.
+  const compareCells = new Map();
+  let compareRows = [];
+  const listedIds = [...parts.companyRows.keys()];
+  for (let i = 0; i < listedIds.length; i += 3) {
+    let chunk = listedIds.slice(i, i + 3);
+    if (chunk.length < 2) chunk = [listedIds[0], ...chunk];
+    const html = await getHtml(`/companies/karsilastir?ids=${chunk.join(',')}`);
+    if (!compareRows.length) {
+      compareRows = [...html.matchAll(/<tr(?: data-better="(\w+)")?>\s*(<th scope="row">[\s\S]*?<\/th>)/g)]
+        .map(match => ({ better: match[1] || '', head: rewrite(match[2]) }));
+    }
+    for (const id of chunk) {
+      if (compareCells.has(id)) continue;
+      const cells = [...html.matchAll(new RegExp(`<t[hd][^>]*data-firm="${id}"[^>]*>[\\s\\S]*?</t[hd]>`, 'g'))].map(match => rewrite(match[0]));
+      compareCells.set(id, cells);
+    }
+  }
 
   return {
     builtAt: Date.now(),
@@ -168,12 +188,16 @@ async function collectData(parts, rewrite) {
         photos: (item.images || []).length,
         bids: item.bidCount || 0,
         views: item.viewCount || 0,
+        urgent: isUrgent(item),
         row: rewrite(parts.rows.get(String(item._id))),
         card: rewrite(parts.cards.get(String(item._id)) || '')
       })),
+    compareRows,
     companies: companies
       .filter(item => parts.companyRows.has(String(item._id)))
       .map(item => ({
+        id: String(item._id),
+        compare: compareCells.get(String(item._id)) || [],
         name: item.companyName || item.name,
         city: item.address || '',
         areas: item.serviceCities || [],
@@ -256,7 +280,8 @@ async function main() {
     const parts = await collectListingParts();
     const { pages, aliases } = await crawl([
       ...[...parts.rows.keys()].map(id => `/requests/${id}`),
-      ...[...parts.companyRows.keys()].map(id => `/companies/${id}`)
+      ...[...parts.companyRows.keys()].map(id => `/companies/${id}`),
+      '/companies/karsilastir'
     ]);
     const rewrite = makeRewriter(aliases);
     const data = await collectData(parts, rewrite);

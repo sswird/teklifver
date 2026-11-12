@@ -13,6 +13,7 @@
     if (state.period) params.set('period', state.period);
     if (state.photos) params.set('photos', 'on');
     if (state.noBids) params.set('noBids', 'on');
+    if (state.urgent) params.set('urgent', 'on');
     if (state.sort !== 'newest') params.set('sort', state.sort);
     if (state.view !== 'list') params.set('view', state.view);
     if (state.page > 1) params.set('page', state.page);
@@ -20,7 +21,7 @@
     return '/requests' + (query ? '?' + query : '');
   };
   const hasFilters = filters.search || filters.category !== 'all' || filters.city || filters.budgetMin ||
-    filters.budgetMax || filters.period || filters.photos || filters.noBids;
+    filters.budgetMax || filters.period || filters.photos || filters.noBids || filters.urgent;
 
   const pageNumbers = [];
   for (let n = Math.max(1, page - 3); n <= Math.min(totalPages, page + 3); n += 1) pageNumbers.push(n);
@@ -76,6 +77,7 @@
           <div class="filter-group">
             <label class="check-line"><input type="checkbox" name="photos" value="on" <%= filters.photos ? 'checked' : '' %>> Fotoğraflı talepler</label>
             <label class="check-line"><input type="checkbox" name="noBids" value="on" <%= filters.noBids ? 'checked' : '' %>> Teklif almamış talepler</label>
+            <label class="check-line"><input type="checkbox" name="urgent" value="on" <%= filters.urgent ? 'checked' : '' %>> Yalnızca acil işler</label>
           </div>
           <div class="filter-group">
             <button class="btn btn-navy btn-block" type="submit">Ara</button>
@@ -94,7 +96,7 @@
           <strong><%= total %></strong> talep bulundu
         </span>
         <form action="/requests" method="GET">
-          <% Object.entries({ search: filters.search, category: filters.category === 'all' ? '' : filters.category, city: filters.city, budgetMin: filters.budgetMin || '', budgetMax: filters.budgetMax || '', period: filters.period, photos: filters.photos ? 'on' : '', noBids: filters.noBids ? 'on' : '', view: filters.view === 'list' ? '' : filters.view }).forEach(([key, value]) => { if (value) { %>
+          <% Object.entries({ search: filters.search, category: filters.category === 'all' ? '' : filters.category, city: filters.city, budgetMin: filters.budgetMin || '', budgetMax: filters.budgetMax || '', period: filters.period, photos: filters.photos ? 'on' : '', noBids: filters.noBids ? 'on' : '', urgent: filters.urgent ? 'on' : '', view: filters.view === 'list' ? '' : filters.view }).forEach(([key, value]) => { if (value) { %>
             <input type="hidden" name="<%= key %>" value="<%= value %>">
           <% } }) %>
           <select class="select" name="sort" aria-label="Sırala" data-autosubmit>
@@ -125,6 +127,7 @@
 
       <%
         const quick = [
+          ['urgent', 'Acil', Boolean(filters.urgent), { urgent: !filters.urgent }],
           ['period', 'Son 24 saat', filters.period === '1', { period: filters.period === '1' ? '' : '1' }],
           ['photos', 'Fotoğraflı', Boolean(filters.photos), { photos: !filters.photos }],
           ['noBids', 'Teklif almamış', Boolean(filters.noBids), { noBids: !filters.noBids }],
@@ -148,6 +151,7 @@
         if (filters.period) chips.push([filters.period === '1' ? 'Son 24 saat' : `Son ${filters.period} gün`, listUrl({ period: '' })]);
         if (filters.photos) chips.push(['Fotoğraflı', listUrl({ photos: false })]);
         if (filters.noBids) chips.push(['Teklif almamış', listUrl({ noBids: false })]);
+        if (filters.urgent) chips.push(['Acil', listUrl({ urgent: false })]);
       %>
       <div class="filter-chips" id="filterChips" <%= chips.length ? '' : 'hidden' %>>
         <% chips.forEach(([label, url]) => { %>

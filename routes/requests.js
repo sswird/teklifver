@@ -7,6 +7,7 @@ const Message = require('../models/Message');
 const Report = require('../models/Report');
 const Review = require('../models/Review');
 const categories = require('../config/categories');
+const { badgesFor } = require('../lib/badges');
 const cities = require('../config/cities');
 const { isCustomer, isCompany, isLoggedIn, requireVerifiedEmail } = require('../middleware/auth');
 const { limits } = require('../lib/limits');
@@ -422,7 +423,7 @@ router.get('/:id', async (req, res, next) => {
     const bidSort = ['amount', 'days', 'rating'].includes(req.query.bidSort) ? req.query.bidSort : 'amount';
     const allBids = (
       await Bid.find({ request: request._id })
-        .populate('company', 'name companyName rating ratingCount email phone verified suspended')
+        .populate('company', 'name companyName rating ratingCount email phone verified suspended createdAt')
         .sort({ amount: 1, createdAt: 1 })
         .lean()
     ).filter(bid => bid.company && !(bid.company.suspended && bid.status === 'pending'));
@@ -498,7 +499,9 @@ router.get('/:id', async (req, res, next) => {
       viewer && viewer.role === 'company' && !userBid ? User.findById(viewer.id).select('plan bidUsage').lean() : null
     ]);
 
+    const bidBadges = await badgesFor(allBids.map(bid => bid.company));
     res.render('requests/show', {
+      bidBadges,
       title: request.title,
       fullTitle: `${request.title} - ${request.category}${request.city ? `, ${request.city}` : ''} | TeklifVer`,
       metaDescription: request.description.slice(0, 155),

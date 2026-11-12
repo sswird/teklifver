@@ -12,6 +12,7 @@ const { isLoggedIn, isCompany } = require('../middleware/auth');
 const { str } = require('../lib/input');
 const { searchPatterns } = require('../public/js/search-terms');
 const { companyStats } = require('../lib/stats');
+const { badgesFor } = require('../lib/badges');
 const { liveFilter } = require('../lib/listing');
 const { limits } = require('../lib/limits');
 const { notify } = require('../lib/notify');
@@ -61,6 +62,7 @@ router.get('/', async (req, res, next) => {
       .limit(PAGE_SIZE)
       .lean();
 
+    const badgeMap = await badgesFor(companies);
     const params = new URLSearchParams();
     Object.entries({ search, city, category, minRating, verified: verified ? 'on' : '', sort: sort === 'rating' ? '' : sort })
       .forEach(([key, value]) => { if (value) params.set(key, value); });
@@ -69,6 +71,7 @@ router.get('/', async (req, res, next) => {
       title: 'Firma Rehberi',
       metaDescription: 'Puan, kategori ve ile göre hizmet firmaları. Yorumları okuyun, firmaları karşılaştırın.',
       companies,
+      badgeMap,
       categories,
       search,
       city,
@@ -80,6 +83,30 @@ router.get('/', async (req, res, next) => {
       page,
       totalPages,
       pageQuery: params.toString()
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Firma karşılaştırma: en fazla üç firma yan yana. Sıra, adresteki sıradır.
+router.get('/karsilastir', async (req, res, next) => {
+  try {
+    const ids = [...new Set(String(req.query.ids || '').split(','))].filter(id => mongoose.isValidObjectId(id)).slice(0, 3);
+    const found = ids.length
+      ? await User.find({ _id: { $in: ids }, role: 'company', suspended: { $ne: true } }).select(PUBLIC_FIELDS).lean()
+      : [];
+    const companies = ids.map(id => found.find(company => String(company._id) === id)).filter(Boolean);
+    const [statsList, badgeMap] = await Promise.all([
+      Promise.all(companies.map(company => companyStats(company._id))),
+      badgesFor(companies)
+    ]);
+    res.render('companies/compare', {
+      title: 'Firma Karşılaştırma',
+      metaDescription: 'Firmaların puanını, iş sayısını, teslim süresini ve hizmet bölgesini yan yana karşılaştırın.',
+      noIndex: true,
+      ownHeading: true,
+      rows: companies.map((company, index) => ({ company, stats: statsList[index], badges: badgeMap.get(String(company._id)) }))
     });
   } catch (err) {
     next(err);
@@ -105,7 +132,7 @@ router.get('/:id', async (req, res, next) => {
     if (!viewer || viewer.id !== String(company._id)) {
       await User.updateOne({ _id: company._id }, { $inc: { profileViews: 1 } }, { timestamps: false });
     }
-    const [wonBids, stats, reviews, ownRequests, alreadyReported] = await Promise.all([
+    const [wonBids, stats, reviews, ownRequests, alreadyReported, badgeMap] = await Promise.all([
       Bid.find({ company: company._id, status: 'accepted' })
         .populate('request', 'no title category status city location images createdAt')
         .sort({ createdAt: -1 })
@@ -122,7 +149,8 @@ router.get('/:id', async (req, res, next) => {
       viewer && viewer.role === 'customer'
         ? Request.find({ ...liveFilter(), customer: viewer.id }).select('title invitedCompanies').sort({ createdAt: -1 }).limit(20).lean()
         : [],
-      viewer ? CompanyReport.exists({ company: company._id, reporter: viewer.id }) : null
+      viewer ? CompanyReport.exists({ company: company._id, reporter: viewer.id }) : null,
+      badgesFor([company])
     ]);
 
     const companyId = String(company._id);
@@ -148,6 +176,7 @@ router.get('/:id', async (req, res, next) => {
       },
       company,
       stats,
+      badges: badgeMap.get(String(company._id)),
       reviews: reviews.filter(review => review.customer),
       jobs: wonBids.filter(bid => bid.request).map(bid => ({ ...bid.request, wonAmount: bid.amount })),
       inviteOptions: ownRequests.filter(item => !(item.invitedCompanies || []).some(id => String(id) === companyId)),

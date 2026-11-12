@@ -1,0 +1,86 @@
+<%- include('../partials/header') %>
+
+<%
+  // Satırdaki en iyi değer: yüksek iyi (puan, iş sayısı) ya da düşük iyi (teslim süresi). Hepsi eşitse işaret yok.
+  const bestOf = (values, better) => {
+    const numbers = values.filter(value => typeof value === 'number');
+    if (numbers.length < 2 || new Set(numbers).size < 2) return null;
+    return better === 'low' ? Math.min(...numbers) : Math.max(...numbers);
+  };
+  const metrics = [
+    ['Puan', 'high', row => (row.company.ratingCount > 0 ? row.company.rating : null), row => (row.company.ratingCount > 0 ? `${ratingLabel(row.company.rating)} (${row.company.ratingCount} yorum)` : 'Henüz yok')],
+    ['Verilen teklif', 'high', row => row.stats.bidTotal, row => String(row.stats.bidTotal)],
+    ['Kabul edilen teklif', 'high', row => row.stats.accepted, row => String(row.stats.accepted)],
+    ['Tamamlanan iş', 'high', row => row.stats.completed, row => String(row.stats.completed)],
+    ['Ortalama teslim süresi', 'low', row => row.stats.avgDays, row => (row.stats.avgDays === null ? '-' : `${row.stats.avgDays} gün`)]
+  ];
+%>
+<div class="wrap page">
+  <div class="crumbs"><a href="/">Ana Sayfa</a> &rsaquo; <a href="/companies">Firma Rehberi</a> &rsaquo; <span>Karşılaştır</span></div>
+
+  <section class="box compare-box">
+    <h1 class="box-head">Firma Karşılaştırma <a href="/companies">Başka firma seç</a></h1>
+    <div data-compare-page>
+      <% if (rows.length < 2) { %>
+        <div class="empty compare-empty">
+          <h2>Karşılaştırmak için en az iki firma seçin</h2>
+          <p>Firma rehberinde firmaların yanındaki “Karşılaştır” kutusunu işaretleyin; en fazla üç firmayı yan yana görebilirsiniz.</p>
+          <a class="btn btn-primary" href="/companies">Firma Rehberine Git</a>
+        </div>
+      <% } else { %>
+        <div class="compare-scroll">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th scope="col"><span class="visually-hidden">Özellik</span></th>
+                <% rows.forEach(row => { const name = row.company.companyName || row.company.name; %>
+                  <th scope="col" data-firm="<%= row.company._id %>">
+                    <%- include('../partials/company-mark', { company: row.company }) %>
+                    <a class="compare-name" href="/companies/<%= row.company._id %>"><%= name %></a>
+                    <% if (row.company.verified) { %><%- include('../partials/verified') %><% } %>
+                    <div class="firm-badges"><%- include('../partials/firm-badges', { badges: row.badges }) %></div>
+                  </th>
+                <% }) %>
+              </tr>
+            </thead>
+            <tbody>
+              <% metrics.forEach(([label, better, valueOf, textOf]) => { const values = rows.map(valueOf); const top = bestOf(values, better); %>
+                <tr data-better="<%= better %>">
+                  <th scope="row"><%= label %></th>
+                  <% rows.forEach((row, index) => { %><td data-firm="<%= row.company._id %>" data-value="<%= values[index] === null ? '' : values[index] %>"<% if (top !== null && values[index] === top) { %> class="is-best"<% } %>><%= textOf(row) %></td><% }) %>
+                </tr>
+              <% }) %>
+              <tr>
+                <th scope="row">Kategoriler</th>
+                <% rows.forEach(row => { %><td data-firm="<%= row.company._id %>"><div class="cat-chips">
+                  <% (row.company.categories || []).forEach(name => { const linked = allCategories.find(entry => entry.name === name); %>
+                    <a class="cat-chip" href="<%= categoryUrl(name) %>"><% if (linked) { %><%- include('../partials/cat-icon', { category: linked }) %><% } %><%= name %></a>
+                  <% }) %>
+                </div></td><% }) %>
+              </tr>
+              <tr>
+                <th scope="row">Hizmet bölgesi</th>
+                <% rows.forEach(row => { %><td data-firm="<%= row.company._id %>"><%= row.company.serviceCities && row.company.serviceCities.length ? row.company.serviceCities.join(', ') : 'Tüm Türkiye' %></td><% }) %>
+              </tr>
+              <tr>
+                <th scope="row">İl</th>
+                <% rows.forEach(row => { %><td data-firm="<%= row.company._id %>"><%= row.company.address || '-' %></td><% }) %>
+              </tr>
+              <tr>
+                <th scope="row">Üyelik</th>
+                <% rows.forEach(row => { %><td data-firm="<%= row.company._id %>"><%= memberSince(row.company.createdAt) %></td><% }) %>
+              </tr>
+              <tr>
+                <th scope="row"><span class="visually-hidden">Bağlantı</span></th>
+                <% rows.forEach(row => { %><td data-firm="<%= row.company._id %>"><a class="btn btn-sm" href="/companies/<%= row.company._id %>">Firma Sayfası</a></td><% }) %>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="box-note">Her satırda en iyi değer sarıyla işaretlidir. Sayılar sitedeki teklif ve işlerden hesaplanır.</p>
+      <% } %>
+    </div>
+  </section>
+</div>
+
+<%- include('../partials/footer') %>

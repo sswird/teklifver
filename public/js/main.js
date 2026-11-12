@@ -9,7 +9,7 @@
     const root = document.documentElement;
     const meta = $('meta[name="theme-color"]');
     const paintBar = () => {
-      if (meta) meta.content = root.dataset.theme === 'dark' ? '#0b0b0b' : '#16181b';
+      if (meta) meta.content = root.dataset.theme === 'dark' ? '#141414' : '#ffd200';
     };
 
     paintBar();
@@ -850,6 +850,34 @@
     sync();
   }
 
+  /* Firma rehberi: en fazla üç firma seçilip karşılaştırılır. Liste yeniden çizilse de çalışsın diye olay belgeye bağlanır. */
+  function initCompare() {
+    const bar = $('[data-compare-bar]');
+    if (!bar) return;
+    const go = $('[data-compare-go]', bar);
+    const base = go.getAttribute('href');
+    const update = () => {
+      const picked = $$('[data-compare]:checked').map(box => box.value);
+      $('[data-compare-count]', bar).textContent = picked.length;
+      $('[data-compare-hint]', bar).textContent = picked.length < 2 ? 'Bir firma daha seçin' : picked.length === 3 ? 'En fazla üç firma' : 'Bir firma daha ekleyebilirsiniz';
+      bar.hidden = picked.length === 0;
+      go.setAttribute('aria-disabled', String(picked.length < 2));
+      go.href = picked.length >= 2 ? `${base}?ids=${picked.join(',')}` : base;
+      $$('[data-compare]').forEach(box => { box.disabled = !box.checked && picked.length >= 3; });
+    };
+    document.addEventListener('change', event => {
+      if (event.target.matches('[data-compare]')) update();
+    });
+    go.addEventListener('click', event => {
+      if (go.getAttribute('aria-disabled') === 'true') event.preventDefault();
+    });
+    $('[data-compare-clear]', bar).addEventListener('click', () => {
+      $$('[data-compare]:checked').forEach(box => { box.checked = false; });
+      update();
+    });
+    update();
+  }
+
   /* Talep taslağı: yalnızca tercih çerezine onay verildiyse tarayıcıda saklanır */
   function initDraft() {
     const form = $('form[data-draft]');
@@ -1004,6 +1032,7 @@
     initPortfolio();
     initCategoryGuess();
     initCategoryPicker();
+    initCompare();
     initCopyLink();
     initShareMenu();
     initThread();

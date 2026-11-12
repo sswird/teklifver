@@ -86,6 +86,8 @@
                 <td>
                   <a class="listing-title" href="/companies/<%= company._id %>"><%= name %></a>
                   <% if (company.verified) { %><%- include('../partials/verified') %><% } %>
+                  <div class="firm-badges"><%- include('../partials/firm-badges', { badges: badgeMap.get(String(company._id)) }) %></div>
+                  <label class="compare-pick"><input type="checkbox" data-compare value="<%= company._id %>"> Karşılaştır</label>
                   <% if (company.specialties && company.specialties.length) { %>
                     <div class="tag-line"><%= company.specialties.join(', ') %></div>
                   <% } %>
@@ -101,6 +103,11 @@
             <% }) %>
           </tbody>
         </table>
+        <div class="compare-bar" data-compare-bar hidden>
+          <span class="compare-bar-text"><b data-compare-count>0</b> firma seçildi <span class="compare-bar-hint" data-compare-hint>Bir firma daha seçin</span></span>
+          <button class="btn btn-sm" type="button" data-compare-clear>Temizle</button>
+          <a class="btn btn-primary" href="/companies/karsilastir" data-compare-go aria-disabled="true">Karşılaştır</a>
+        </div>
         <% if (totalPages > 1) { %>
           <nav class="pagination" aria-label="Sayfalar">
             <% for (let n = Math.max(1, page - 3); n <= Math.min(totalPages, page + 3); n += 1) { %>

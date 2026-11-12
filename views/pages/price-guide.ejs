@@ -37,6 +37,31 @@
       </table>
     </div>
   </section>
+
+  <section class="box">
+    <h2 class="box-head">Teklif Dağılımı</h2>
+    <p class="box-note">Her çubuk bir fiyat aralığında kaç teklif verildiğini gösterir. Koyu çubuklar tekliflerin ortadaki yarısıdır; üzerine gelince aralık ve sayı görünür.</p>
+    <div class="dist-grid">
+      <% allCategories.forEach(category => { const row = guide[category.name]; if (!row || !row.distribution) return;
+           const dist = row.distribution; const width = 240; const height = 76; const gap = 2; const barWidth = (width - gap * (dist.bins.length - 1)) / dist.bins.length; %>
+        <figure class="dist-card">
+          <figcaption class="dist-head"><%- include('../partials/cat-icon', { category }) %><a href="<%= categoryUrl(category.name) %>"><%= category.name %></a><span class="dist-total"><%= row.total %> teklif</span></figcaption>
+          <svg class="dist-chart" viewBox="0 0 <%= width %> <%= height + 2 %>" role="img" aria-label="<%= category.name %>: tekliflerin yarısı <%= money(row.typicalLow) %> ile <%= money(row.typicalHigh) %> arasında">
+            <% dist.bins.forEach((bin, index) => { const barHeight = bin.count ? Math.max(4, Math.round((bin.count / dist.peak) * height)) : 0; const x = index * (barWidth + gap); const inside = bin.to >= row.typicalLow && bin.from <= row.typicalHigh; %>
+              <g class="dist-bar <%= inside ? 'is-mid' : '' %>">
+                <title><%= money(bin.from) %> - <%= money(bin.to) %>: <%= bin.count %> teklif</title>
+                <rect class="dist-hit" x="<%= x.toFixed(1) %>" y="0" width="<%= barWidth.toFixed(1) %>" height="<%= height %>"></rect>
+                <% if (barHeight) { %><path d="M<%= x.toFixed(1) %> <%= height %>V<%= height - barHeight + 4 %>a4 4 0 0 1 4 -4h<%= (barWidth - 8).toFixed(1) %>a4 4 0 0 1 4 4V<%= height %>z"></path><% } %>
+              </g>
+            <% }) %>
+            <line class="dist-base" x1="0" y1="<%= height + 1 %>" x2="<%= width %>" y2="<%= height + 1 %>"></line>
+          </svg>
+          <div class="dist-axis"><span>≤ <%= money(dist.bins[0].from) %></span><span>≥ <%= money(dist.bins[dist.bins.length - 1].to) %></span></div>
+          <p class="dist-note">Tekliflerin yarısı <strong><%= money(row.typicalLow) %> - <%= money(row.typicalHigh) %></strong> arasında</p>
+        </figure>
+      <% }) %>
+    </div>
+  </section>
 </div>
 
 <%- include('../partials/footer') %>
