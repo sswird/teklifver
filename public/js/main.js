@@ -878,6 +878,19 @@
     update();
   }
 
+  /* Talep formu: ilçe kutusu seçilen ildeki ilçe adlarını önerir (aynı ilçe farklı yazılmasın) */
+  function initLocationSuggestions() {
+    const city = $('#city');
+    const location = $('#location[data-districts]');
+    const list = $('#locationOptions');
+    if (!city || !location || !list) return;
+    let map = {};
+    try { map = JSON.parse(location.dataset.districts || '{}'); } catch { /* bozuk veri yok sayılır */ }
+    city.addEventListener('change', () => {
+      list.replaceChildren(...(map[city.value] || []).map(name => new Option(name, name)));
+    });
+  }
+
   /* Detaylı arama: il seçilince o ildeki ilçeler gelir */
   function initDistrictSelect() {
     const city = $('#filterCity');
@@ -1064,6 +1077,7 @@
     initCompare();
     initFilterButton();
     initDistrictSelect();
+    initLocationSuggestions();
     initCopyLink();
     initShareMenu();
     initThread();

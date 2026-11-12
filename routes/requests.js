@@ -19,8 +19,8 @@ const { rateLimit } = require('express-rate-limit');
 const { uploadImages, deleteImages, copyImages, MAX_IMAGES } = require('../middleware/upload');
 const { str, safeNext } = require('../lib/input');
 const { searchPatterns, matchesText } = require('../public/js/search-terms');
-const { openCountsByCategory, uniqueByPhoto, categoryAverages, priceGuide } = require('../lib/stats');
-const { SORT_OPTIONS, liveFilter, readFilters, buildConditions, filtersToQuery, firmsServing } = require('../lib/listing');
+const { openCountsByCategory, uniqueByPhoto, categoryAverages, priceGuide, districtsByCity: loadDistricts } = require('../lib/stats');
+const { SORT_OPTIONS, liveFilter, readFilters, buildConditions, filtersToQuery, firmsServing, placePrefixSource } = require('../lib/listing');
 const { notify, notifyMany } = require('../lib/notify');
 const mongoose = require('mongoose');
 const { REPORT_REASONS } = Report;
@@ -116,25 +116,14 @@ router.get('/', async (req, res, next) => {
 
     // Arama ya da filtre varken soldaki kategori sayıları o aramaya göre (kategori seçimi hariç) sayılır.
     const filtered = ['search', 'city', 'district', 'budgetMin', 'budgetMax', 'period', 'photos', 'noBids', 'urgent'].some(key => filters[key]);
-    const [total, counts, menuRows, districtRows] = await Promise.all([
+    const [total, counts, menuRows, districtsByCity] = await Promise.all([
       Request.countDocuments(filter),
       openCountsByCategory(),
       filtered
         ? Request.aggregate([{ $match: buildConditions({ ...filters, category: 'all' }) }, { $group: { _id: '$category', total: { $sum: 1 } } }])
         : null,
-      Request.aggregate([
-        { $match: { ...liveFilter(), city: { $nin: [null, ''] }, location: { $nin: [null, ''] } } },
-        { $group: { _id: { city: '$city', location: '$location' } } }
-      ])
+      loadDistricts()
     ]);
-    // İl -> ilçeler; aynı ilçe farklı yazılmışsa (kadıköy/Kadıköy) bir kez görünür.
-    const districtsByCity = {};
-    for (const { _id: row } of districtRows) {
-      const list = (districtsByCity[row.city] ||= []);
-      const name = row.location.trim();
-      if (!list.some(item => item.toLocaleLowerCase('tr-TR') === name.toLocaleLowerCase('tr-TR'))) list.push(name);
-    }
-    Object.values(districtsByCity).forEach(list => list.sort((a, b) => a.localeCompare(b, 'tr')));
     const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1);
     const page = Math.min(requestedPage, totalPages);
 
@@ -178,14 +167,36 @@ router.get('/suggest', suggestLimiter, async (req, res, next) => {
     const q = str(req.query.q);
     if (q.length < 2) return res.json({ items: [] });
 
-    const matches = await Request.find({
-      ...liveFilter(),
-      $and: searchPatterns(q).map(pattern => ({ title: { $regex: pattern, $options: 'i' } }))
-    })
-      .select('title no')
-      .sort({ viewCount: -1 })
-      .limit(6)
-      .lean();
+    // Yer önerileri: yazılan bir ilin ya da açık taleplerde geçen bir ilçenin başıysa ("ank" -> Ankara, "kad" -> Kadıköy)
+    const prefix = placePrefixSource(q);
+    const matchedCities = cities.filter(city => new RegExp(prefix, 'i').test(city)).slice(0, 5);
+    const [matches, cityRows, districtRows] = await Promise.all([
+      Request.find({
+        ...liveFilter(),
+        $and: searchPatterns(q).map(pattern => ({ title: { $regex: pattern, $options: 'i' } }))
+      })
+        .select('title no')
+        .sort({ viewCount: -1 })
+        .limit(6)
+        .lean(),
+      matchedCities.length
+        ? Request.aggregate([{ $match: { ...liveFilter(), city: { $in: matchedCities } } }, { $group: { _id: '$city', total: { $sum: 1 } } }, { $sort: { total: -1 } }, { $limit: 2 }])
+        : [],
+      Request.aggregate([
+        { $match: { ...liveFilter(), city: { $nin: [null, ''] }, location: { $regex: prefix, $options: 'i' } } },
+        { $group: { _id: { city: '$city', location: '$location' }, total: { $sum: 1 } } },
+        { $sort: { total: -1 } },
+        { $limit: 3 }
+      ])
+    ]);
+    const places = [
+      ...cityRows.map(row => ({ label: row._id, hint: `İl · ${row.total} talep`, url: `/requests?city=${encodeURIComponent(row._id)}` })),
+      ...districtRows.map(({ _id: row, total }) => ({
+        label: `${row.location}, ${row.city}`,
+        hint: `İlçe · ${total} talep`,
+        url: `/requests?${new URLSearchParams({ city: row.city, district: row.location })}`
+      }))
+    ].slice(0, 3);
 
     res.json({
       items: [
@@ -194,6 +205,7 @@ router.get('/suggest', suggestLimiter, async (req, res, next) => {
           hint: 'Kategori',
           url: `/requests?category=${encodeURIComponent(name)}`
         })),
+        ...places,
         ...matches.map(item => ({ label: item.title, hint: `No: ${item.no}`, url: `/requests/${item._id}` }))
       ]
     });
@@ -224,12 +236,13 @@ router.get('/new', customerOrGuest, (req, res, next) => {
   const guessed = chosen ? '' : categories.guess(formTitle);
   // Ziyaretçiyken yazıp hesap açan kullanıcı taslağını hazır bulur.
   const pending = req.session.user && !formTitle ? req.session.pendingRequest : null;
-  priceGuide()
-    .then(priceHints => res.render('requests/new', {
+  Promise.all([priceGuide(), loadDistricts()])
+    .then(([priceHints, districtsByCity]) => res.render('requests/new', {
       title: 'Talep Ver',
       categories,
       maxImages: MAX_IMAGES,
       priceHints,
+      districtsByCity,
       guest: !req.session.user,
       restored: Boolean(pending),
       guessedCategory: pending ? '' : guessed,
@@ -614,7 +627,8 @@ router.get('/:id/edit', isCustomer, async (req, res, next) => {
       title: 'Talebi Düzenle',
       request: request.toObject(),
       categories,
-      maxImages: MAX_IMAGES
+      maxImages: MAX_IMAGES,
+      districtsByCity: await loadDistricts()
     });
   } catch (err) {
     next(err);

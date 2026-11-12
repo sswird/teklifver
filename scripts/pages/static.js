@@ -487,7 +487,26 @@
         .sort((a, b) => b.views - a.views)
         .slice(0, 6)
         .map(item => ({ label: item.title, hint: `No: ${item.no}`, url: `${BASE}/requests/${item.id}/` }));
-      return new Response(JSON.stringify({ items: [...categories, ...requests] }), {
+      // Yer önerileri: il ya da ilçe adının başı ("ank" -> Ankara, "kad" -> Kadıköy)
+      const prefix = new RegExp('^' + term.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/[iıİI]/g, '[iıİI]'), 'i');
+      const cityCounts = {};
+      const districtCounts = {};
+      data.requests.forEach(item => {
+        if (item.city && prefix.test(item.city)) cityCounts[item.city] = (cityCounts[item.city] || 0) + 1;
+        if (item.city && item.location && prefix.test(item.location)) {
+          const key = item.city + '|' + item.location;
+          districtCounts[key] = (districtCounts[key] || 0) + 1;
+        }
+      });
+      const places = [
+        ...Object.entries(cityCounts).sort((a, b) => b[1] - a[1]).slice(0, 2)
+          .map(([city, total]) => ({ label: city, hint: `İl · ${total} talep`, url: `${BASE}/requests/?city=${encodeURIComponent(city)}` })),
+        ...Object.entries(districtCounts).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([key, total]) => {
+          const [city, district] = key.split('|');
+          return { label: `${district}, ${city}`, hint: `İlçe · ${total} talep`, url: `${BASE}/requests/?${new URLSearchParams({ city, district })}` };
+        })
+      ].slice(0, 3);
+      return new Response(JSON.stringify({ items: [...categories, ...places, ...requests] }), {
         headers: { 'Content-Type': 'application/json' }
       });
     });
