@@ -5,7 +5,7 @@ const User = require('../models/User');
 const Bid = require('../models/Bid');
 const Review = require('../models/Review');
 const { openCountsByCategory, uniqueByPhoto } = require('../lib/stats');
-const { liveFilter } = require('../lib/listing');
+const { liveFilter, buildConditions, readFilters } = require('../lib/listing');
 const allCategories = require('../config/categories');
 const { priceBoard } = require('../lib/price-board');
 const { recentActivity } = require('../lib/activity');
@@ -60,6 +60,7 @@ router.get('/', async (req, res, next) => {
     const categoryTiles = [...allCategories].sort((a, b) => (counts[b.name] || 0) - (counts[a.name] || 0)).slice(0, 11);
 
     const board = await priceBoard();
+    const urgentCount = await Request.countDocuments(buildConditions(readFilters({ urgent: 'on' })));
     // Tek yorumla 5 puan alan firma, çok yorumlu 4,8'in önüne geçmesin.
     const leaders = topCompanies
       .map(company => ({ company, score: (company.rating * company.ratingCount + 4 * 3) / (company.ratingCount + 3) }))
@@ -106,6 +107,7 @@ router.get('/', async (req, res, next) => {
       counts,
       topCompanies: leaders,
       leaderBadges,
+      urgentCount,
       cityRows,
       total: Object.values(counts).reduce((sum, count) => sum + count, 0),
       stats: { todayCount, companyCount, bidCount, completedCount },

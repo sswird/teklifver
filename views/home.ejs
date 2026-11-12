@@ -29,6 +29,7 @@
         <div class="box-head">Kısayollar</div>
         <ul class="side-list">
           <li><a href="/requests?period=1">Son 24 saat <% if (stats.todayCount) { %><span class="count"><%= stats.todayCount %></span><% } %></a></li>
+          <li><a href="/requests?urgent=on">Acil işler <% if (urgentCount) { %><span class="count"><%= urgentCount %></span><% } %></a></li>
           <li><a href="/requests?noBids=on">Teklif almamış talepler</a></li>
           <li><a href="/requests?photos=on">Fotoğraflı talepler</a></li>
           <li><a href="/requests?sort=deadline">Süresi yaklaşanlar</a></li>

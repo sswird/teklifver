@@ -167,18 +167,23 @@ router.get('/suggest', suggestLimiter, async (req, res, next) => {
     const q = str(req.query.q);
     if (q.length < 2) return res.json({ items: [] });
 
-    // Yer önerileri: yazılan bir ilin ya da açık taleplerde geçen bir ilçenin başıysa ("ank" -> Ankara, "kad" -> Kadıköy)
+    // Yer önerileri: yazılan bir ilin ya da açık taleplerde geçen bir ilçenin başıysa ("ank" -> Ankara, "kad" -> Kadıköy).
+    // Kısa yazılarda (2-3 harf) kategoriler yalnız kelime başıyla eşleşir, başlık önerisi gelmez: "ist" "istiyorum"u bulmasın.
+    const short = q.length < 4;
     const prefix = placePrefixSource(q);
+    const wordStart = new RegExp(`(^|[\\s&/-])${prefix.slice(1)}`, 'i');
     const matchedCities = cities.filter(city => new RegExp(prefix, 'i').test(city)).slice(0, 5);
     const [matches, cityRows, districtRows] = await Promise.all([
-      Request.find({
-        ...liveFilter(),
-        $and: searchPatterns(q).map(pattern => ({ title: { $regex: pattern, $options: 'i' } }))
-      })
-        .select('title no')
-        .sort({ viewCount: -1 })
-        .limit(6)
-        .lean(),
+      short
+        ? []
+        : Request.find({
+          ...liveFilter(),
+          $and: searchPatterns(q).map(pattern => ({ title: { $regex: pattern, $options: 'i' } }))
+        })
+          .select('title no')
+          .sort({ viewCount: -1 })
+          .limit(6)
+          .lean(),
       matchedCities.length
         ? Request.aggregate([{ $match: { ...liveFilter(), city: { $in: matchedCities } } }, { $group: { _id: '$city', total: { $sum: 1 } } }, { $sort: { total: -1 } }, { $limit: 2 }])
         : [],
@@ -200,7 +205,7 @@ router.get('/suggest', suggestLimiter, async (req, res, next) => {
 
     res.json({
       items: [
-        ...categories.names.filter(name => matchesText(q, [name])).slice(0, 3).map(name => ({
+        ...categories.names.filter(name => (short ? wordStart.test(name) : matchesText(q, [name]))).slice(0, 3).map(name => ({
           label: name,
           hint: 'Kategori',
           url: `/requests?category=${encodeURIComponent(name)}`

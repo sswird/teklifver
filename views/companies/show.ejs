@@ -164,6 +164,25 @@
     <% } %>
   </section>
 
+  <% if (similarFirms.length) { %>
+    <section class="box">
+      <div class="box-head">Benzer Firmalar<% if (firstCategory) { %> <a href="/companies?category=<%= encodeURIComponent(firstCategory.name) %>">Tüm <%= firstCategory.name %> firmaları</a><% } %></div>
+      <ul class="similar-firms">
+        <% similarFirms.forEach(firm => { %>
+          <li>
+            <%- include('../partials/company-mark', { company: firm }) %>
+            <div class="similar-body">
+              <a class="similar-name" href="/companies/<%= firm._id %>"><%= firm.companyName || firm.name %></a>
+              <% if (firm.verified) { %><%- include('../partials/verified') %><% } %>
+              <div class="similar-meta"><% if (firm.ratingCount > 0) { %><%- icon('star', { size: 11, class: 'star' }) %> <%= ratingLabel(firm.rating) %> (<%= firm.ratingCount %> yorum)<% } else { %>Henüz yorum yok<% } %><%= firm.address ? ' · ' + firm.address : '' %></div>
+              <div class="firm-badges"><%- include('../partials/firm-badges', { badges: similarBadges.get(String(firm._id)) }) %></div>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+    </section>
+  <% } %>
+
   <% if (currentUser && !isOwnPage) { %>
     <details class="report-box">
       <summary><%- icon('flag', { size: 12 }) %> Bu firmayı şikayet et</summary>

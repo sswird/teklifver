@@ -132,7 +132,7 @@ router.get('/:id', async (req, res, next) => {
     if (!viewer || viewer.id !== String(company._id)) {
       await User.updateOne({ _id: company._id }, { $inc: { profileViews: 1 } }, { timestamps: false });
     }
-    const [wonBids, stats, reviews, ownRequests, alreadyReported, badgeMap] = await Promise.all([
+    const [wonBids, stats, reviews, ownRequests, alreadyReported, badgeMap, similarFirms] = await Promise.all([
       Bid.find({ company: company._id, status: 'accepted' })
         .populate('request', 'no title category status city location images createdAt')
         .sort({ createdAt: -1 })
@@ -150,8 +150,17 @@ router.get('/:id', async (req, res, next) => {
         ? Request.find({ ...liveFilter(), customer: viewer.id }).select('title invitedCompanies').sort({ createdAt: -1 }).limit(20).lean()
         : [],
       viewer ? CompanyReport.exists({ company: company._id, reporter: viewer.id }) : null,
-      badgesFor([company])
+      badgesFor([company]),
+      // Benzer firmalar: aynı kategorilerde hizmet veren, puanı yüksek ilk dört firma
+      company.categories && company.categories.length
+        ? User.find({ role: 'company', suspended: { $ne: true }, _id: { $ne: company._id }, categories: { $in: company.categories } })
+          .select('name companyName avatar rating ratingCount address verified createdAt')
+          .sort({ rating: -1, ratingCount: -1 })
+          .limit(4)
+          .lean()
+        : []
     ]);
+    const similarBadges = await badgesFor(similarFirms);
 
     const companyId = String(company._id);
     const title = company.companyName || company.name;
@@ -177,6 +186,8 @@ router.get('/:id', async (req, res, next) => {
       company,
       stats,
       badges: badgeMap.get(String(company._id)),
+      similarFirms,
+      similarBadges,
       reviews: reviews.filter(review => review.customer),
       jobs: wonBids.filter(bid => bid.request).map(bid => ({ ...bid.request, wonAmount: bid.amount })),
       inviteOptions: ownRequests.filter(item => !(item.invitedCompanies || []).some(id => String(id) === companyId)),

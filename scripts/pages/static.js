@@ -469,26 +469,25 @@
     markBest(holder);
   }
 
-  /* Arama önerileri: main.js sunucuya sorar, burada yerel veriden yanıtlanır */
+  /* Arama önerileri: main.js sunucuya sorar, burada yerel veriden, sunucudaki kurallarla yanıtlanır */
   window.fetch = (url, options) => {
     if (typeof url !== 'string' || !url.startsWith('/requests/suggest')) return nativeFetch(url, options);
-    const term = new URLSearchParams(url.split('?')[1]).get('q') || '';
+    const term = (new URLSearchParams(url.split('?')[1]).get('q') || '').trim();
     return loadData().then(data => {
+      // Kısa yazılarda (2-3 harf) kategoriler yalnız kelime başıyla eşleşir, başlık önerisi gelmez.
+      const short = term.length < 4;
+      const body = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/[iıİI]/g, '[iıİI]');
+      const prefix = new RegExp('^' + body, 'i');
+      const wordStart = new RegExp('(^|[\\s&/-])' + body, 'i');
       const categories = data.categories
-        .filter(item => window.TeklifverSearch.matchesText(term, [item.name]))
+        .filter(item => (short ? wordStart.test(item.name) : window.TeklifverSearch.matchesText(term, [item.name])))
         .slice(0, 3)
         .map(item => ({
           label: item.name,
           hint: 'Kategori',
           url: `${BASE}/requests/?category=${encodeURIComponent(item.name)}`
         }));
-      const requests = data.requests
-        .filter(item => window.TeklifverSearch.matchesText(term, [item.title]))
-        .sort((a, b) => b.views - a.views)
-        .slice(0, 6)
-        .map(item => ({ label: item.title, hint: `No: ${item.no}`, url: `${BASE}/requests/${item.id}/` }));
       // Yer önerileri: il ya da ilçe adının başı ("ank" -> Ankara, "kad" -> Kadıköy)
-      const prefix = new RegExp('^' + term.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/[iıİI]/g, '[iıİI]'), 'i');
       const cityCounts = {};
       const districtCounts = {};
       data.requests.forEach(item => {
@@ -506,6 +505,11 @@
           return { label: `${district}, ${city}`, hint: `İlçe · ${total} talep`, url: `${BASE}/requests/?${new URLSearchParams({ city, district })}` };
         })
       ].slice(0, 3);
+      const requests = short ? [] : data.requests
+        .filter(item => window.TeklifverSearch.matchesText(term, [item.title]))
+        .sort((a, b) => b.views - a.views)
+        .slice(0, 6)
+        .map(item => ({ label: item.title, hint: `No: ${item.no}`, url: `${BASE}/requests/${item.id}/` }));
       return new Response(JSON.stringify({ items: [...categories, ...places, ...requests] }), {
         headers: { 'Content-Type': 'application/json' }
       });
