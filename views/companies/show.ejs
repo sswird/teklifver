@@ -42,7 +42,11 @@
         <p class="tag-line" style="margin-top:8px"><strong>Hizmetler:</strong> <%= company.specialties.join(', ') %></p>
       <% } %>
       <% if (company.categories && company.categories.length) { %>
-        <p class="tag-line" style="margin-top:4px"><strong>Kategoriler:</strong> <%= company.categories.join(', ') %></p>
+        <div class="cat-chips"><strong>Kategoriler:</strong>
+          <% company.categories.forEach(name => { const linked = allCategories.find(entry => entry.name === name); %>
+            <a class="cat-chip" href="<%= categoryUrl(name) %>"><% if (linked) { %><%- include('../partials/cat-icon', { category: linked }) %><% } %><%= name %></a>
+          <% }) %>
+        </div>
       <% } %>
       <p class="tag-line" style="margin-top:4px"><strong>Hizmet bölgesi:</strong> <%= company.serviceCities && company.serviceCities.length ? company.serviceCities.join(', ') : 'Tüm Türkiye' %></p>
     </div>

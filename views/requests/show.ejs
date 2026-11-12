@@ -101,7 +101,8 @@
       <table class="info-table">
         <tr><td>Talep No</td><td><strong><%= request.no %></strong></td></tr>
         <tr><td>Talep Tarihi</td><td><%= formatDate(request.createdAt) %></td></tr>
-        <tr><td>Kategori</td><td><%= request.category %></td></tr>
+        <% const requestCategory = allCategories.find(entry => entry.name === request.category); %>
+        <tr><td>Kategori</td><td><a class="cat-link" href="<%= categoryUrl(request.category) %>"><% if (requestCategory) { %><%- include('../partials/cat-icon', { category: requestCategory }) %><% } %><%= request.category %></a></td></tr>
         <tr><td>Son Tarih</td><td><%= request.deadline ? formatDate(request.deadline) : 'Belirtilmemiş' %><% if (request.deadline && isOpen && !isExpired(request)) { %> <span class="muted small">(<span data-deadline="<%= new Date(request.deadline).toISOString() %>"><%= timeLeft(request.deadline) %></span> kaldı)</span><% } %></td></tr>
         <% if (request.discoveryTime) { %>
           <tr><td>Keşif</td><td><%= request.discoveryTime %></td></tr>

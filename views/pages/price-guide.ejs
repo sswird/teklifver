@@ -21,7 +21,7 @@
         <tbody>
           <% allCategories.forEach(category => { const row = guide[category.name]; %>
             <tr>
-              <td><a href="<%= categoryUrl(category.name) %>"><%= category.name %></a></td>
+              <td><a class="cat-link" href="<%= categoryUrl(category.name) %>"><%- include('../partials/cat-icon', { category }) %><%= category.name %></a></td>
               <% if (row && row.total >= 3) { %>
                 <td class="num"><strong><%= money(row.average) %></strong></td>
                 <td class="num"><%= money(row.lowest) %></td>

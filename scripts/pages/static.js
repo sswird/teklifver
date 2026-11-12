@@ -208,6 +208,16 @@
     if (chips.length > 1) box.append(element('a', { className: 'filter-clear', href: `${BASE}/requests/`, textContent: 'Tümünü temizle' }));
   }
 
+  function renderQuickFilters(filters) {
+    $$('[data-quick]').forEach(link => {
+      const kind = link.dataset.quick;
+      const on = kind === 'period' ? filters.period === '1' : kind === 'deadline' ? filters.sort === 'deadline' : Boolean(filters[kind]);
+      const overrides = kind === 'period' ? { period: on ? '' : '1' } : kind === 'deadline' ? { sort: on ? 'newest' : 'deadline' } : { [kind]: !on };
+      link.classList.toggle('is-active', on);
+      link.href = requestUrl(filters, overrides);
+    });
+  }
+
   function renderRequests(data) {
     const filters = readRequestFilters(data);
     const matched = data.requests
@@ -252,6 +262,7 @@
     });
 
     renderChips(filters);
+    renderQuickFilters(filters);
 
     if (filters.category !== 'all') {
       document.title = `${filters.category} - TeklifVer`;

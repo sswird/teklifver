@@ -124,6 +124,21 @@
       </div>
 
       <%
+        const quick = [
+          ['period', 'Son 24 saat', filters.period === '1', { period: filters.period === '1' ? '' : '1' }],
+          ['photos', 'Fotoğraflı', Boolean(filters.photos), { photos: !filters.photos }],
+          ['noBids', 'Teklif almamış', Boolean(filters.noBids), { noBids: !filters.noBids }],
+          ['deadline', 'Süresi yaklaşan', filters.sort === 'deadline', { sort: filters.sort === 'deadline' ? 'newest' : 'deadline' }]
+        ];
+      %>
+      <div class="quick-row" role="group" aria-label="Hızlı filtreler">
+        <span class="quick-label">Hızlı filtre:</span>
+        <% quick.forEach(([kind, label, on, overrides]) => { %>
+          <a class="quick-chip <%= on ? 'is-active' : '' %>" data-quick="<%= kind %>" href="<%= listUrl(overrides) %>"><% if (on) { %><%- icon('check', { size: 12 }) %><% } %><%= label %></a>
+        <% }) %>
+      </div>
+
+      <%
         const chips = [];
         if (filters.search) chips.push([`"${filters.search}"`, listUrl({ search: '' })]);
         if (filters.category !== 'all') chips.push([filters.category, listUrl({ category: 'all' })]);
