@@ -127,7 +127,45 @@
     return nav;
   }
 
+  const hasActiveFilters = filters => Boolean(filters.search || filters.city || filters.budgetMin || filters.budgetMax ||
+    filters.period || filters.photos || filters.noBids || filters.urgent);
+
+  // Sunucudaki categories.guess ile aynı kural: en uzun eşleşen anahtar kelime kazanır.
+  function guessCategory(data, text) {
+    const title = String(text || '').toLocaleLowerCase('tr-TR');
+    let best = '';
+    let bestLength = 0;
+    data.categories.forEach(category => {
+      String(category.keywords || '').split(',').forEach(word => {
+        if (word && word.length > bestLength && title.includes(word)) {
+          best = category.name;
+          bestLength = word.length;
+        }
+      });
+    });
+    return best;
+  }
+
   function syncCategoryMenu(data, filters) {
+    const filtered = hasActiveFilters(filters);
+    const menuCounts = {};
+    if (filtered) {
+      data.requests
+        .filter(item => matchesRequest(item, { ...filters, category: 'all' }, data.builtAt))
+        .forEach(item => { menuCounts[item.category] = (menuCounts[item.category] || 0) + 1; });
+    }
+    const note = $('[data-menu-note]');
+    if (note) note.hidden = !filtered;
+    $$('.category-menu .side-list > li > a').forEach(link => {
+      const category = new URL(link.href).searchParams.get('category') || 'all';
+      if (filtered) {
+        const count = category === 'all' ? Object.values(menuCounts).reduce((a, b) => a + b, 0) : menuCounts[category] || 0;
+        const counter = $('.count', link);
+        if (counter) counter.textContent = count;
+        link.classList.toggle('is-empty', category !== 'all' && !count);
+        link.href = requestUrl(filters, { category });
+      }
+    });
     $$('.side-list a').forEach(link => {
       const category = new URL(link.href).searchParams.get('category') || 'all';
       link.classList.toggle('is-active', category === filters.category);
@@ -248,12 +286,39 @@
 
     const isGallery = filters.view === 'gallery';
     table.hidden = isGallery || visible.length === 0;
+    $$('.empty-more', section).forEach(node => node.remove());
     if (!visible.length) {
-      section.append(element('div', { className: 'empty' }, [
-        element('h2', { textContent: 'Bu aramada talep çıkmadı' }),
-        element('p', { textContent: 'İli veya bütçeyi kaldırıp yeniden deneyin.' }),
-        element('a', { className: 'btn', href: `${BASE}/requests/`, textContent: 'Tüm Talepler' })
-      ]));
+      const tips = element('ul', { className: 'empty-tips' });
+      if (hasActiveFilters(filters) || filters.category !== 'all') tips.append(element('li', { textContent: 'Yukarıdaki filtrelerden birini kaldırın.' }));
+      const suggestion = filters.search ? guessCategory(data, filters.search) : '';
+      if (suggestion && suggestion !== filters.category) {
+        const total = data.requests.filter(item => item.category === suggestion).length;
+        tips.append(element('li', {}, [
+          element('a', { href: requestUrl(filters, { category: suggestion, search: '' }), textContent: suggestion }),
+          ` kategorisindeki ${total} açık talebe bakın.`
+        ]));
+      }
+      const children = [
+        element('h2', { textContent: filters.search ? `"${filters.search}" için açık talep bulunamadı` : 'Bu filtrelerle açık talep bulunamadı' }),
+        tips
+      ];
+      if (filters.search) {
+        const params = new URLSearchParams({ title: filters.search, ...(filters.city ? { city: filters.city } : {}) });
+        children.push(
+          element('p', { className: 'empty-cta', textContent: 'Bu işi siz mi yaptıracaksınız? Talebinizi yazın, firmalar size teklif göndersin.' }),
+          element('a', { className: 'btn btn-primary', href: `${BASE}/requests/new/?${params}`, textContent: 'Bu İş İçin Talep Ver' }),
+          ' '
+        );
+      }
+      children.push(element('a', { className: 'btn', href: `${BASE}/requests/`, textContent: 'Tüm Talepler' }));
+      table.before(element('div', { className: 'empty empty-search' }, children));
+      // Altında son eklenen talepler: aynı tablo, en yeni beş satırla
+      const latest = [...data.requests].sort((a, b) => b.created - a.created).slice(0, 5);
+      if (latest.length && !isGallery) {
+        table.before(element('h2', { className: 'empty-more', textContent: 'Son eklenen talepler' }));
+        $('tbody', table).innerHTML = latest.map(item => item.row).join('');
+        table.hidden = false;
+      }
     } else if (isGallery) {
       section.append(element('div', { className: 'showcase-grid', innerHTML: visible.map(item => item.card).join('') }));
     } else {

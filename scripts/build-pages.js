@@ -170,7 +170,7 @@ async function collectData(parts, rewrite) {
 
   return {
     builtAt: Date.now(),
-    categories: categories.map(({ name, subs }) => ({ name, subs })),
+    categories: categories.map(({ name, subs, keywords }) => ({ name, subs, keywords })),
     adRows: parts.ads.map(rewrite),
     requests: requests
       .filter(item => parts.rows.has(String(item._id)))

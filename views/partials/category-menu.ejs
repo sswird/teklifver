@@ -1,12 +1,20 @@
-<details class="box" open data-collapse-mobile>
+<%
+  // Arama ya da filtre varken sayılar o aramaya göredir ve bağlantılar aramayı korur.
+  // Statik ön izleme aynı işi tarayıcıda yapar (scripts/pages/static.js syncCategoryMenu).
+  const menuCounts = locals.menuCounts || null;
+  const shown = menuCounts || counts;
+  const linkFor = locals.menuUrl || (name => (name === 'all' ? '/requests' : `/requests?category=${encodeURIComponent(name)}`));
+%>
+<details class="box category-menu" open data-collapse-mobile>
   <summary class="box-head">Kategoriler <%- icon('chevron-down', { size: 14 }) %></summary>
+  <p class="menu-note" data-menu-note <%= menuCounts ? '' : 'hidden' %>>Sayılar bu aramaya göre</p>
   <ul class="side-list">
-    <li><a class="<%= active === 'all' ? 'is-active' : '' %>" href="/requests"><span class="cat-icon" aria-hidden="true"><%- icon('list', { size: 16 }) %></span>Tüm Talepler <span class="count"><%= Object.values(counts).reduce((a, b) => a + b, 0) %></span></a></li>
-    <% allCategories.forEach(category => { const isActive = active === category.name; %>
+    <li><a class="<%= active === 'all' ? 'is-active' : '' %>" href="<%= linkFor('all') %>"><span class="cat-icon" aria-hidden="true"><%- icon('list', { size: 16 }) %></span>Tüm Talepler <span class="count"><%= Object.values(shown).reduce((a, b) => a + b, 0) %></span></a></li>
+    <% allCategories.forEach(category => { const isActive = active === category.name; const count = shown[category.name] || 0; %>
       <li>
-        <a class="side-main <%= isActive ? 'is-active' : '' %>" href="/requests?category=<%= encodeURIComponent(category.name) %>">
+        <a class="side-main <%= isActive ? 'is-active' : '' %><%= menuCounts && !count ? ' is-empty' : '' %>" href="<%= linkFor(category.name) %>">
           <%- include('cat-icon', { category }) %><%= category.name %>
-          <span class="count"><%= counts[category.name] || 0 %></span>
+          <span class="count"><%= count %></span>
         </a>
         <% if (isActive) { %>
           <div class="side-subs">

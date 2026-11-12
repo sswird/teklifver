@@ -114,7 +114,15 @@ router.get('/', async (req, res, next) => {
     const requestedPage = Math.max(parseInt(req.query.page, 10) || 1, 1);
     const filter = buildConditions(filters);
 
-    const [total, counts] = await Promise.all([Request.countDocuments(filter), openCountsByCategory()]);
+    // Arama ya da filtre varken soldaki kategori sayıları o aramaya göre (kategori seçimi hariç) sayılır.
+    const filtered = ['search', 'city', 'budgetMin', 'budgetMax', 'period', 'photos', 'noBids', 'urgent'].some(key => filters[key]);
+    const [total, counts, menuRows] = await Promise.all([
+      Request.countDocuments(filter),
+      openCountsByCategory(),
+      filtered
+        ? Request.aggregate([{ $match: buildConditions({ ...filters, category: 'all' }) }, { $group: { _id: '$category', total: { $sum: 1 } } }])
+        : null
+    ]);
     const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1);
     const page = Math.min(requestedPage, totalPages);
 
@@ -123,6 +131,9 @@ router.get('/', async (req, res, next) => {
       .skip((page - 1) * PAGE_SIZE)
       .limit(PAGE_SIZE)
       .lean();
+    // Sonuç çıkmazsa sayfa boş kalmasın: uygun kategori önerisi ve son eklenen talepler
+    const suggestion = !requests.length && filters.search ? categories.guess(filters.search) : '';
+    const fallback = requests.length ? [] : await Request.find(liveFilter()).sort({ createdAt: -1 }).limit(5).lean();
 
     res.render('requests/index', {
       title: filters.category === 'all' ? 'Talepler' : filters.category,
@@ -136,6 +147,9 @@ router.get('/', async (req, res, next) => {
       noIndex: Boolean(filtersToQuery(filters) && !(filters.category !== 'all' && filtersToQuery(filters).split('&').length === 1)) || filters.sort !== 'newest' || filters.view !== 'list' || page > 1,
       savedQuery: filtersToQuery(filters),
       counts,
+      menuCounts: menuRows ? Object.fromEntries(menuRows.map(row => [row._id, row.total])) : null,
+      suggestion,
+      fallback,
       total,
       page,
       totalPages

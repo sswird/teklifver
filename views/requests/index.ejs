@@ -38,7 +38,7 @@
 
   <div class="layout">
     <aside>
-      <%- include('../partials/category-menu', { active: filters.category }) %>
+      <%- include('../partials/category-menu', { active: filters.category, menuCounts, menuUrl: name => listUrl({ category: name }) }) %>
 
       <details class="box" id="detayli-arama" open data-collapse-mobile>
         <summary class="box-head">Detaylı Arama <%- icon('chevron-down', { size: 14 }) %></summary>
@@ -163,14 +163,23 @@
       </div>
 
       <% if (requests.length === 0) { %>
-        <div class="empty">
-          <h2>Bu aramada talep çıkmadı</h2>
-          <p>İli veya bütçeyi kaldırıp yeniden deneyin. Aramayı kaydederseniz yeni talep geldiğinde görebilirsiniz.</p>
+        <div class="empty empty-search">
+          <h2><%= filters.search ? `"${filters.search}" için açık talep bulunamadı` : 'Bu filtrelerle açık talep bulunamadı' %></h2>
+          <ul class="empty-tips">
+            <% if (chips.length) { %><li>Yukarıdaki filtrelerden birini kaldırın<% if (chips.length > 1) { %> ya da <a href="/requests">hepsini temizleyin</a><% } %>.</li><% } %>
+            <% if (suggestion && suggestion !== filters.category) { %><li><a href="<%= listUrl({ category: suggestion, search: '' }) %>"><%= suggestion %></a> kategorisindeki <%= counts[suggestion] || 0 %> açık talebe bakın.</li><% } %>
+            <% if (savedQuery) { %><li>Aramayı kaydederseniz uygun talep geldiğinde bildirim alırsınız.</li><% } %>
+          </ul>
           <% if (filters.search && (!currentUser || currentUser.role === 'customer')) { %>
+            <p class="empty-cta">Bu işi siz mi yaptıracaksınız? Talebinizi yazın, firmalar size teklif göndersin.</p>
             <a class="btn btn-primary" href="/requests/new?title=<%= encodeURIComponent(filters.search) %>&city=<%= encodeURIComponent(filters.city) %>">Bu İş İçin Talep Ver</a>
           <% } %>
           <a class="btn" href="/requests">Tüm Talepler</a>
         </div>
+        <% if (fallback.length) { %>
+          <h2 class="empty-more">Son eklenen talepler</h2>
+          <%- include('../partials/listing-table', { items: fallback }) %>
+        <% } %>
       <% } else if (filters.view === 'gallery') { %>
         <%- include('../partials/showcase-grid', { items: requests }) %>
       <% } else { %>

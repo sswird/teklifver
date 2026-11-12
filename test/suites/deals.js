@@ -294,7 +294,7 @@ async function newRequest(c, fields) {
   check('paylaşım görseli mutlak', /og:image" content="http/.test(home));
   check('sürümlü css', /\/css\/style\.css\?v=[a-f0-9]{10}/.test(home));
   const categoryPage = (await guest.get(`/requests?category=${encodeURIComponent('Temizlik')}&sort=views`)).text;
-  check('kategori canonical sadeleşir', categoryPage.includes('/requests?category=Temizlik"'));
+  check('kategori canonical sadeleşir', /<link rel="canonical" href="[^"?]*\/hizmet\/temizlik">/.test(categoryPage));
   check('firma json-ld', (await guest.get(`/companies/${firmId}`)).text.includes('"LocalBusiness"'));
 
   // Örnek verileri silme

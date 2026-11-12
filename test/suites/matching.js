@@ -92,7 +92,7 @@ const search = async term => get(null, `/requests?search=${encodeURIComponent(te
   check('talep önerisi eklere dayanır', (await (await fetch(`${BASE}/requests/suggest?q=${encodeURIComponent('boyacı')}`)).json()).items.length > 0);
 
   const none = (await search('xyzqwe')).text;
-  check('sonuç yoksa talep vermeye yönlendirir', none.includes('Bu aramada talep çıkmadı') && none.includes('/requests/new?title=xyzqwe'));
+  check('sonuç yoksa talep vermeye yönlendirir', none.includes('için açık talep bulunamadı') && none.includes('/requests/new?title=xyzqwe'));
   check('firmaya talep ver önerilmez', !(await get(izmir.cookie, '/requests?search=xyzqwe')).text.includes('Bu İş İçin Talep Ver'));
 
   const filtered = (await get(null, `/requests?search=boya&city=${encodeURIComponent('Ankara')}`)).text;
