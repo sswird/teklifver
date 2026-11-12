@@ -891,6 +891,21 @@ html[data-theme='dark'] .cat-icon { background: color-mix(in srgb, var(--c) 24%,
 .category-card-head { align-items: center; gap: 9px; }
 .category-card-head .cat-icon { width: 30px; height: 30px; }
 
+/* Fotoğrafsız talep: gri kutu yerine kamera simgesi ve kısa not */
+.no-photo.is-placeholder { flex-direction: column; gap: 3px; background: var(--head); color: var(--muted); font-size: 11.5px; line-height: 1.15; }
+.no-photo.is-placeholder::before { content: ""; width: 24px; height: 24px; background: currentColor; opacity: 0.75; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8'%3E%3Cpath d='M3 7h4l2-3h6l2 3h4v13H3z'/%3E%3Ccircle cx='12' cy='13' r='3.5'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8'%3E%3Cpath d='M3 7h4l2-3h6l2 3h4v13H3z'/%3E%3Ccircle cx='12' cy='13' r='3.5'/%3E%3C/svg%3E") center / contain no-repeat; }
+.showcase-photo .no-photo.is-placeholder { gap: 5px; font-size: 12.5px; }
+.showcase-photo .no-photo.is-placeholder::before { width: 34px; height: 34px; }
+
+/* Talep formu: ikonlu kategori kutuları */
+.cat-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 8px; margin-top: 2px; }
+.cat-pick { display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 7px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); color: var(--text); font: 600 14px/1.2 var(--font); text-align: left; cursor: pointer; }
+.cat-pick:hover { background: var(--head); border-color: var(--control-border); }
+.cat-pick[aria-pressed='true'] { background: var(--tag-bg); border-color: var(--accent-line); box-shadow: inset 0 0 0 1px var(--accent-line); }
+.cat-pick:focus-visible { outline: 2px solid var(--link); outline-offset: 1px; }
+.field.has-picker { position: relative; }
+.field.has-picker > .select { position: absolute; left: 0; top: 34px; width: 1px; height: 1px; min-height: 0; padding: 0; border: 0; opacity: 0; pointer-events: none; }
+
 /* Başlık: masaüstünde koyu iki kat; telefonda logo ile hesap düğmeleri aynı satırda */
 .topbar-bell .icon { display: none; }
 .menu-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -997,6 +1012,8 @@ html[data-theme='dark'] .cat-icon { background: color-mix(in srgb, var(--c) 24%,
   .panel-menu .side-list a.is-active { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
 
   .form-step .field-row.is-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cat-picker { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .cat-pick { gap: 7px; padding: 6px 8px; font-size: 13.5px; }
   .auth-side-photo { display: none; }
   .company-cover { height: 110px; }
   .company-cover + .company-head .company-mark { width: 60px; height: 60px; margin-top: -26px; font-size: 22px; }

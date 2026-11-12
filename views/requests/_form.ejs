@@ -3,6 +3,11 @@
 <legend class="form-step-head"><span class="form-step-no" aria-hidden="true">1</span>İşinizi anlatın</legend>
 <div class="field <%= errors.category ? 'has-error' : '' %>">
   <label class="field-label" for="category">Kategori</label>
+  <div class="cat-picker" role="group" aria-label="Kategori seçin" data-cat-picker hidden>
+    <% categories.forEach(category => { %>
+      <button class="cat-pick" type="button" data-value="<%= category.name %>" aria-pressed="<%= form.category === category.name %>"><%- include('../partials/cat-icon', { category }) %><span><%= category.name %></span></button>
+    <% }) %>
+  </div>
   <select class="select" id="category" name="category" data-guessed="<%= locals.guessedCategory || '' %>" required>
     <option value="" disabled <%= form.category ? '' : 'selected' %>>Seçiniz</option>
     <% categories.forEach(category => { %>

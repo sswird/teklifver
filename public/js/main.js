@@ -802,7 +802,8 @@
     };
     select.addEventListener('change', event => {
       showPrice();
-      if (event.isTrusted) {
+      // Kişi kendisi seçtiyse (listeden ya da kategori kutusundan) tahmin bir daha üstüne yazmaz.
+      if (event.isTrusted || event.detail === 'picker') {
         auto = '';
         note.hidden = true;
       }
@@ -828,6 +829,25 @@
       }
     });
     showPrice();
+  }
+
+  /* Talep formu: kategori ikonlu kutulardan seçilir; liste yedek olarak arkada kalır */
+  function initCategoryPicker() {
+    const picker = $('[data-cat-picker]');
+    const select = $('#category');
+    if (!picker || !select) return;
+    const tiles = $$('.cat-pick', picker);
+    const sync = () => tiles.forEach(tile => tile.setAttribute('aria-pressed', String(tile.dataset.value === select.value)));
+    tiles.forEach(tile => tile.addEventListener('click', () => {
+      select.value = tile.dataset.value;
+      select.dispatchEvent(new Event('input', { bubbles: true }));
+      select.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: 'picker' }));
+    }));
+    select.addEventListener('change', sync);
+    select.tabIndex = -1;
+    select.closest('.field').classList.add('has-picker');
+    picker.hidden = false;
+    sync();
   }
 
   /* Talep taslağı: yalnızca tercih çerezine onay verildiyse tarayıcıda saklanır */
@@ -983,6 +1003,7 @@
     initGallery();
     initPortfolio();
     initCategoryGuess();
+    initCategoryPicker();
     initCopyLink();
     initShareMenu();
     initThread();
