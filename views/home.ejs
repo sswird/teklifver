@@ -82,7 +82,7 @@
       <% if (vitrinCount) { %>
         <section class="box vitrin-box">
           <div class="box-head">Anasayfa Vitrini <a href="/requests?photos=on&sort=views">Tüm vitrin talepleri</a></div>
-          <%- include('partials/showcase-grid', { items: showcase.slice(0, vitrinCount) }) %>
+          <%- include('partials/showcase-grid', { items: showcase.slice(0, vitrinCount), shortPrice: true }) %>
         </section>
       <% } %>
 

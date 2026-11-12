@@ -1114,7 +1114,7 @@ h2 { font: 700 17px/1.3 var(--font); letter-spacing: 0; }
 .listing-table.is-classic .listing-title { font-size: 14.5px; }
 .listing-table.is-classic .listing-snippet { margin-top: 2px; color: var(--muted); font-size: 12.5px; -webkit-line-clamp: 1; }
 .listing-table.is-classic .listing-sub { display: flex; flex-wrap: wrap; gap: 0 6px; margin-top: 2px; font-size: 12.5px; }
-.listing-table.is-classic .listing-sub span + span::before { content: "·"; margin-right: 6px; }
+.listing-table.is-classic .listing-sub > span:not(:last-child)::after { content: "·"; margin-left: 6px; }
 .listing-table.is-classic .col-budget { width: 150px; white-space: nowrap; }
 .listing-table.is-classic .col-budget .price-tag { font-size: 14px; }
 .listing-table.is-classic .col-budget .price-tag.is-open { font-size: 12.5px; }
@@ -1155,11 +1155,22 @@ h2 { font: 700 17px/1.3 var(--font); letter-spacing: 0; }
   .place-line .map-link { margin-left: 6px; }
 }
 
+/* Vitrin: klasik pazar yeri gibi ince çizgili hücreler; dış kenardaki çizgiler kutu tarafından kırpılır */
+.vitrin-box { overflow: hidden; }
+.vitrin-box .showcase-grid { gap: 0; margin: 0 -1px -1px 0; padding: 0; }
+.vitrin-box .showcase-item { padding: 10px 10px 11px; border-right: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); }
+.vitrin-box .showcase-item:hover { background: var(--hover); }
+.vitrin-box .showcase-title { margin-top: 7px; }
+
+/* Talep formu: adım numarası başlıkla aynı satırda, "1." biçiminde */
+.form-step-head { gap: 6px; }
+.form-step-no { display: inline; }
+
 /* Fiyat: süslü etiket yerine kalın yazı */
 .price-tag, .listing-table.is-feed .price-tag { padding: 0; background: none; clip-path: none; color: var(--text); font: 700 15px/1.3 var(--font); }
 .price-tag::before { display: none; }
 .price-tag.is-open, .listing-table.is-feed .price-tag.is-open { color: var(--muted); font: 400 13px/1.3 var(--font); }
-.showcase-price { overflow: visible; white-space: normal; font: 700 13px/1.3 var(--font); }
+.showcase-price { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 700 13px/1.3 var(--font); }
 
 /* Kategori ikonları: küçük, zeminsiz, kendi renginde */
 .cat-icon, html[data-theme='dark'] .cat-icon { width: 18px; height: 18px; background: none; border: 0; border-radius: 0; }
@@ -1244,9 +1255,9 @@ h2 { font: 700 17px/1.3 var(--font); letter-spacing: 0; }
 .compare-table tbody tr:last-child th, .compare-table tbody tr:last-child td { border-bottom: 0; }
 .compare-empty p { max-width: 52ch; margin: 6px auto 14px; }
 
-/* Fiyat rehberi: teklif dağılımı. Renkler tek tonun iki adımı, iki temada ayrı ayrı denetlendi. */
-:root { --dist-mid: #7d5500; --dist-side: #a98b38; }
-html[data-theme='dark'] { --dist-mid: #bb8800; --dist-side: #8a5c00; }
+/* Fiyat rehberi: teklif dağılımı. Sitenin mavisinin iki tonu; açık ve koyu temada renk denetiminden geçti. */
+:root { --dist-mid: #0f4fa0; --dist-side: #5a8bd0; }
+html[data-theme='dark'] { --dist-mid: #5794e2; --dist-side: #3466ab; }
 .dist-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 12px; }
 .dist-card { margin: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); }
 .dist-head { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; font-weight: 700; }
@@ -1269,6 +1280,10 @@ html[data-theme='dark'] { --dist-mid: #bb8800; --dist-side: #8a5c00; }
   .composer .composer-title { font-size: 16px; }
   .urgent-list { grid-template-columns: minmax(0, 1fr); }
   .urgent-list li:nth-child(odd) { border-right: 0; }
+  .urgent-list li:nth-child(n + 5) { display: none; }
+  /* Fiyat panosu şeridi: her kartta ad, aralık ve teklif sayısı alt alta */
+  .price-board-feed .price-board-rows li { grid-template-columns: minmax(0, 1fr); border-left-color: var(--line-soft); }
+  .price-board-feed .price-board-count { grid-column: 1; grid-row: auto; align-self: start; }
   .compare-bar { bottom: 64px; margin-inline: 8px; }
   .compare-bar-hint { display: block; margin-left: 0; }
   .compare-table thead th:first-child, .compare-table tbody th { width: 110px; }

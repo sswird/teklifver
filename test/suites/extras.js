@@ -175,6 +175,7 @@ const idOf = path => path.split('/').pop();
   const cityDetailPath = (cityList.match(/class="listing-title" href="(\/requests\/[a-f0-9]{24})"/) || [])[1];
   const cityDetail = cityDetailPath ? (await get(null, cityDetailPath)).text : "";
   check("talep sayfasında haritada göster bağlantısı", /href="https:\/\/www\.google\.com\/maps\/search\/\?api=1&(amp;)?query=[^"]+"/.test(cityDetail) && cityDetail.includes(encodeURIComponent("İstanbul")));
+  check("vitrinde kısa tutar, tam tutar ipucunda", /class="showcase-price" title="[^"]*\d TL">[^<]*bin TL</.test(home));
   check("kategori sayfası büyük fotoğraf kullanmaz", !(await get(null, "/hizmet/temizlik")).text.includes("landing-photo"));
   check("yeni firma rozeti üyelik tarihinden gelir", /class="firm-badge firm-badge-newcomer"/.test(firmPage) && !/firm-badge-favorite/.test(firmPage));
   const guide = (await get(null, "/companies")).text;

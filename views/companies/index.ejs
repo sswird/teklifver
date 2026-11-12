@@ -87,10 +87,10 @@
                   <a class="listing-title" href="/companies/<%= company._id %>"><%= name %></a>
                   <% if (company.verified) { %><%- include('../partials/verified') %><% } %>
                   <div class="firm-badges"><%- include('../partials/firm-badges', { badges: badgeMap.get(String(company._id)) }) %></div>
-                  <label class="compare-pick"><input type="checkbox" data-compare value="<%= company._id %>"> Karşılaştır</label>
                   <% if (company.specialties && company.specialties.length) { %>
                     <div class="tag-line"><%= company.specialties.join(', ') %></div>
                   <% } %>
+                  <label class="compare-pick"><input type="checkbox" data-compare value="<%= company._id %>"> Karşılaştır</label>
                 </td>
                 <td class="col-date nowrap">
                   <% if (company.ratingCount > 0) { %>
