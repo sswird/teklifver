@@ -928,6 +928,22 @@ html[data-theme='dark'] .cat-icon { background: color-mix(in srgb, var(--c) 24%,
 .cat-link { display: inline-flex; align-items: center; gap: 7px; }
 .cat-link .cat-icon { border-radius: 5px; }
 
+/* ==========================================================================
+   Marka imzası: TeklifVer bir fiyat etiketidir ve bir iş yeridir.
+   Sarı-siyah iş şeridi sayfanın başında ve sonunda, etiket motifi logoda ve
+   fiyatlarda, 404 sayfasında; bölüm başlıklarında sarı işaret.
+   ========================================================================== */
+.site-head::before { content: ""; display: block; height: 5px; background: repeating-linear-gradient(-45deg, var(--accent) 0 10px, var(--topbar) 10px 20px); }
+.box-head { box-shadow: inset 4px 0 0 var(--accent); }
+.squiggle { display: inline-block; padding-bottom: 7px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 10' preserveAspectRatio='none'%3E%3Cpath d='M2 6 Q 12 1 22 6 T 42 6 T 62 6 T 82 6 T 102 6 T 118 5' fill='none' stroke='%231c1e21' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E") left bottom / 100% 10px no-repeat; }
+
+/* Hata sayfası: kod, iple asılı dev bir fiyat etiketinde */
+.error-page { padding-top: 70px; }
+.error-tag { position: relative; display: inline-block; margin-bottom: 26px; transform: rotate(-6deg); transform-origin: 30px 50%; }
+.error-tag::before { content: ""; position: absolute; left: 22px; bottom: 50%; width: 2px; height: 64px; background: var(--muted); transform: rotate(-38deg); transform-origin: bottom center; }
+.error-tag span { position: relative; display: block; padding: 6px 30px 10px 54px; background: var(--accent); color: var(--accent-ink); clip-path: polygon(30px 0, 100% 0, 100% 100%, 30px 100%, 0 50%); font: 700 76px/1 var(--font-head); letter-spacing: 0.02em; }
+.error-tag span::before { content: ""; position: absolute; left: 22px; top: 50%; width: 14px; height: 14px; margin-top: -7px; background: var(--surface); border-radius: 50%; }
+
 /* Başlık: masaüstünde koyu iki kat; telefonda logo ile hesap düğmeleri aynı satırda */
 .topbar-bell .icon { display: none; }
 .menu-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -988,7 +1004,7 @@ html[data-theme='dark'] .cat-icon { background: color-mix(in srgb, var(--c) 24%,
 
 @media (max-width: 760px) {
   .site-head { position: relative; background: var(--mainbar); }
-  .topbar { position: absolute; top: 0; right: 0; z-index: 41; background: none; }
+  .topbar { position: absolute; top: 5px; right: 0; z-index: 41; background: none; }
   .topbar-inner { width: auto; max-width: none; min-height: 56px; padding-block: 0; gap: 4px; }
   .theme-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
   .theme-toggle { justify-content: center; width: 36px; height: 36px; margin-right: 0; padding: 0; border-radius: 50%; color: var(--on-dark); }
@@ -1056,6 +1072,12 @@ html[data-theme='dark'] .cat-icon { background: color-mix(in srgb, var(--c) 24%,
 
 @media screen and (prefers-reduced-motion: no-preference) {
   .logo:hover .logo-tag { animation: tag-swing 0.8s ease-out; }
+  @media (hover: hover) and (min-width: 761px) {
+    .price-tag { transform-origin: 9px 50%; }
+    .listing-table tbody tr:hover .price-tag:not(.is-open) { animation: tag-swing 0.8s ease-out; }
+    .error-tag span { transform-origin: 22px 50%; }
+    .error-tag:hover span { animation: tag-swing 0.8s ease-out; }
+  }
   :root { --ease: cubic-bezier(0.2, 0.8, 0.2, 1); }
 
   .btn, .social-btn, .searchbar button, .tab, .quick-reply, .tag-cloud a { transition: transform 0.08s var(--ease); }
