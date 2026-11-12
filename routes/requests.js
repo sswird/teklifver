@@ -115,14 +115,26 @@ router.get('/', async (req, res, next) => {
     const filter = buildConditions(filters);
 
     // Arama ya da filtre varken soldaki kategori sayıları o aramaya göre (kategori seçimi hariç) sayılır.
-    const filtered = ['search', 'city', 'budgetMin', 'budgetMax', 'period', 'photos', 'noBids', 'urgent'].some(key => filters[key]);
-    const [total, counts, menuRows] = await Promise.all([
+    const filtered = ['search', 'city', 'district', 'budgetMin', 'budgetMax', 'period', 'photos', 'noBids', 'urgent'].some(key => filters[key]);
+    const [total, counts, menuRows, districtRows] = await Promise.all([
       Request.countDocuments(filter),
       openCountsByCategory(),
       filtered
         ? Request.aggregate([{ $match: buildConditions({ ...filters, category: 'all' }) }, { $group: { _id: '$category', total: { $sum: 1 } } }])
-        : null
+        : null,
+      Request.aggregate([
+        { $match: { ...liveFilter(), city: { $nin: [null, ''] }, location: { $nin: [null, ''] } } },
+        { $group: { _id: { city: '$city', location: '$location' } } }
+      ])
     ]);
+    // İl -> ilçeler; aynı ilçe farklı yazılmışsa (kadıköy/Kadıköy) bir kez görünür.
+    const districtsByCity = {};
+    for (const { _id: row } of districtRows) {
+      const list = (districtsByCity[row.city] ||= []);
+      const name = row.location.trim();
+      if (!list.some(item => item.toLocaleLowerCase('tr-TR') === name.toLocaleLowerCase('tr-TR'))) list.push(name);
+    }
+    Object.values(districtsByCity).forEach(list => list.sort((a, b) => a.localeCompare(b, 'tr')));
     const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1);
     const page = Math.min(requestedPage, totalPages);
 
@@ -148,6 +160,7 @@ router.get('/', async (req, res, next) => {
       savedQuery: filtersToQuery(filters),
       counts,
       menuCounts: menuRows ? Object.fromEntries(menuRows.map(row => [row._id, row.total])) : null,
+      districtsByCity,
       suggestion,
       fallback,
       total,

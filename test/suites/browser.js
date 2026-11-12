@@ -225,6 +225,11 @@ const logout = async page => page.clickAndWait('form[action="/logout"] button');
     check('hareketi azalt açıksa geçiş yok', (await style('.btn', 'transitionDuration')) === '0s');
     await page.send('Emulation.setEmulatedMedia', { features: [] });
 
+    // Detaylı aramada il seçilince ilçeler gelir
+    await page.goto('/requests');
+    await page.fill('#filterCity', 'İstanbul');
+    check('il seçince ilçeler gelir', await page.evaluate(`!document.querySelector('[data-district-group]').hidden && document.getElementById('filterDistrict').options.length > 1`));
+
     // Hiçbir ekran genişliğinde sayfa yana taşmaz
     for (const width of [1280, 1190, 1100, 1020, 900, 800, 761, 760, 600, 412, 360]) {
       await page.send('Emulation.setDeviceMetricsOverride', { width, height: 800, deviceScaleFactor: 1, mobile: false });

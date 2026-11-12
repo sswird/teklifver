@@ -67,6 +67,7 @@
       search: (query.get('search') || '').trim(),
       category: data.categories.some(item => item.name === category) ? category : 'all',
       city: query.get('city') || '',
+      district: (query.get('district') || '').trim(),
       budgetMin: positive(query.get('budgetMin')),
       budgetMax: positive(query.get('budgetMax')),
       period: ['1', '7', '30'].includes(period) ? period : '',
@@ -82,6 +83,7 @@
   function matchesRequest(item, filters, builtAt) {
     if (filters.category !== 'all' && item.category !== filters.category) return false;
     if (filters.city && item.city !== filters.city) return false;
+    if (filters.district && fold(item.location) !== fold(filters.district)) return false;
     if (filters.budgetMin && item.max < filters.budgetMin && item.min < filters.budgetMin) return false;
     if (filters.budgetMax && item.min > filters.budgetMax) return false;
     if (filters.period && item.created < builtAt - Number(filters.period) * DAY_MS) return false;
@@ -101,6 +103,7 @@
     if (state.search) params.set('search', state.search);
     if (state.category !== 'all') params.set('category', state.category);
     if (state.city) params.set('city', state.city);
+    if (state.district) params.set('district', state.district);
     if (state.budgetMin) params.set('budgetMin', state.budgetMin);
     if (state.budgetMax) params.set('budgetMax', state.budgetMax);
     if (state.period) params.set('period', state.period);
@@ -127,7 +130,7 @@
     return nav;
   }
 
-  const hasActiveFilters = filters => Boolean(filters.search || filters.city || filters.budgetMin || filters.budgetMax ||
+  const hasActiveFilters = filters => Boolean(filters.search || filters.city || filters.district || filters.budgetMin || filters.budgetMax ||
     filters.period || filters.photos || filters.noBids || filters.urgent);
 
   // Sunucudaki categories.guess ile aynı kural: en uzun eşleşen anahtar kelime kazanır.
@@ -191,6 +194,16 @@
       setHidden(form, 'view', filters.view === 'list' ? '' : filters.view);
       form.elements.search.value = filters.search;
       form.elements.city.value = filters.city;
+      const districtSelect = form.elements.district;
+      if (districtSelect) {
+        let map = {};
+        try { map = JSON.parse(districtSelect.dataset.districts || '{}'); } catch { /* bozuk veri yok sayılır */ }
+        const names = map[filters.city] || [];
+        districtSelect.replaceChildren(new Option('Tümü', ''), ...names.map(name => new Option(name, name)));
+        districtSelect.value = names.find(name => fold(name) === fold(filters.district)) || '';
+        const group = districtSelect.closest('[data-district-group]');
+        if (group) group.hidden = names.length === 0;
+      }
       form.elements.budgetMin.value = filters.budgetMin || '';
       form.elements.budgetMax.value = filters.budgetMax || '';
       form.elements.period.value = filters.period;
@@ -199,7 +212,7 @@
       if (form.elements.urgent) form.elements.urgent.checked = filters.urgent;
 
       const hasFilters = filters.search || filters.category !== 'all' || filters.city || filters.budgetMin ||
-        filters.budgetMax || filters.period || filters.photos || filters.noBids || filters.urgent;
+        filters.budgetMax || filters.period || filters.photos || filters.noBids || filters.urgent || filters.district;
       if (hasFilters) {
         const clear = element('a', { className: 'small', href: `${BASE}/requests/`, textContent: 'Filtreleri temizle' });
         const holder = element('div', {}, [clear]);
@@ -214,6 +227,7 @@
       setHidden(sortForm, 'search', filters.search);
       setHidden(sortForm, 'category', filters.category === 'all' ? '' : filters.category);
       setHidden(sortForm, 'city', filters.city);
+      setHidden(sortForm, 'district', filters.district);
       setHidden(sortForm, 'budgetMin', filters.budgetMin || '');
       setHidden(sortForm, 'budgetMax', filters.budgetMax || '');
       setHidden(sortForm, 'period', filters.period);
@@ -236,7 +250,8 @@
     const money = value => `${Number(value).toLocaleString('tr-TR')} TL`;
     if (filters.search) chips.push([`"${filters.search}"`, { search: '' }]);
     if (filters.category !== 'all') chips.push([filters.category, { category: 'all' }]);
-    if (filters.city) chips.push([filters.city, { city: '' }]);
+    if (filters.city) chips.push([filters.city, { city: '', district: '' }]);
+    if (filters.district) chips.push([filters.district, { district: '' }]);
     if (filters.budgetMin) chips.push([`En az ${money(filters.budgetMin)}`, { budgetMin: 0 }]);
     if (filters.budgetMax) chips.push([`En çok ${money(filters.budgetMax)}`, { budgetMax: 0 }]);
     if (filters.period) chips.push([filters.period === '1' ? 'Son 24 saat' : `Son ${filters.period} gün`, { period: '' }]);
@@ -255,8 +270,26 @@
   function renderFilterButton(filters) {
     const button = $('[data-open-filters]');
     if (!button || !button.lastChild) return;
-    const active = [filters.search, filters.city, filters.budgetMin, filters.budgetMax, filters.period, filters.photos, filters.noBids, filters.urgent].filter(Boolean).length;
+    const active = [filters.search, filters.city, filters.district, filters.budgetMin, filters.budgetMax, filters.period, filters.photos, filters.noBids, filters.urgent].filter(Boolean).length;
     button.lastChild.textContent = ' Filtrele' + (active ? ` (${active})` : '');
+  }
+
+  function renderSortHeads(filters) {
+    const next = { budget: filters.sort === 'budget_high' ? 'budget_low' : 'budget_high', bids: 'bids', date: filters.sort === 'newest' ? 'oldest' : 'newest' };
+    const dir = {
+      budget: filters.sort === 'budget_high' ? 'descending' : filters.sort === 'budget_low' ? 'ascending' : '',
+      bids: filters.sort === 'bids' ? 'descending' : '',
+      date: filters.sort === 'newest' ? 'descending' : filters.sort === 'oldest' ? 'ascending' : ''
+    };
+    $$('[data-sort-head]').forEach(link => {
+      const key = link.dataset.sortHead;
+      link.href = requestUrl(filters, { sort: next[key] });
+      link.classList.toggle('is-descending', dir[key] === 'descending');
+      link.classList.toggle('is-ascending', dir[key] === 'ascending');
+      const th = link.closest('th');
+      if (dir[key]) th.setAttribute('aria-sort', dir[key]);
+      else th.removeAttribute('aria-sort');
+    });
   }
 
   function renderQuickFilters(filters) {
@@ -342,6 +375,7 @@
     renderChips(filters);
     renderQuickFilters(filters);
     renderFilterButton(filters);
+    renderSortHeads(filters);
 
     if (filters.category !== 'all') {
       document.title = `${filters.category} - TeklifVer`;

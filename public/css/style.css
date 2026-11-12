@@ -1179,6 +1179,14 @@ h2 { font: 700 17px/1.3 var(--font); letter-spacing: 0; }
 .empty-cta { margin: 14px 0 0; color: var(--text-soft); }
 .empty-more { margin: 0; padding: 10px 12px; border-top: 1px solid var(--line); background: var(--head); font-size: 14px; }
 
+/* Sıralanabilir sütun başlıkları: soluk çift ok, seçili olanda yön */
+.sort-head { color: inherit; white-space: nowrap; }
+.sort-head:hover { color: var(--text); text-decoration: underline; }
+.sort-head::after { content: "↕"; margin-left: 3px; opacity: 0.45; font-size: 11px; }
+.sort-head.is-descending, .sort-head.is-ascending { color: var(--text); }
+.sort-head.is-descending::after { content: "▼"; opacity: 1; font-size: 9px; }
+.sort-head.is-ascending::after { content: "▲"; opacity: 1; font-size: 9px; }
+
 /* Fiyat: süslü etiket yerine kalın yazı */
 .price-tag, .listing-table.is-feed .price-tag { padding: 0; background: none; clip-path: none; color: var(--text); font: 700 15px/1.3 var(--font); }
 .price-tag::before { display: none; }

@@ -11,6 +11,7 @@
     <a href="/requests">Talepler</a> &rsaquo;
     <a href="<%= categoryUrl(request.category) %>"><%= request.category %></a>
     <% if (request.city) { %>&rsaquo; <a href="<%= categoryCityUrl(request.category, request.city) %>"><%= request.city %></a><% } %>
+    <% if (request.city && request.location) { %>&rsaquo; <a href="/requests?<%= new URLSearchParams({ category: request.category, city: request.city, district: request.location }).toString() %>"><%= request.location %></a><% } %>
   </div>
 
   <% if (isOwner && ['open', 'in_progress', 'completed'].includes(request.status)) {

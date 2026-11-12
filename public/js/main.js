@@ -878,6 +878,21 @@
     update();
   }
 
+  /* Detaylı arama: il seçilince o ildeki ilçeler gelir */
+  function initDistrictSelect() {
+    const city = $('#filterCity');
+    const district = $('#filterDistrict');
+    if (!city || !district) return;
+    let map = {};
+    try { map = JSON.parse(district.dataset.districts || '{}'); } catch { /* bozuk veri yok sayılır */ }
+    const group = district.closest('[data-district-group]');
+    city.addEventListener('change', () => {
+      const names = map[city.value] || [];
+      district.replaceChildren(new Option('Tümü', ''), ...names.map(name => new Option(name, name)));
+      if (group) group.hidden = names.length === 0;
+    });
+  }
+
   /* Telefonda "Filtrele": kapalı Detaylı Arama kutusunu açar ve oraya götürür */
   function initFilterButton() {
     const button = $('[data-open-filters]');
@@ -1048,6 +1063,7 @@
     initCategoryPicker();
     initCompare();
     initFilterButton();
+    initDistrictSelect();
     initCopyLink();
     initShareMenu();
     initThread();

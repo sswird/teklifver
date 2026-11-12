@@ -8,6 +8,7 @@
     if (state.search) params.set('search', state.search);
     if (state.category !== 'all') params.set('category', state.category);
     if (state.city) params.set('city', state.city);
+    if (state.district) params.set('district', state.district);
     if (state.budgetMin) params.set('budgetMin', state.budgetMin);
     if (state.budgetMax) params.set('budgetMax', state.budgetMax);
     if (state.period) params.set('period', state.period);
@@ -20,7 +21,7 @@
     const query = params.toString();
     return '/requests' + (query ? '?' + query : '');
   };
-  const hasFilters = filters.search || filters.category !== 'all' || filters.city || filters.budgetMin ||
+  const hasFilters = filters.search || filters.category !== 'all' || filters.city || filters.district || filters.budgetMin ||
     filters.budgetMax || filters.period || filters.photos || filters.noBids || filters.urgent;
 
   const pageNumbers = [];
@@ -60,6 +61,16 @@
               <% }) %>
             </select>
           </div>
+          <% const cityDistricts = districtsByCity[filters.city] || []; %>
+          <div class="filter-group" data-district-group <%= cityDistricts.length ? '' : 'hidden' %>>
+            <label class="filter-title" for="filterDistrict">İlçe</label>
+            <select class="select" id="filterDistrict" name="district" data-districts="<%= JSON.stringify(districtsByCity) %>">
+              <option value="">Tümü</option>
+              <% cityDistricts.forEach(name => { %>
+                <option value="<%= name %>" <%= filters.district && filters.district.toLocaleLowerCase('tr-TR') === name.toLocaleLowerCase('tr-TR') ? 'selected' : '' %>><%= name %></option>
+              <% }) %>
+            </select>
+          </div>
           <div class="filter-group">
             <span class="filter-title">Bütçe (TL)</span>
             <div class="filter-pair">
@@ -91,14 +102,14 @@
 
     <section class="box">
       <div class="result-bar">
-        <% const activeFilters = [filters.search, filters.city, filters.budgetMin, filters.budgetMax, filters.period, filters.photos, filters.noBids, filters.urgent].filter(Boolean).length; %>
+        <% const activeFilters = [filters.search, filters.city, filters.district, filters.budgetMin, filters.budgetMax, filters.period, filters.photos, filters.noBids, filters.urgent].filter(Boolean).length; %>
         <a class="btn btn-sm mobile-filter" href="#detayli-arama" data-open-filters><%- icon('list', { size: 13 }) %> Filtrele<%= activeFilters ? ` (${activeFilters})` : '' %></a>
         <span class="result-count">
           <% if (filters.search) { %>&quot;<%= filters.search %>&quot; aramanızda <% } %>
           <strong><%= total %></strong> talep bulundu
         </span>
         <form action="/requests" method="GET">
-          <% Object.entries({ search: filters.search, category: filters.category === 'all' ? '' : filters.category, city: filters.city, budgetMin: filters.budgetMin || '', budgetMax: filters.budgetMax || '', period: filters.period, photos: filters.photos ? 'on' : '', noBids: filters.noBids ? 'on' : '', urgent: filters.urgent ? 'on' : '', view: filters.view === 'list' ? '' : filters.view }).forEach(([key, value]) => { if (value) { %>
+          <% Object.entries({ search: filters.search, category: filters.category === 'all' ? '' : filters.category, city: filters.city, district: filters.district, budgetMin: filters.budgetMin || '', budgetMax: filters.budgetMax || '', period: filters.period, photos: filters.photos ? 'on' : '', noBids: filters.noBids ? 'on' : '', urgent: filters.urgent ? 'on' : '', view: filters.view === 'list' ? '' : filters.view }).forEach(([key, value]) => { if (value) { %>
             <input type="hidden" name="<%= key %>" value="<%= value %>">
           <% } }) %>
           <select class="select" name="sort" aria-label="Sırala" data-autosubmit>
@@ -147,7 +158,8 @@
         const chips = [];
         if (filters.search) chips.push([`"${filters.search}"`, listUrl({ search: '' })]);
         if (filters.category !== 'all') chips.push([filters.category, listUrl({ category: 'all' })]);
-        if (filters.city) chips.push([filters.city, listUrl({ city: '' })]);
+        if (filters.city) chips.push([filters.city, listUrl({ city: '', district: '' })]);
+        if (filters.district) chips.push([filters.district, listUrl({ district: '' })]);
         if (filters.budgetMin) chips.push([`En az ${money(filters.budgetMin)}`, listUrl({ budgetMin: 0 })]);
         if (filters.budgetMax) chips.push([`En çok ${money(filters.budgetMax)}`, listUrl({ budgetMax: 0 })]);
         if (filters.period) chips.push([filters.period === '1' ? 'Son 24 saat' : `Son ${filters.period} gün`, listUrl({ period: '' })]);
@@ -183,7 +195,15 @@
       <% } else if (filters.view === 'gallery') { %>
         <%- include('../partials/showcase-grid', { items: requests }) %>
       <% } else { %>
-        <%- include('../partials/listing-table', { items: requests, adEvery: 8 }) %>
+        <%
+          // Sütun başlığına tıklayınca sıralama; aynı başlığa yeniden tıklamak yönü çevirir.
+          const sortHeads = {
+            budget: { href: listUrl({ sort: filters.sort === 'budget_high' ? 'budget_low' : 'budget_high' }), dir: filters.sort === 'budget_high' ? 'descending' : filters.sort === 'budget_low' ? 'ascending' : '' },
+            bids: { href: listUrl({ sort: 'bids' }), dir: filters.sort === 'bids' ? 'descending' : '' },
+            date: { href: listUrl({ sort: filters.sort === 'newest' ? 'oldest' : 'newest' }), dir: filters.sort === 'newest' ? 'descending' : filters.sort === 'oldest' ? 'ascending' : '' }
+          };
+        %>
+        <%- include('../partials/listing-table', { items: requests, adEvery: 8, sortHeads }) %>
       <% } %>
 
       <% if (totalPages > 1) { %>

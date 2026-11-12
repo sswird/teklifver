@@ -11,10 +11,11 @@
     <tr>
       <th class="col-photo"><span class="visually-hidden">Fotoğraf</span></th>
       <th>Talep Başlığı</th>
-      <th class="col-budget">Bütçe</th>
-      <th class="col-bids">Teklif</th>
+      <% const heads = locals.sortHeads || null; %>
+      <th class="col-budget"<% if (heads && heads.budget.dir) { %> aria-sort="<%= heads.budget.dir %>"<% } %>><% if (heads) { %><a class="sort-head <%= heads.budget.dir ? 'is-' + heads.budget.dir : '' %>" href="<%= heads.budget.href %>" data-sort-head="budget">Bütçe</a><% } else { %>Bütçe<% } %></th>
+      <th class="col-bids"<% if (heads && heads.bids.dir) { %> aria-sort="<%= heads.bids.dir %>"<% } %>><% if (heads) { %><a class="sort-head <%= heads.bids.dir ? 'is-' + heads.bids.dir : '' %>" href="<%= heads.bids.href %>" data-sort-head="bids">Teklif</a><% } else { %>Teklif<% } %></th>
       <% if (!compact) { %>
-        <th class="col-date">Tarih</th>
+        <th class="col-date"<% if (heads && heads.date.dir) { %> aria-sort="<%= heads.date.dir %>"<% } %>><% if (heads) { %><a class="sort-head <%= heads.date.dir ? 'is-' + heads.date.dir : '' %>" href="<%= heads.date.href %>" data-sort-head="date">Tarih</a><% } else { %>Tarih<% } %></th>
         <th class="col-place">İl / İlçe</th>
       <% } %>
       <th class="col-fav"><span class="visually-hidden">Favori</span></th>
