@@ -223,7 +223,7 @@
           <%- include('../partials/listing-table', { items: fallback }) %>
         <% } %>
       <% } else if (filters.view === 'gallery') { %>
-        <%- include('../partials/showcase-grid', { items: requests }) %>
+        <%- include('../partials/showcase-grid', { items: requests, showMeta: true }) %>
       <% } else { %>
         <%
           // Sütun başlığına tıklayınca sıralama; aynı başlığa yeniden tıklamak yönü çevirir.

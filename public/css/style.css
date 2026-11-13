@@ -1305,6 +1305,17 @@ h2 { font: 700 17px/1.3 var(--font); letter-spacing: 0; }
 /* Arama: yazım önerisi */
 .spell-fix { margin: -4px 0 10px; font-size: 15px; }
 
+/* Talep sahibine uygun firmalar */
+.firm-invites { margin: 6px 0 0; padding: 0; list-style: none; font-size: 13px; }
+.firm-invites li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 8px; padding: 6px 0; }
+.firm-invites li + li { border-top: 1px solid var(--line-soft); }
+.firm-invites li > a, .firm-invites li > .small { grid-column: 1; }
+.firm-invites li > form, .firm-invites li > .invite-done { grid-column: 2; grid-row: 1 / span 2; }
+.invite-done { color: var(--green); font-size: 12px; font-weight: 600; }
+
+/* Galeri kartı: yer ve teklif sayısı */
+.showcase-meta { margin-top: 1px; overflow: hidden; color: var(--muted); font-size: 12.5px; white-space: nowrap; text-overflow: ellipsis; }
+
 /* Fiyat: süslü etiket yerine kalın yazı */
 .price-tag, .listing-table.is-feed .price-tag { padding: 0; background: none; clip-path: none; color: var(--text); font: 700 15px/1.3 var(--font); }
 .price-tag::before { display: none; }

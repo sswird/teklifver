@@ -586,7 +586,7 @@ router.get('/:id', async (req, res, next) => {
       return { _id: bid._id, status: bid.status, createdAt: bid.createdAt, company, hidden: true };
     });
 
-    const [similarAll, ownerOpenCount, averages, review, alreadyReported, lastBid, bidder, newerRequest, olderRequest, ownerOthers, favoriteCount, board] = await Promise.all([
+    const [similarAll, ownerOpenCount, averages, review, alreadyReported, lastBid, bidder, newerRequest, olderRequest, ownerOthers, favoriteCount, board, suitableFirms] = await Promise.all([
       Request.find({ ...liveFilter(), category: request.category, _id: { $ne: request._id } })
         .sort({ createdAt: -1 })
         .limit(20)
@@ -607,7 +607,15 @@ router.get('/:id', async (req, res, next) => {
       Request.find({ ...liveFilter(), customer: request.customer._id, _id: { $ne: request._id } }).sort({ createdAt: -1 }).limit(3).select('title budget').lean(),
       // Kaç kişi favorilerine ekledi: firmalar için ilgi göstergesi
       User.countDocuments({ favorites: request._id }),
-      priceBoard()
+      priceBoard(),
+      // Talep sahibine davet için: bu kategoride çalışan, ile hizmet veren, henüz teklif vermemiş firmalar (puana göre)
+      isOwner && request.status === 'open' && !isExpired(request)
+        ? User.find({ role: 'company', suspended: { $ne: true }, categories: request.category, ...firmsServing(request.city), _id: { $nin: allBids.map(bid => bid.company._id) } })
+          .select('name companyName rating ratingCount address')
+          .sort({ rating: -1, ratingCount: -1 })
+          .limit(4)
+          .lean()
+        : []
     ]);
     // Talep fiyat panosundaki bir işe uyuyorsa (boya badana gibi) o işte tekliflerin çoğunun düştüğü aralık
     const jobPrice = board.find(row => row.category === request.category && matchesText(row.search, [request.title])) || null;
@@ -653,6 +661,8 @@ router.get('/:id', async (req, res, next) => {
       ownerOthers,
       favoriteCount,
       jobPrice,
+      suitableFirms,
+      invitedIds: (request.invitedCompanies || []).map(String),
       newerRequest,
       olderRequest,
       canSeeBids,
@@ -763,7 +773,7 @@ router.put('/:id', isCustomer, uploadImages, async (req, res, next) => {
 // Firmayı açık talebe teklif vermeye davet et
 router.post('/:id/invite/:companyId', isCustomer, requireVerifiedEmail, limits.invite, async (req, res, next) => {
   const companyId = str(req.params.companyId);
-  const back = mongoose.isValidObjectId(companyId) ? `/companies/${companyId}` : '/companies';
+  const back = safeNext(req.body.next) || (mongoose.isValidObjectId(companyId) ? `/companies/${companyId}` : '/companies');
   try {
     const request = await loadOwnOpenRequest(req, res);
     if (!request) return;

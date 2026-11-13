@@ -189,6 +189,30 @@
             </form>
           </div>
         </div>
+        <% if (suitableFirms.length) { %>
+          <div class="side-card" id="uygun-firmalar">
+            <div class="side-card-head">Uygun Firmalar</div>
+            <div class="side-card-body">
+              <p class="small muted">Bu işte çalışan firmalar. Davet ederseniz talebinizden haberleri olur.</p>
+              <ul class="firm-invites">
+                <% suitableFirms.forEach(firm => { %>
+                  <li>
+                    <a href="/companies/<%= firm._id %>"><%= firm.companyName || firm.name %></a>
+                    <span class="small muted"><% if (firm.ratingCount > 0) { %><%- icon('star', { size: 11, class: 'star' }) %> <%= ratingLabel(firm.rating) %> (<%= firm.ratingCount %>)<% } else { %>Yeni firma<% } %><% if (firm.address) { %> · <%= firm.address %><% } %></span>
+                    <% if (invitedIds.includes(String(firm._id))) { %>
+                      <span class="invite-done">Davet edildi</span>
+                    <% } else { %>
+                      <form action="/requests/<%= request._id %>/invite/<%= firm._id %>" method="POST">
+                        <input type="hidden" name="next" value="/requests/<%= request._id %>#uygun-firmalar">
+                        <button class="btn btn-sm" type="submit">Davet Et</button>
+                      </form>
+                    <% } %>
+                  </li>
+                <% }) %>
+              </ul>
+            </div>
+          </div>
+        <% } %>
       <% } else if (isOwner && request.status === 'in_progress') { %>
         <div class="side-card">
           <div class="side-card-head">İşi Tamamla</div>

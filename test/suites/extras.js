@@ -295,6 +295,16 @@ const idOf = path => path.split('/').pop();
   check("alt bilgide çok arananlar", (await get(null, '/')).text.includes('<strong>Çok arananlar:</strong>'));
   check("müşteri panelinde görüntülenme", /\d+ görüntülenme<\/div>/.test((await get(owner, '/dashboard')).text));
 
+  // Talep sahibine uygun firmalar ve tek tıkla davet, galeride yer ve teklif sayısı
+  const ownerView = (await get(owner, fresh)).text;
+  const inviteAction = (ownerView.match(/action="(\/requests\/[a-f0-9]{24}\/invite\/[a-f0-9]{24})"/) || [])[1];
+  check("talep sahibine uygun firmalar", ownerView.includes('id="uygun-firmalar"') && Boolean(inviteAction));
+  const invite = inviteAction ? await post(owner, inviteAction, { next: `${fresh}#uygun-firmalar` }) : { status: 0 };
+  check("davetten sonra talebe dönülür", invite.status === 302 && invite.location === `${fresh}#uygun-firmalar`, String(invite.location));
+  check("davet edilen firma işaretli", (await get(owner, fresh)).text.includes('<span class="invite-done">Davet edildi</span>'));
+  check("ziyaretçi uygun firmaları görmez", !(await get(null, fresh)).text.includes('uygun-firmalar'));
+  check("galeride yer ve teklif sayısı", /class="showcase-meta">[^<]*\d+ teklif<\/div>/.test((await get(null, '/requests?view=gallery')).text));
+
   console.log(`${passed} geçti, ${failures} hata`);
   process.exit(failures ? 1 : 0);
 })().catch(err => {

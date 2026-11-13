@@ -12,6 +12,7 @@
       <div class="showcase-title"><%= item.title %></div>
       <%# Ana sayfa vitrininin dar hücrelerinde kısa tutar ("90-160 bin TL"), tam tutar ipucunda; başka yerlerde tam tutar ve "TL" tutardan ayrılmaz %>
       <div class="showcase-price" title="<%= budgetLabel(item.budget) %>"><%= locals.shortPrice ? shortBudget(item.budget) : budgetLabel(item.budget).replace(/ TL$/, '\u00a0TL') %></div>
+      <% if (locals.showMeta) { const place = [item.city, item.location].filter(Boolean).join(' / '); %><div class="showcase-meta"><%= place ? place + ' · ' : '' %><%= item.bidCount || 0 %> teklif</div><% } %>
     </a>
   <% }) %>
 </div>
