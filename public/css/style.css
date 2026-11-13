@@ -1219,6 +1219,14 @@ h2 { font: 700 17px/1.3 var(--font); letter-spacing: 0; }
 /* Fiyat rehberine bağlantıyla gelince ilgili grafik belli olsun */
 .dist-card:target { border-color: var(--link); box-shadow: 0 0 0 2px var(--selected-line); }
 
+/* Talep formu: karakter sayacı ve hızlı son tarih */
+.char-count { margin-top: -2px; }
+.char-count.is-short { color: var(--amber); }
+.quick-dates { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; margin-top: 4px; color: var(--muted); font-size: 12.5px; }
+.quick-dates[hidden] { display: none; }
+/* Yan yana alanlardan biri uzayınca (hızlı seçim satırı) diğerinin kutusu uzamasın */
+.form-step .field-row { align-items: start; }
+
 /* Fiyat: süslü etiket yerine kalın yazı */
 .price-tag, .listing-table.is-feed .price-tag { padding: 0; background: none; clip-path: none; color: var(--text); font: 700 15px/1.3 var(--font); }
 .price-tag::before { display: none; }

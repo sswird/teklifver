@@ -878,6 +878,34 @@
     update();
   }
 
+  /* Talep formu: açıklama karakter sayacı ve son tarih için hızlı seçim (1 hafta, 2 hafta, 1 ay) */
+  function initFormHelpers() {
+    $$('[data-char-count-for]').forEach(counter => {
+      const field = document.getElementById(counter.dataset.charCountFor);
+      if (!field) return;
+      const min = Number(counter.dataset.min) || 0;
+      const update = () => {
+        const length = field.value.trim().length;
+        counter.textContent = length < min ? `${length} karakter · en az ${min} karakter yazın` : `${length} karakter`;
+        counter.classList.toggle('is-short', length > 0 && length < min);
+      };
+      field.addEventListener('input', update);
+      update();
+    });
+
+    const box = $('[data-quick-dates]');
+    const deadline = $('#deadline');
+    if (!box || !deadline) return;
+    // Tarih Türkiye saatine göre: gece yarısından sonra da doğru gün seçilsin
+    const format = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul', year: 'numeric', month: '2-digit', day: '2-digit' });
+    box.hidden = false;
+    $$('[data-days]', box).forEach(button => button.addEventListener('click', () => {
+      deadline.value = format.format(new Date(Date.now() + Number(button.dataset.days) * 86400000));
+      deadline.dispatchEvent(new Event('input', { bubbles: true }));
+      deadline.dispatchEvent(new Event('change', { bubbles: true }));
+    }));
+  }
+
   /* Talep formu: ilçe kutusu seçilen ildeki ilçe adlarını önerir (aynı ilçe farklı yazılmasın) */
   function initLocationSuggestions() {
     const city = $('#city');
@@ -1078,6 +1106,7 @@
     initFilterButton();
     initDistrictSelect();
     initLocationSuggestions();
+    initFormHelpers();
     initCopyLink();
     initShareMenu();
     initThread();

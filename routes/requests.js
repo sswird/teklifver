@@ -30,6 +30,11 @@ const MAX_DESCRIPTION = 5000;
 // "ghgfn" gibi denemeler yayına girmesin.
 const MIN_TITLE = 8;
 const MIN_DESCRIPTION = 20;
+// Formdaki karakter sayacı en az uzunluğu buradan okur.
+router.use((req, res, next) => {
+  res.locals.minDescription = MIN_DESCRIPTION;
+  next();
+});
 const HAS_VOWEL = /[aeıioöuüâîû]/i;
 const MAX_QUESTION = 500;
 const MAX_ANSWER = 1000;

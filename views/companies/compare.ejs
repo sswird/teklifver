@@ -12,6 +12,7 @@
     ['Verilen teklif', 'high', row => row.stats.bidTotal, row => String(row.stats.bidTotal)],
     ['Kabul edilen teklif', 'high', row => row.stats.accepted, row => String(row.stats.accepted)],
     ['Tamamlanan iş', 'high', row => row.stats.completed, row => String(row.stats.completed)],
+    ['Teklif hızı', 'low', row => row.stats.responseHours, row => (row.stats.responseHours === null ? '-' : responseLabel(row.stats.responseHours))],
     ['Ortalama teslim süresi', 'low', row => row.stats.avgDays, row => (row.stats.avgDays === null ? '-' : `${row.stats.avgDays} gün`)]
   ];
 %>

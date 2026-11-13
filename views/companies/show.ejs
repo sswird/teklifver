@@ -23,6 +23,7 @@
           <% if (company.address) { %> · <%= company.address %><% } %>
           · Üyelik: <%= memberSince(company.createdAt) %>
           <% if (stats.lastBidAt) { %>· Son teklif: <%= timeAgo(stats.lastBidAt) %><% } %>
+          <% if (stats.responseHours !== null) { %>· Genelde <%= responseLabel(stats.responseHours) %> teklif verir<% } %>
         </div>
         <% if (badges && badges.length) { %><div class="firm-badges"><%- include('../partials/firm-badges', { badges }) %></div><% } %>
       </div>
