@@ -6,7 +6,7 @@ const User = require('../models/User');
 const categories = require('../config/categories');
 const content = require('../config/category-content');
 const { liveFilter } = require('../lib/listing');
-const { priceGuide } = require('../lib/stats');
+const { priceGuide, districtCounts } = require('../lib/stats');
 const { money } = require('../lib/helpers');
 const { categoryBySlug, cityBySlug, categoryUrl, cityUrl, categoryCityUrl } = require('../lib/slug');
 
@@ -56,13 +56,15 @@ async function renderLanding(req, res, next, { category, city }) {
       ...(city ? { $or: [{ address: city }, { serviceCities: city }] } : {})
     };
 
-    const [requests, companies, guide, cityRows, categoryRows] = await Promise.all([
+    const [requests, companies, guide, cityRows, categoryRows, districtRows] = await Promise.all([
       Request.find(filter).sort({ createdAt: -1 }).skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).lean(),
       User.find(companyFilter).select('name companyName rating ratingCount verified address').sort({ rating: -1, ratingCount: -1 }).limit(6).lean(),
       category ? priceGuide() : {},
       // Birbirine bağlantı: kategorideki iller ve ildeki kategoriler
       category ? Request.aggregate([{ $match: { ...liveFilter(), category: category.name, city: { $exists: true, $nin: [null, ''] } } }, { $group: { _id: '$city', total: { $sum: 1 } } }, { $sort: { total: -1 } }, { $limit: 24 }]) : [],
-      city ? Request.aggregate([{ $match: { ...liveFilter(), city } }, { $group: { _id: '$category', total: { $sum: 1 } } }, { $sort: { total: -1 } }]) : []
+      city ? Request.aggregate([{ $match: { ...liveFilter(), city } }, { $group: { _id: '$category', total: { $sum: 1 } } }, { $sort: { total: -1 } }]) : [],
+      // İldeki ilçeler: talep listesine ilçeyle bağlanır
+      city ? districtCounts(filter) : []
     ]);
 
     const price = category ? guide[category.name] : null;
@@ -117,6 +119,7 @@ async function renderLanding(req, res, next, { category, city }) {
       totalPages,
       path,
       cityLinks: cityRows.map(row => ({ name: row._id, total: row.total, url: categoryCityUrl(category.name, row._id) })),
+      districtLinks: districtRows.map(row => ({ name: row.name, total: row.total, url: `/requests?${new URLSearchParams({ ...(category ? { category: category.name } : {}), city, district: row.name })}` })),
       categoryLinks: city
         ? categoryRows.map(row => ({ name: row._id, total: row.total, url: categoryCityUrl(row._id, city) }))
         : categories.filter(item => !category || item.name !== category.name).slice(0, 12).map(item => ({ name: item.name, url: categoryUrl(item.name) }))

@@ -38,6 +38,37 @@
     </div>
   </section>
 
+  <% if (jobs.length) { %>
+    <section class="box">
+      <h2 class="box-head">Sık Yaptırılan İşler</h2>
+      <p class="box-note">Son altı ayda bu işler için verilen tekliflerin ortadaki yarısı; en ucuz ve en pahalı dörtte birlik teklifler hesaba katılmaz.</p>
+      <div class="table-scroll">
+        <table class="data-table jobs-table">
+          <thead>
+            <tr>
+              <th>İş</th>
+              <th>Kategori</th>
+              <th class="num">Tekliflerin Çoğu</th>
+              <th class="num">Teklif Sayısı</th>
+              <th class="num"><span class="visually-hidden">Talep</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% jobs.forEach(job => { %>
+              <tr>
+                <td><a href="/requests?<%= new URLSearchParams({ category: job.category, search: job.search }) %>"><%= job.label %></a></td>
+                <td class="muted"><%= job.category %></td>
+                <td class="num"><strong><%= money(job.low).replace(' TL', '') %> - <%= money(job.high) %></strong></td>
+                <td class="num"><%= job.count %></td>
+                <td class="num"><a href="/requests/new?<%= new URLSearchParams({ title: job.label }) %>">Talep Ver</a></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  <% } %>
+
   <section class="box">
     <h2 class="box-head">Teklif Dağılımı</h2>
     <p class="box-note">Her çubuk bir fiyat aralığında kaç teklif verildiğini gösterir. Koyu çubuklar tekliflerin ortadaki yarısıdır; üzerine gelince aralık ve sayı görünür.</p>

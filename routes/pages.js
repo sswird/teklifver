@@ -7,6 +7,7 @@ const categories = require('../config/categories');
 const { rateLimit } = require('express-rate-limit');
 const { liveFilter } = require('../lib/listing');
 const { openCountsByCategory, priceGuide } = require('../lib/stats');
+const { priceBoard } = require('../lib/price-board');
 const { str, isEmail } = require('../lib/input');
 const { sendInBackground, isEnabled: mailEnabled, verificationRequired } = require('../lib/mailer');
 const ContactMessage = require('../models/ContactMessage');
@@ -57,7 +58,9 @@ router.get('/fiyat-rehberi', async (req, res, next) => {
     res.render('pages/price-guide', {
       title: 'Fiyat Rehberi',
       metaDescription: 'Kategorilere göre verilen tekliflerin ortalaması, en düşük ve en yüksek tutarları.',
-      guide: await priceGuide()
+      guide: await priceGuide(),
+      // Sık yaptırılan işlerin fiyat aralığı (ana sayfadaki fiyat panosuyla aynı hesap)
+      jobs: await priceBoard()
     });
   } catch (err) {
     next(err);

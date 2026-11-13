@@ -19,7 +19,7 @@ const { rateLimit } = require('express-rate-limit');
 const { uploadImages, deleteImages, copyImages, MAX_IMAGES } = require('../middleware/upload');
 const { str, safeNext } = require('../lib/input');
 const { searchPatterns, matchesText } = require('../public/js/search-terms');
-const { openCountsByCategory, uniqueByPhoto, categoryAverages, priceGuide, districtsByCity: loadDistricts } = require('../lib/stats');
+const { openCountsByCategory, uniqueByPhoto, categoryAverages, priceGuide, districtsByCity: loadDistricts, districtCounts } = require('../lib/stats');
 const { SORT_OPTIONS, liveFilter, readFilters, buildConditions, filtersToQuery, firmsServing, placePrefixSource } = require('../lib/listing');
 const { notify, notifyMany } = require('../lib/notify');
 const mongoose = require('mongoose');
@@ -120,13 +120,17 @@ router.get('/', async (req, res, next) => {
 
     // Arama ya da filtre varken soldaki kategori sayıları o aramaya göre (kategori seçimi hariç) sayılır.
     const filtered = ['search', 'city', 'district', 'budgetMin', 'budgetMax', 'period', 'photos', 'noBids', 'urgent'].some(key => filters[key]);
-    const [total, counts, menuRows, districtsByCity] = await Promise.all([
+    // İl seçiliyse soldaki ilçe listesi: sayılar ilçe seçimi hariç aynı aramaya göre.
+    const cityFilter = filters.city ? buildConditions({ ...filters, district: '' }) : null;
+    const [total, counts, menuRows, districtsByCity, districtRows, cityTotal] = await Promise.all([
       Request.countDocuments(filter),
       openCountsByCategory(),
       filtered
         ? Request.aggregate([{ $match: buildConditions({ ...filters, category: 'all' }) }, { $group: { _id: '$category', total: { $sum: 1 } } }])
         : null,
-      loadDistricts()
+      loadDistricts(),
+      cityFilter ? districtCounts(cityFilter) : [],
+      cityFilter ? Request.countDocuments(cityFilter) : 0
     ]);
     const totalPages = Math.max(Math.ceil(total / filters.perPage), 1);
     const page = Math.min(requestedPage, totalPages);
@@ -154,6 +158,8 @@ router.get('/', async (req, res, next) => {
       counts,
       menuCounts: menuRows ? Object.fromEntries(menuRows.map(row => [row._id, row.total])) : null,
       districtsByCity,
+      districtRows,
+      cityTotal,
       suggestion,
       fallback,
       total,

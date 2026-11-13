@@ -264,6 +264,17 @@ const idOf = path => path.split('/').pop();
   check("talep sahibinin diğer açık talepleri", kwicPage.includes('Diğer açık talepleri') && othersBlock.includes(`href="${fresh}"`) && !othersBlock.includes(`href="${kwic}"`));
   check("rehberde karşılaştır kutusu ayrı sütunda", /<td class="col-compare"><label class="compare-pick"><input type="checkbox" data-compare value="[a-f0-9]{24}"> Karşılaştır<\/label><\/td>/.test(guide));
 
+  // İlçeler kutusu, sayfa yolunda il ve ilçe, il sayfasında ilçeler, fiyat rehberinde sık yaptırılan işler
+  const istanbulList = (await get(null, `/requests?city=${encodeURIComponent('İstanbul')}`)).text;
+  check("il seçilince ilçeler kutusu", istanbulList.includes('class="box district-menu"') && /<a class="is-active" href="\/requests\?city=%C4%B0stanbul">Tüm İstanbul <span class="count">\d+<\/span><\/a>/.test(istanbulList) && /district=Kad%C4%B1k%C3%B6y">Kadıköy <span class="count">\d+<\/span>/.test(istanbulList));
+  const kadikoyList = (await get(null, `/requests?city=${encodeURIComponent('İstanbul')}&district=${encodeURIComponent('Kadıköy')}`)).text;
+  check("seçili ilçe işaretli, sayfa yolunda il ve ilçe", /<a class="is-active" href="\/requests\?city=%C4%B0stanbul&amp;district=Kad%C4%B1k%C3%B6y">Kadıköy/.test(kadikoyList) && /&rsaquo; <a href="\/requests\?city=%C4%B0stanbul">İstanbul<\/a> &rsaquo; <span>Kadıköy<\/span>/.test(kadikoyList));
+  check("il seçilmeden ilçeler kutusu çıkmaz", !(await get(null, '/requests')).text.includes('district-menu'));
+  const istanbulLanding = (await get(null, '/il/istanbul')).text;
+  check("il sayfasında ilçeler", istanbulLanding.includes('İstanbul İlçeleri') && /href="\/requests\?city=%C4%B0stanbul&amp;district=[^"]+">[^<]+ <span class="count">\d+<\/span>/.test(istanbulLanding));
+  const jobsGuide = (await get(null, '/fiyat-rehberi')).text;
+  check("fiyat rehberinde sık yaptırılan işler", jobsGuide.includes('Sık Yaptırılan İşler') && jobsGuide.includes('href="/requests/new?title=Boya+badana"'));
+
   console.log(`${passed} geçti, ${failures} hata`);
   process.exit(failures ? 1 : 0);
 })().catch(err => {

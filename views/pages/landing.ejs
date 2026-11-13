@@ -122,6 +122,15 @@
         </div>
       <% } %>
 
+      <% if (locals.districtLinks && districtLinks.length) { %>
+        <div class="box">
+          <h2 class="box-head"><%= city %> İlçeleri</h2>
+          <ul class="side-list district-list">
+            <% districtLinks.forEach(item => { %><li><a href="<%= item.url %>"><%= item.name %> <span class="count"><%= item.total %></span></a></li><% }) %>
+          </ul>
+        </div>
+      <% } %>
+
       <% if (categoryLinks.length) { %>
         <div class="box">
           <h2 class="box-head"><%= city ? city + ' Hizmetleri' : 'Diğer Hizmetler' %></h2>

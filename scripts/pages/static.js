@@ -171,7 +171,7 @@
         link.href = requestUrl(filters, { category });
       }
     });
-    $$('.side-list a').forEach(link => {
+    $$('.category-menu .side-list a').forEach(link => {
       const category = new URL(link.href).searchParams.get('category') || 'all';
       link.classList.toggle('is-active', category === filters.category);
     });
@@ -186,6 +186,51 @@
       subs.append(element('a', { href: `${BASE}/requests/?${params}`, textContent: label }));
     });
     active.after(subs);
+  }
+
+  // İl seçiliyken soldaki İlçeler kutusu; sayılar ilçe seçimi hariç aynı aramaya göre (sunucudaki gibi).
+  function syncDistrictMenu(data, filters) {
+    $$('[data-district-menu]').forEach(node => node.remove());
+    if (!filters.city) return;
+    const inCity = data.requests.filter(item => matchesRequest(item, { ...filters, district: '' }, data.builtAt));
+    const rows = new Map();
+    inCity.filter(item => item.location && item.location.trim()).forEach(item => {
+      const name = item.location.trim();
+      const row = rows.get(fold(name)) || { name, total: 0 };
+      row.total += 1;
+      rows.set(fold(name), row);
+    });
+    if (!rows.size) return;
+    const list = [...rows.values()].sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, 'tr'));
+    const entry = (label, total, district, active) => element('li', {}, [
+      element('a', { className: active ? 'is-active' : '', href: requestUrl(filters, { district }) }, [`${label} `, element('span', { className: 'count', textContent: String(total) })])
+    ]);
+    const chevron = $('.category-menu > summary .icon');
+    const box = element('details', { className: 'box district-menu', open: !window.matchMedia('(max-width: 760px)').matches }, [
+      element('summary', { className: 'box-head' }, ['İlçeler ', ...(chevron ? [chevron.cloneNode(true)] : [])]),
+      element('ul', { className: 'side-list' }, [
+        entry(`Tüm ${filters.city}`, inCity.length, '', !filters.district),
+        ...list.map(row => entry(row.name, row.total, row.name, fold(row.name) === fold(filters.district)))
+      ])
+    ]);
+    box.dataset.districtMenu = '';
+    const menu = $('.category-menu');
+    if (menu) menu.after(box);
+  }
+
+  // Sayfa yolu: Talepler › Kategori › İl › İlçe (sonuncusu düz yazı)
+  function syncCrumbs(filters) {
+    const crumbs = $('.crumbs');
+    if (!crumbs) return;
+    const trail = [];
+    if (filters.category !== 'all') trail.push([filters.category, { category: filters.category }]);
+    if (filters.city) trail.push([filters.city, { category: filters.category, city: filters.city }]);
+    if (filters.city && filters.district) trail.push([filters.district, null]);
+    trail.forEach(([label, state], index) => {
+      const last = index === trail.length - 1;
+      const base = { search: '', category: 'all', city: '', district: '', budgetMin: 0, budgetMax: 0, period: '', photos: false, noBids: false, urgent: false, sort: 'newest', view: 'list', perPage: PAGE_SIZE };
+      crumbs.append(' › ', last ? element('span', { textContent: label }) : element('a', { href: requestUrl(base, state), textContent: label }));
+    });
   }
 
   function syncRequestForms(filters) {
@@ -408,12 +453,10 @@
       if (pager) pager.after(perPageBox);
     }
 
-    if (filters.category !== 'all') {
-      document.title = `${filters.category} - TeklifVer`;
-      const crumbs = $('.crumbs');
-      crumbs.append(' › ', element('span', { textContent: filters.category }));
-    }
+    if (filters.category !== 'all') document.title = `${filters.category} - TeklifVer`;
+    syncCrumbs(filters);
     syncCategoryMenu(data, filters);
+    syncDistrictMenu(data, filters);
     syncRequestForms(filters);
   }
 

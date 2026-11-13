@@ -30,10 +30,24 @@
 %>
 
 <div class="wrap page">
+  <%
+    // Sayfa yolu: Talepler › Kategori › İl › İlçe; sonuncusu düz yazı, öncekiler yalnız o seçimle açılır.
+    const crumbUrl = state => {
+      const params = new URLSearchParams();
+      if (state.category && state.category !== 'all') params.set('category', state.category);
+      if (state.city) params.set('city', state.city);
+      const query = params.toString();
+      return '/requests' + (query ? '?' + query : '');
+    };
+    const trail = [];
+    if (filters.category !== 'all') trail.push([filters.category, crumbUrl({ category: filters.category })]);
+    if (filters.city) trail.push([filters.city, crumbUrl({ category: filters.category, city: filters.city })]);
+    if (filters.city && filters.district) trail.push([filters.district, null]);
+  %>
   <div class="crumbs">
     <a href="/">Ana Sayfa</a> &rsaquo;
     <a href="/requests">Talepler</a>
-    <% if (filters.category !== 'all') { %>&rsaquo; <span><%= filters.category %></span><% } %>
+    <% trail.forEach(([label, url], index) => { %>&rsaquo; <% if (index === trail.length - 1) { %><span><%= label %></span><% } else { %><a href="<%= url %>"><%= label %></a><% } %> <% }) %>
   </div>
 
   <%- include('../partials/ad', { format: 'leaderboard' }) %>
@@ -41,6 +55,19 @@
   <div class="layout">
     <aside>
       <%- include('../partials/category-menu', { active: filters.category, menuCounts, menuUrl: name => listUrl({ category: name }) }) %>
+
+      <% if (filters.city && districtRows.length) { const pickedDistrict = filters.district.toLocaleLowerCase('tr-TR'); %>
+        <%# İl seçiliyken ilçeler; statik ön izleme aynısını tarayıcıda kurar (scripts/pages/static.js syncDistrictMenu) %>
+        <details class="box district-menu" open data-collapse-mobile data-district-menu>
+          <summary class="box-head">İlçeler <%- icon('chevron-down', { size: 14 }) %></summary>
+          <ul class="side-list">
+            <li><a<% if (!filters.district) { %> class="is-active"<% } %> href="<%= listUrl({ district: '' }) %>">Tüm <%= filters.city %> <span class="count"><%= cityTotal %></span></a></li>
+            <% districtRows.forEach(row => { %>
+              <li><a<% if (row.name.toLocaleLowerCase('tr-TR') === pickedDistrict) { %> class="is-active"<% } %> href="<%= listUrl({ district: row.name }) %>"><%= row.name %> <span class="count"><%= row.total %></span></a></li>
+            <% }) %>
+          </ul>
+        </details>
+      <% } %>
 
       <details class="box" id="detayli-arama" open data-collapse-mobile>
         <summary class="box-head">Detaylı Arama <%- icon('chevron-down', { size: 14 }) %></summary>
