@@ -1,0 +1,17 @@
+/* Yalnızca statik önizlemede yüklenir. */
+.preview-bar {
+  padding: 5px 12px;
+  background: var(--warn-bg);
+  border-bottom: 1px solid var(--warn-line);
+  color: var(--amber);
+  font-size: 12px;
+  text-align: center;
+}
+.preview-note {
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-line);
+  color: var(--amber);
+}
+.static-loading .layout > section { visibility: hidden; }
