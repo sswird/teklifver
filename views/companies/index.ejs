@@ -87,6 +87,7 @@
               <th class="col-date"<% if (sort === 'rating') { %> aria-sort="descending"<% } %>><a class="sort-head <%= sort === 'rating' ? 'is-descending' : '' %>" href="<%= companySortUrl('rating') %>" data-company-sort="rating">Puan</a></th>
               <th class="col-date">İl</th>
               <th class="col-date"<% if (sort === 'newest') { %> aria-sort="descending"<% } %>><a class="sort-head <%= sort === 'newest' ? 'is-descending' : '' %>" href="<%= companySortUrl('newest') %>" data-company-sort="newest">Üyelik</a></th>
+              <th class="col-compare"><span class="visually-hidden">Karşılaştır</span></th>
             </tr>
           </thead>
           <tbody>
@@ -96,11 +97,10 @@
                 <td>
                   <a class="listing-title" href="/companies/<%= company._id %>"><%= name %></a>
                   <% if (company.verified) { %><%- include('../partials/verified') %><% } %>
-                  <div class="firm-badges"><%- include('../partials/firm-badges', { badges: badgeMap.get(String(company._id)) }) %></div>
+                  <span class="firm-badges"><%- include('../partials/firm-badges', { badges: badgeMap.get(String(company._id)) }) %></span>
                   <% if (company.specialties && company.specialties.length) { %>
                     <div class="tag-line"><%= company.specialties.join(', ') %></div>
                   <% } %>
-                  <label class="compare-pick"><input type="checkbox" data-compare value="<%= company._id %>"> Karşılaştır</label>
                 </td>
                 <td class="col-date nowrap">
                   <% if (company.ratingCount > 0) { %>
@@ -109,6 +109,7 @@
                 </td>
                 <td class="col-date"><%= company.address || '-' %></td>
                 <td class="col-date"><%= memberSince(company.createdAt) %></td>
+                <td class="col-compare"><label class="compare-pick"><input type="checkbox" data-compare value="<%= company._id %>"> Karşılaştır</label></td>
               </tr>
             <% }) %>
           </tbody>

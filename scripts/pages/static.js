@@ -306,6 +306,19 @@
     });
   }
 
+  // Arama sonucunda açıklama, aranan kelimenin geçtiği yerden gösterilir; kelime kalın yazılır (sunucudaki gibi).
+  function highlightRows(table, items, search) {
+    $$('tbody tr:not(.ad-row)', table).forEach((row, index) => {
+      const item = items[index];
+      const snippet = $('.listing-snippet', row);
+      if (!item || !snippet || !item.description) return;
+      const words = window.TeklifverSearch;
+      const parts = words.highlightParts(words.snippetAround(item.description, search, 140), search);
+      snippet.replaceChildren(...parts.map(part => (part.hit ? element('b', { className: 'hit', textContent: part.text }) : document.createTextNode(part.text))));
+      snippet.classList.add('is-search');
+    });
+  }
+
   function renderRequests(data) {
     const filters = readRequestFilters(data);
     const matched = data.requests
@@ -365,6 +378,7 @@
         const ad = ads.length && index > 0 && index % 8 === 0 ? ads[(start + index / 8) % ads.length] : '';
         return ad + item.row;
       }).join('');
+      if (filters.search) highlightRows(table, visible, filters.search);
     }
 
     const nav = pagination(filters, page, totalPages);

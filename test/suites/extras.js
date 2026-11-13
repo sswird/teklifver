@@ -254,6 +254,16 @@ const idOf = path => path.split('/').pop();
   check("bakılmış talep başlığı mor", css.includes('.listing-table.is-classic a.listing-title:visited'));
   check("telefonda üst bantta mesaj ve favori gizlenir", /class="topbar-messages" href="\/messages"/.test(secondLook) && css.includes('.topbar-messages, .topbar-favs { display: none; }'));
 
+  // Arama sonucunda açıklama kesiti ve kalın kelime, talep sahibinin diğer talepleri, rehberde karşılaştır sütunu
+  const kwic = await newRequest(owner, { title: `Balkon korkuluğu yenilenecek ${stamp}`, description: `${FILLER} Demir korkuluk zımparalanacak, ardından vernikleme${stamp} yapılacak; renk önerilerine açığım.`, category: 'İnşaat & Tadilat' });
+  const kwicList = (await get(null, `/requests?search=vernikleme${stamp}`)).text;
+  check("aramada açıklama kelimenin geçtiği yerden başlar, kelime kalın", kwicList.includes(`href="${kwic}"`) && new RegExp(`<p class="listing-snippet is-search">\\.\\.\\.[^<]*<b class="hit">vernikleme${stamp}</b>`).test(kwicList));
+  check("aramasız listede açıklama baştan", !(await get(null, '/requests')).text.includes('class="listing-snippet is-search"'));
+  const kwicPage = (await get(null, kwic)).text;
+  const othersBlock = (kwicPage.split('class="owner-others"')[1] || '').split('</ul>')[0];
+  check("talep sahibinin diğer açık talepleri", kwicPage.includes('Diğer açık talepleri') && othersBlock.includes(`href="${fresh}"`) && !othersBlock.includes(`href="${kwic}"`));
+  check("rehberde karşılaştır kutusu ayrı sütunda", /<td class="col-compare"><label class="compare-pick"><input type="checkbox" data-compare value="[a-f0-9]{24}"> Karşılaştır<\/label><\/td>/.test(guide));
+
   console.log(`${passed} geçti, ${failures} hata`);
   process.exit(failures ? 1 : 0);
 })().catch(err => {

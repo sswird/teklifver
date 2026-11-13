@@ -205,7 +205,7 @@
             date: { href: listUrl({ sort: filters.sort === 'newest' ? 'oldest' : 'newest' }), dir: filters.sort === 'newest' ? 'descending' : filters.sort === 'oldest' ? 'ascending' : '' }
           };
         %>
-        <%- include('../partials/listing-table', { items: requests, adEvery: 8, sortHeads }) %>
+        <%- include('../partials/listing-table', { items: requests, adEvery: 8, sortHeads, highlight: filters.search }) %>
       <% } %>
 
       <% if (totalPages > 1) { %>

@@ -541,7 +541,7 @@ router.get('/:id', async (req, res, next) => {
       return { _id: bid._id, status: bid.status, createdAt: bid.createdAt, company, hidden: true };
     });
 
-    const [similarAll, ownerOpenCount, averages, review, alreadyReported, lastBid, bidder, newerRequest, olderRequest] = await Promise.all([
+    const [similarAll, ownerOpenCount, averages, review, alreadyReported, lastBid, bidder, newerRequest, olderRequest, ownerOthers] = await Promise.all([
       Request.find({ ...liveFilter(), category: request.category, _id: { $ne: request._id } })
         .sort({ createdAt: -1 })
         .limit(20)
@@ -557,7 +557,9 @@ router.get('/:id', async (req, res, next) => {
       viewer && viewer.role === 'company' && !userBid ? User.findById(viewer.id).select('plan bidUsage').lean() : null,
       // Önceki / sonraki talep: aynı kategoride, listedeki sırayla (en yeni başta)
       Request.findOne({ ...liveFilter(), category: request.category, createdAt: { $gt: request.createdAt } }).sort({ createdAt: 1 }).select('title').lean(),
-      Request.findOne({ ...liveFilter(), category: request.category, createdAt: { $lt: request.createdAt } }).sort({ createdAt: -1 }).select('title').lean()
+      Request.findOne({ ...liveFilter(), category: request.category, createdAt: { $lt: request.createdAt } }).sort({ createdAt: -1 }).select('title').lean(),
+      // Talep sahibinin diğer açık talepleri: firma birkaç işe birlikte teklif verebilir.
+      Request.find({ ...liveFilter(), customer: request.customer._id, _id: { $ne: request._id } }).sort({ createdAt: -1 }).limit(3).select('title budget').lean()
     ]);
 
     const bidBadges = await badgesFor(allBids.map(bid => bid.company));
@@ -598,6 +600,7 @@ router.get('/:id', async (req, res, next) => {
         5
       ),
       ownerOpenCount,
+      ownerOthers,
       newerRequest,
       olderRequest,
       canSeeBids,

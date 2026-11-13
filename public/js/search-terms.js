@@ -74,5 +74,46 @@
     });
   }
 
-  return { searchPatterns, matchesText };
+  // Aranan kelimelerin metinde kelime başında geçtiği yerleri bulur (vurgu ve açıklama kesiti için).
+  // wholeWord: eşleşme kelimenin sonuna kadar uzar ("boya" araması "boyanacak" kelimesinin tamamını kalın yazar).
+  function hitPattern(text, flags, wholeWord) {
+    const sources = text ? searchPatterns(text) : [];
+    const tail = wholeWord ? '[\\p{L}\\p{N}]*' : '';
+    return sources.length ? new RegExp(`(?<![\\p{L}\\p{N}])(?:${sources.join('|')})${tail}`, flags) : null;
+  }
+
+  // Uzun açıklamadan aranan kelimenin ilk geçtiği yerin çevresini alır; kelime yoksa baştan kısaltır.
+  function snippetAround(text, query, length) {
+    const value = String(text || '').replace(/\s+/g, ' ').trim();
+    const pattern = hitPattern(query, 'iu');
+    const found = pattern ? value.search(pattern) : -1;
+    let start = 0;
+    if (found > 30) {
+      // Kelimenin önünde birkaç kelimelik bağlam kalır; kelime ortasından başlanmaz.
+      const space = value.lastIndexOf(' ', found - 24);
+      start = space < 0 ? 0 : space + 1;
+    }
+    const end = start + length;
+    if (start === 0 && end >= value.length) return value;
+    return `${start > 0 ? '...' : ''}${value.slice(start, end).trim()}${end < value.length ? '...' : ''}`;
+  }
+
+  // Metni aranan kelimelerin geçtiği yerlerden parçalara ayırır: [{ text, hit }].
+  function highlightParts(text, query) {
+    const value = String(text || '');
+    const pattern = hitPattern(query, 'giu', true);
+    if (!value || !pattern) return [{ text: value, hit: false }];
+    const parts = [];
+    let last = 0;
+    for (const match of value.matchAll(pattern)) {
+      if (!match[0]) continue;
+      if (match.index > last) parts.push({ text: value.slice(last, match.index), hit: false });
+      parts.push({ text: match[0], hit: true });
+      last = match.index + match[0].length;
+    }
+    if (last < value.length) parts.push({ text: value.slice(last), hit: false });
+    return parts;
+  }
+
+  return { searchPatterns, matchesText, snippetAround, highlightParts };
 }));

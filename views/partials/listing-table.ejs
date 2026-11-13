@@ -41,7 +41,7 @@
           <a class="listing-title" href="/requests/<%= item._id %>"><%= truncate(item.title, 90) %></a>
           <% if (isUrgent(item)) { %><span class="label label-urgent">ACİL</span><% } %>
           <% if (isFresh(item)) { %><span class="label label-new">YENİ</span><% } %>
-          <% if (item.description) { %><p class="listing-snippet"><%= truncate(item.description.replace(/\s+/g, ' '), 140) %></p><% } %>
+          <% if (item.description && locals.highlight) { %><p class="listing-snippet is-search"><%- searchSnippet(item.description, highlight) %></p><% } else if (item.description) { %><p class="listing-snippet"><%= truncate(item.description.replace(/\s+/g, ' '), 140) %></p><% } %>
           <div class="listing-sub">
             <span><%= item.category %></span>
             <% if (compact) { %><span class="listing-place"><%= placeLabel(item) %></span><span title="<%= formatDate(item.createdAt) %>"><%= timeAgo(item.createdAt) %></span><% } %>

@@ -137,6 +137,14 @@
           <strong><%= isOwner || (currentUser && currentUser.isAdmin) ? request.customer.name : shortName(request.customer.name) %></strong>
           <div class="muted small">Üyelik: <%= memberSince(request.customer.createdAt) %></div>
           <div class="small"><%= ownerOpenCount %> açık talep</div>
+          <% if (ownerOthers.length) { %>
+            <p class="owner-others-head"><%= isOwner ? 'Diğer açık talepleriniz' : 'Diğer açık talepleri' %></p>
+            <ul class="owner-others">
+              <% ownerOthers.forEach(other => { %>
+                <li><a href="/requests/<%= other._id %>"><%= truncate(other.title, 60) %></a><span><%= budgetLabel(other.budget) %></span></li>
+              <% }) %>
+            </ul>
+          <% } %>
         </div>
       </div>
 
