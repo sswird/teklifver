@@ -349,6 +349,8 @@ const logout = async page => page.clickAndWait('form[action="/logout"] button');
     check('kategorinin teklif aralığı gösterilir', (await page.evaluate("document.getElementById('categoryPrice').textContent")).includes(' TL arasında'));
     await page.fill('#title', 'Daire boyanacak');
     check('yazı değişince tahmin de değişir', (await fieldValue('category')) === 'İnşaat & Tadilat');
+    await sleep(900);
+    check('başlık yazılınca benzer açık talepler', await page.evaluate(`!document.querySelector('[data-similar]').hidden && document.querySelectorAll('[data-similar] li').length > 0`));
     await page.goto(`/requests/new?category=${encodeURIComponent('Eğitim')}`);
     await page.fill('#title', 'Daire boyanacak');
     check('seçilmiş kategori değiştirilmez', (await fieldValue('category')) === 'Eğitim');

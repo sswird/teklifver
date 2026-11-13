@@ -1289,6 +1289,19 @@ h2 { font: 700 17px/1.3 var(--font); letter-spacing: 0; }
 /* Fiyat rehberi: sık yaptırılan işler */
 .jobs-table td:first-child a { font-weight: 600; }
 
+/* Talep formu: benzer açık talepler */
+.similar-requests { margin-top: 6px; padding: 8px 12px; background: var(--head); border: 1px solid var(--line-soft); border-radius: var(--radius); font-size: 13px; }
+.similar-requests[hidden] { display: none; }
+.similar-head { margin: 0 0 2px; color: var(--muted); font-size: 12px; }
+.similar-requests ul { margin: 0; padding: 0; list-style: none; }
+.similar-requests li { padding: 3px 0; }
+.similar-requests li + li { border-top: 1px solid var(--line-soft); }
+.similar-requests li span { display: block; color: var(--muted); font-size: 12px; }
+
+/* Firmalar İçin: paket tablosu */
+.plan-table { margin: 6px 0 8px; }
+.plan-table th.num, .plan-table td.num { text-align: center; }
+
 /* Fiyat: süslü etiket yerine kalın yazı */
 .price-tag, .listing-table.is-feed .price-tag { padding: 0; background: none; clip-path: none; color: var(--text); font: 700 15px/1.3 var(--font); }
 .price-tag::before { display: none; }

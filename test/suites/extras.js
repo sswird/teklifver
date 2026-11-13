@@ -275,6 +275,16 @@ const idOf = path => path.split('/').pop();
   const jobsGuide = (await get(null, '/fiyat-rehberi')).text;
   check("fiyat rehberinde sık yaptırılan işler", jobsGuide.includes('Sık Yaptırılan İşler') && jobsGuide.includes('href="/requests/new?title=Boya+badana"'));
 
+  // Talep formunda benzer açık talepler, firmalar için paket tablosu, talepte favori sayısı
+  const similarJson = await (await fetch(`${BASE}/requests/similar?q=${encodeURIComponent('Daire boyanacak')}`)).json();
+  check("başlığa benzer açık talepler", similarJson.items.length > 0 && similarJson.items.length <= 3 && /daire/i.test(similarJson.items[0].title) && /boya/i.test(similarJson.items[0].title) && typeof similarJson.items[0].budget === 'string' && Number.isInteger(similarJson.items[0].bids) && /^\/requests\/[a-f0-9]{24}$/.test(similarJson.items[0].url));
+  check("kısa başlıkta benzer talep aranmaz", (await (await fetch(`${BASE}/requests/similar?q=ev`)).json()).items.length === 0);
+  check("talep formunda benzer talepler kutusu", (await get(null, '/requests/new')).text.includes('data-similar hidden'));
+  const forFirms = (await get(null, '/firmalar-icin')).text;
+  check("firmalar için paket tablosu", forFirms.includes('class="data-table plan-table"') && forFirms.includes('Sınırsız') && forFirms.includes('490 TL'));
+  await post(firm, `${kwic}/favorite`);
+  check("talepte favori sayısı", /görüntülenme · 1 favori/.test((await get(null, kwic)).text));
+
   console.log(`${passed} geçti, ${failures} hata`);
   process.exit(failures ? 1 : 0);
 })().catch(err => {

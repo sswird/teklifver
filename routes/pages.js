@@ -35,7 +35,8 @@ Object.entries(pages).forEach(([path, page]) => {
       pagePath: path,
       // Yardım metni sitenin gerçek ayarına göre yazılır.
       codeLogin: verificationRequired(),
-      freeBids: PLANS.free.monthlyBids
+      freeBids: PLANS.free.monthlyBids,
+      plans: Object.values(PLANS)
     });
   });
 });

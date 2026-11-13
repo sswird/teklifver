@@ -40,7 +40,7 @@
       <h1><%= request.title %></h1>
       <% if (isUrgent(request)) { %><span class="label label-urgent">ACİL</span><% } %>
       <% const questionCount = (request.questions || []).length; %>
-      <p class="detail-meta">Talep No <strong><%= request.no %></strong> · <a href="#teklifler"><%= bids.length %> teklif</a><% if (questionCount || (isOpen && !isExpired(request))) { %> · <a href="#soru-cevap"><%= questionCount %> soru</a><% } %> · <%= request.viewCount %> görüntülenme<% if (similar.length) { %> · <a href="#benzer">benzer talepler</a><% } %></p>
+      <p class="detail-meta">Talep No <strong><%= request.no %></strong> · <a href="#teklifler"><%= bids.length %> teklif</a><% if (questionCount || (isOpen && !isExpired(request))) { %> · <a href="#soru-cevap"><%= questionCount %> soru</a><% } %> · <%= request.viewCount %> görüntülenme<% if (favoriteCount) { %> · <%= favoriteCount %> favori<% } %><% if (similar.length) { %> · <a href="#benzer">benzer talepler</a><% } %></p>
     </div>
     <div class="detail-actions">
       <% if (currentUser) { %>

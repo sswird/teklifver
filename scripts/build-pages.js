@@ -137,7 +137,7 @@ async function collectData(parts, rewrite) {
   const User = require(path.join(ROOT, 'models', 'User'));
   const categories = require(path.join(ROOT, 'config', 'categories'));
   const { liveFilter } = require(path.join(ROOT, 'lib', 'listing'));
-  const { isUrgent } = require(path.join(ROOT, 'lib', 'helpers'));
+  const { isUrgent, budgetLabel } = require(path.join(ROOT, 'lib', 'helpers'));
 
   const [requests, companies] = await Promise.all([
     Request.find(liveFilter())
@@ -184,6 +184,7 @@ async function collectData(parts, rewrite) {
         location: item.location || '',
         min: (item.budget && item.budget.min) || 0,
         max: (item.budget && item.budget.max) || 0,
+        budget: budgetLabel(item.budget),
         created: time(item.createdAt),
         deadline: time(item.deadline),
         photos: (item.images || []).length,

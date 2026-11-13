@@ -13,12 +13,12 @@ const { isCustomer, isCompany, isLoggedIn, requireVerifiedEmail } = require('../
 const { limits } = require('../lib/limits');
 const { categoryUrl, categoryCityUrl } = require('../lib/slug');
 const { alertSavedSearches } = require('../lib/search-alerts');
-const { parseDateInput, isExpired, discoveryTimes } = require('../lib/helpers');
+const { parseDateInput, isExpired, discoveryTimes, budgetLabel } = require('../lib/helpers');
 const { bidAllowance } = require('../lib/plans');
 const { rateLimit } = require('express-rate-limit');
 const { uploadImages, deleteImages, copyImages, MAX_IMAGES } = require('../middleware/upload');
 const { str, safeNext } = require('../lib/input');
-const { searchPatterns, matchesText } = require('../public/js/search-terms');
+const { searchPatterns, matchesText, similarityPatterns, rankSimilar } = require('../public/js/search-terms');
 const { openCountsByCategory, uniqueByPhoto, categoryAverages, priceGuide, districtsByCity: loadDistricts, districtCounts } = require('../lib/stats');
 const { SORT_OPTIONS, liveFilter, readFilters, buildConditions, filtersToQuery, firmsServing, placePrefixSource } = require('../lib/listing');
 const { notify, notifyMany } = require('../lib/notify');
@@ -223,6 +223,37 @@ router.get('/suggest', suggestLimiter, async (req, res, next) => {
         ...places,
         ...matches.map(item => ({ label: item.title, hint: `No: ${item.no}`, url: `/requests/${item._id}` }))
       ]
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Talep formunda başlık yazılırken benzer açık talepler: bütçe ve teklif sayısı fikir verir.
+// Statik ön izleme aynı sıralamayı tarayıcıda yapar (scripts/pages/static.js).
+router.get('/similar', suggestLimiter, async (req, res, next) => {
+  try {
+    const q = str(req.query.q);
+    const patterns = similarityPatterns(q);
+    if (q.length < 4 || !patterns.length) return res.json({ items: [] });
+    const candidates = await Request.find({ ...liveFilter(), $or: patterns.map(({ source }) => ({ title: { $regex: source, $options: 'i' } })) })
+      .select('title category budget bidCount city location createdAt')
+      .sort({ createdAt: -1 })
+      .limit(200)
+      .lean();
+    const ranked = rankSimilar(
+      candidates.map(item => ({ ...item, bids: item.bidCount || 0, created: new Date(item.createdAt).getTime() })),
+      q,
+      str(req.query.category)
+    ).slice(0, 3);
+    res.json({
+      items: ranked.map(item => ({
+        title: item.title,
+        url: `/requests/${item._id}`,
+        budget: budgetLabel(item.budget),
+        bids: item.bids,
+        place: [item.city, item.location].filter(Boolean).join(' / ')
+      }))
     });
   } catch (err) {
     next(err);
@@ -547,7 +578,7 @@ router.get('/:id', async (req, res, next) => {
       return { _id: bid._id, status: bid.status, createdAt: bid.createdAt, company, hidden: true };
     });
 
-    const [similarAll, ownerOpenCount, averages, review, alreadyReported, lastBid, bidder, newerRequest, olderRequest, ownerOthers] = await Promise.all([
+    const [similarAll, ownerOpenCount, averages, review, alreadyReported, lastBid, bidder, newerRequest, olderRequest, ownerOthers, favoriteCount] = await Promise.all([
       Request.find({ ...liveFilter(), category: request.category, _id: { $ne: request._id } })
         .sort({ createdAt: -1 })
         .limit(20)
@@ -565,7 +596,9 @@ router.get('/:id', async (req, res, next) => {
       Request.findOne({ ...liveFilter(), category: request.category, createdAt: { $gt: request.createdAt } }).sort({ createdAt: 1 }).select('title').lean(),
       Request.findOne({ ...liveFilter(), category: request.category, createdAt: { $lt: request.createdAt } }).sort({ createdAt: -1 }).select('title').lean(),
       // Talep sahibinin diğer açık talepleri: firma birkaç işe birlikte teklif verebilir.
-      Request.find({ ...liveFilter(), customer: request.customer._id, _id: { $ne: request._id } }).sort({ createdAt: -1 }).limit(3).select('title budget').lean()
+      Request.find({ ...liveFilter(), customer: request.customer._id, _id: { $ne: request._id } }).sort({ createdAt: -1 }).limit(3).select('title budget').lean(),
+      // Kaç kişi favorilerine ekledi: firmalar için ilgi göstergesi
+      User.countDocuments({ favorites: request._id })
     ]);
 
     const bidBadges = await badgesFor(allBids.map(bid => bid.company));
@@ -607,6 +640,7 @@ router.get('/:id', async (req, res, next) => {
       ),
       ownerOpenCount,
       ownerOthers,
+      favoriteCount,
       newerRequest,
       olderRequest,
       canSeeBids,

@@ -713,6 +713,14 @@ async function createDemoData({ showcase = false } = {}) {
     });
   }
 
+  // Firmalar ilgilendikleri açık talepleri favorilerine ekler: çok görüntülenen taleplerin birkaç favorisi olur.
+  for (const [, title, category, , , , , , views, , , , extra] of listings) {
+    if ((extra.status || 'open') !== 'open' || views < 40) continue;
+    // Giriş yapılan örnek firma (usta) kendi favorilerini boş başlatsın.
+    const fans = (companiesByCategory[category] || []).filter(key => key !== 'usta').slice(0, views >= 90 ? 3 : views >= 60 ? 2 : 1);
+    for (const key of fans) await User.collection.updateOne({ _id: people[key]._id }, { $addToSet: { favorites: requestIds.get(title) } });
+  }
+
   const thisMonth = monthKey();
   const monthly = await Bid.aggregate([
     { $match: { company: { $in: Object.keys(companies).map(key => people[key]._id) } } },

@@ -12,8 +12,26 @@
         <h2>Başlamak için</h2>
         <p>Firma hesabı açın, ücretsiz. Sayfanıza logonuzu, hizmet verdiğiniz illeri ve yaptığınız işlerin fotoğraflarını ekleyin. Çalıştığınız kategorileri seçtiğinizde o alanlarda açılan yeni talepleri size bildiririz. Beğendiğiniz talebe tutar, süre ve kısa bir not yazarsınız; aklınıza takılan bir şey varsa önce talep sayfasından soru sorabilirsiniz. Müşteri teklifinizi kabul ederse telefonlar karşılıklı açılır.</p>
 
-        <h2>Teklif hakkı</h2>
-        <p>Başlangıç paketinde ayda <%= freeBids %> teklif ücretsizdir ve hak her ayın ilk günü yenilenir. Daha çok iş takip ediyorsanız panelinizdeki Paketler sayfasından Pro ya da Kurumsal pakete geçmek için istek gönderin.</p>
+        <h2>Teklif hakkı ve paketler</h2>
+        <p>Başlangıç paketinde ayda <%= freeBids %> teklif ücretsizdir ve hak her ayın ilk günü yenilenir. Daha çok iş takip ediyorsanız Pro ya da Kurumsal pakete geçebilirsiniz.</p>
+        <div class="table-scroll">
+          <table class="data-table plan-table">
+            <thead>
+              <tr>
+                <th><span class="visually-hidden">Özellik</span></th>
+                <% plans.forEach(plan => { %><th class="num"><%= plan.name %></th><% }) %>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Aylık ücret</td><% plans.forEach(plan => { %><td class="num"><strong><%= plan.price ? money(plan.price) : 'Ücretsiz' %></strong></td><% }) %></tr>
+              <tr><td>Aylık teklif hakkı</td><% plans.forEach(plan => { %><td class="num"><%= plan.monthlyBids === null ? 'Sınırsız' : plan.monthlyBids %></td><% }) %></tr>
+              <tr><td>Firma sayfası, iş örnekleri, yorumlar</td><% plans.forEach(() => { %><td class="num">Var</td><% }) %></tr>
+              <tr><td>Müşterilerle mesajlaşma</td><% plans.forEach(() => { %><td class="num">Var</td><% }) %></tr>
+              <tr><td>Uygun taleplerin bildirimi</td><% plans.forEach(() => { %><td class="num">Var</td><% }) %></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small muted">Sitede şimdilik kartla ödeme alınmıyor. Paket isteğinizi <a href="/iletisim?paket=pro">iletişim formundan</a> gönderin; ödeme ve fatura için size e-postayla dönülür.</p>
 
         <h2>Bilmeniz gerekenler</h2>
         <p>Teklif tutarınızı diğer firmalar göremez. Müşteriler firma sayfanızdan sizi doğrudan taleplerine davet edebilir. Yorumu yalnızca işi tamamlanan müşteri yazar, siz de yorumların altına cevap yazabilirsiniz. Onaylı firma rozetini yönetici inceledikten sonra verir.</p>

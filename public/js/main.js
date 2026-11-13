@@ -936,6 +936,40 @@
     });
   }
 
+  /* Talep formu: başlık yazılırken benzer açık talepler (bütçe ve teklif sayısıyla) */
+  function initSimilarRequests() {
+    const box = $('[data-similar]');
+    const title = $('#title');
+    if (!box || !title) return;
+    const list = $('ul', box);
+    const category = $('#category');
+    let timer;
+    let latest = 0;
+    const update = () => {
+      const q = title.value.trim();
+      if (q.length < 4) { box.hidden = true; return; }
+      const ticket = ++latest;
+      const params = new URLSearchParams({ q, category: category ? category.value : '' });
+      fetch(`/requests/similar?${params}`, { headers: { Accept: 'application/json' } })
+        .then(response => (response.ok ? response.json() : { items: [] }))
+        .then(({ items }) => {
+          if (ticket !== latest) return;
+          list.replaceChildren(...items.map(item => {
+            const row = document.createElement('li');
+            const link = Object.assign(document.createElement('a'), { href: item.url, textContent: item.title, target: '_blank', rel: 'noopener' });
+            const meta = document.createElement('span');
+            meta.textContent = [item.budget, `${item.bids} teklif`, item.place].filter(Boolean).join(' · ');
+            row.append(link, meta);
+            return row;
+          }));
+          box.hidden = items.length === 0;
+        })
+        .catch(() => { box.hidden = true; });
+    };
+    title.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(update, 400); });
+    if (title.value.trim().length >= 4) update();
+  }
+
   /* Talep formu: ilçe kutusu seçilen ildeki ilçe adlarını önerir (aynı ilçe farklı yazılmasın) */
   function initLocationSuggestions() {
     const city = $('#city');
@@ -1138,6 +1172,7 @@
     initLocationSuggestions();
     initFormHelpers();
     initBudgetHint();
+    initSimilarRequests();
     initCopyLink();
     initShareMenu();
     initThread();

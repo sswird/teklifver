@@ -556,8 +556,27 @@
     markBest(holder);
   }
 
+  // Talep formundaki benzer açık talepler: sunucudaki sıralamayla yerel veriden
+  function similarResponse(url) {
+    const query = new URLSearchParams(url.split('?')[1]);
+    const q = (query.get('q') || '').trim();
+    return loadData().then(data => {
+      const items = q.length < 4 ? [] : window.TeklifverSearch.rankSimilar(data.requests, q, query.get('category') || '')
+        .slice(0, 3)
+        .map(item => ({
+          title: item.title,
+          url: `${BASE}/requests/${item.id}/`,
+          budget: item.budget,
+          bids: item.bids,
+          place: [item.city, item.location].filter(Boolean).join(' / ')
+        }));
+      return new Response(JSON.stringify({ items }), { headers: { 'Content-Type': 'application/json' } });
+    });
+  }
+
   /* Arama önerileri: main.js sunucuya sorar, burada yerel veriden, sunucudaki kurallarla yanıtlanır */
   window.fetch = (url, options) => {
+    if (typeof url === 'string' && url.startsWith('/requests/similar')) return similarResponse(url);
     if (typeof url !== 'string' || !url.startsWith('/requests/suggest')) return nativeFetch(url, options);
     const term = (new URLSearchParams(url.split('?')[1]).get('q') || '').trim();
     return loadData().then(data => {

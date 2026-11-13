@@ -25,6 +25,12 @@
 <div class="field <%= errors.title ? 'has-error' : '' %>">
   <label class="field-label" for="title">Talep başlığı</label>
   <input class="input" type="text" id="title" name="title" value="<%= form.title %>" maxlength="200" placeholder="Örneğin: Mutfak dolabı kapakları değişecek" required>
+  <% if (locals.showSimilar) { %>
+    <div class="similar-requests" data-similar hidden>
+      <p class="similar-head">Benzer açık talepler</p>
+      <ul></ul>
+    </div>
+  <% } %>
   <% if (errors.title) { %><p class="field-error"><%= errors.title %></p><% } %>
 </div>
 

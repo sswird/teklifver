@@ -18,6 +18,7 @@
         <% } %>
         <form class="form" action="/requests" method="POST" enctype="multipart/form-data" data-draft="request-draft">
           <%- include('_form', {
+            showSimilar: true,
             guest: Boolean(locals.guest),
             form: {
               title: values.title || '',
