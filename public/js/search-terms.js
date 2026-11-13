@@ -146,5 +146,61 @@
       .map(entry => entry.item);
   }
 
-  return { searchPatterns, matchesText, snippetAround, highlightParts, similarityPatterns, rankSimilar };
+  // İki kelime arasındaki harf farkı; yan yana iki harfin yer değiştirmesi bir sayılır. Sınırı geçince erken biter.
+  function editDistance(a, b, limit) {
+    if (Math.abs(a.length - b.length) > limit) return limit + 1;
+    const rows = [Array.from({ length: b.length + 1 }, (_, j) => j)];
+    for (let i = 1; i <= a.length; i += 1) {
+      rows[i] = [i];
+      let best = i;
+      for (let j = 1; j <= b.length; j += 1) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        let value = Math.min(rows[i - 1][j] + 1, rows[i][j - 1] + 1, rows[i - 1][j - 1] + cost);
+        if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) value = Math.min(value, rows[i - 2][j - 2] + 1);
+        rows[i][j] = value;
+        if (value < best) best = value;
+      }
+      if (best > limit) return limit + 1;
+    }
+    return rows[a.length][b.length];
+  }
+
+  // Yazım önerisi sözlüğü: metinlerdeki en az dört harfli kelimeler ve kaç kez geçtikleri
+  function vocabularyOf(texts) {
+    const words = new Map();
+    texts.forEach(text => String(text || '').split(/[^\p{L}]+/u).forEach(word => {
+      if (word.length >= 4) words.set(lower(word), (words.get(lower(word)) || 0) + 1);
+    }));
+    return words;
+  }
+
+  // "Bunu mu demek istediniz?": sözlükte olmayan kelime en yakın sözlük kelimesiyle değişir
+  // (4-6 harfli kelimede 1, daha uzunda 2 harf fark; eşitlikte sık geçen kelime). Değişen yoksa boş döner.
+  function didYouMean(text, vocabulary) {
+    const words = String(text || '').trim().split(/\s+/).filter(Boolean);
+    if (!words.length || words.length > 5) return '';
+    let changed = false;
+    const fixed = words.map(word => {
+      const plain = lower(word);
+      if (plain.length < 4 || vocabulary.has(plain) || STOP_WORDS.has(plain) || /\d/.test(plain)) return plain;
+      const limit = plain.length >= 7 ? 2 : 1;
+      let best = '';
+      let bestDistance = limit + 1;
+      let bestCount = 0;
+      vocabulary.forEach((count, candidate) => {
+        const distance = editDistance(plain, candidate, limit);
+        if (distance < bestDistance || (distance === bestDistance && count > bestCount)) {
+          best = candidate;
+          bestDistance = distance;
+          bestCount = count;
+        }
+      });
+      if (!best || bestDistance > limit) return plain;
+      changed = true;
+      return best;
+    });
+    return changed ? fixed.join(' ') : '';
+  }
+
+  return { searchPatterns, matchesText, snippetAround, highlightParts, similarityPatterns, rankSimilar, vocabularyOf, didYouMean };
 }));

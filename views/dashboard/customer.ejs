@@ -55,7 +55,7 @@
                 </td>
                 <td>
                   <a class="listing-title" href="/requests/<%= item._id %>"><%= item.title %></a><% if (item.newBids) { %><span class="label label-new"><%= item.newBids %> YENİ TEKLİF</span><% } %>
-                  <div class="listing-sub">No: <%= item.no %> · <%= item.category %></div>
+                  <div class="listing-sub">No: <%= item.no %> · <%= item.category %> · <%= item.viewCount || 0 %> görüntülenme</div>
                 </td>
                 <td class="col-bids"><%= item.bids.length %></td>
                 <td class="col-budget"><%= pending.length ? money(pending[0].amount) : '-' %></td>

@@ -24,6 +24,7 @@ const ads = require('./config/ads');
 const site = require('./config/site');
 const icon = require('./lib/icons');
 const helpers = require('./lib/helpers');
+const { JOBS: popularJobs } = require('./lib/price-board');
 const { visibleProviders } = require('./lib/oauth');
 const { siteUrl, configuredUrl } = require('./lib/url');
 const { verificationRequired, isEnabled: mailEnabled, checkConnection } = require('./lib/mailer');
@@ -87,6 +88,8 @@ async function start() {
   Object.assign(app.locals, helpers, {
     icon,
     site,
+    // Alt bilgideki "Çok arananlar" satırı: fiyat panosundaki işler
+    popularJobs,
     demoActive: hasDemoData,
     // Tek tıkla giriş düğmeleri yalnızca geliştirmede görünür.
     demoAccounts: hasDemoData && !isProduction ? demoAccounts : [],

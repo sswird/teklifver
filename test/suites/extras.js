@@ -285,6 +285,16 @@ const idOf = path => path.split('/').pop();
   await post(firm, `${kwic}/favorite`);
   check("talepte favori sayısı", /görüntülenme · 1 favori/.test((await get(null, kwic)).text));
 
+  // Yazım önerisi, talepte benzer işlerin fiyatı, alt bilgide çok arananlar, müşteri panelinde görüntülenme
+  const typo = (await get(null, `/requests?search=${encodeURIComponent('nakliat')}`)).text;
+  check("yazım hatasında öneri", typo.includes('Bunu mu demek istediniz: <a href="/requests?search=nakliyat"><b>nakliyat</b></a>?'));
+  check("doğru yazımda öneri yok", !(await get(null, `/requests?search=${encodeURIComponent('zzqqxx')}`)).text.includes('Bunu mu demek istediniz'));
+  const boyaPath = ((await get(null, `/requests?search=${encodeURIComponent('boya badana')}`)).text.match(/class="listing-title" href="(\/requests\/[a-f0-9]{24})"/) || [])[1];
+  const boyaPage = boyaPath ? (await get(null, boyaPath)).text : '';
+  check("talepte benzer işlerin fiyatı", /<td>Benzer İşlerde<\/td><td><strong>[\d.]+ - [\d.]+ TL<\/strong> <span class="muted small">\(boya badana, \d+ teklif\)<\/span>/.test(boyaPage));
+  check("alt bilgide çok arananlar", (await get(null, '/')).text.includes('<strong>Çok arananlar:</strong>'));
+  check("müşteri panelinde görüntülenme", /\d+ görüntülenme<\/div>/.test((await get(owner, '/dashboard')).text));
+
   console.log(`${passed} geçti, ${failures} hata`);
   process.exit(failures ? 1 : 0);
 })().catch(err => {

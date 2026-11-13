@@ -206,6 +206,7 @@
       <% if (requests.length === 0) { %>
         <div class="empty empty-search">
           <h2><%= filters.search ? `"${filters.search}" için açık talep bulunamadı` : 'Bu filtrelerle açık talep bulunamadı' %></h2>
+          <% if (spellFix) { %><p class="spell-fix">Bunu mu demek istediniz: <a href="<%= listUrl({ search: spellFix }) %>"><b><%= spellFix %></b></a>?</p><% } %>
           <ul class="empty-tips">
             <% if (chips.length) { %><li>Yukarıdaki filtrelerden birini kaldırın<% if (chips.length > 1) { %> ya da <a href="/requests">hepsini temizleyin</a><% } %>.</li><% } %>
             <% if (suggestion && suggestion !== filters.category) { %><li><a href="<%= listUrl({ category: suggestion, search: '' }) %>"><%= suggestion %></a> kategorisindeki <%= counts[suggestion] || 0 %> açık talebe bakın.</li><% } %>

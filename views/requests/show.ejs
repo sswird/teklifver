@@ -124,6 +124,9 @@
         <tr><td>Durum</td><td><%- include('../partials/status', { status: requestStatus[request.status] }) %></td></tr>
         <tr><td>Teklif Sayısı</td><td><%= bids.length %></td></tr>
         <tr><td>Görüntülenme</td><td><%= request.viewCount %></td></tr>
+        <% if (jobPrice) { %>
+          <tr><td>Benzer İşlerde</td><td><strong><%= money(jobPrice.low).replace(' TL', '') %> - <%= money(jobPrice.high) %></strong> <span class="muted small">(<%= jobPrice.label.toLocaleLowerCase('tr-TR') %>, <%= jobPrice.count %> teklif)</span> <a class="small" href="/fiyat-rehberi">Fiyat rehberi</a></td></tr>
+        <% } %>
         <% if (averages) { %>
           <tr><td>Kategori Ort. Teklif</td><td><%= money(averages.amount) %> <span class="muted small">(<%= averages.days %> gün, <%= averages.total %> teklif)</span><% if (averages.total >= 5) { %> <a class="small" href="/fiyat-rehberi#dagilim-<%= categoryUrl(request.category).split('/').pop() %>">Teklif dağılımı</a><% } %></td></tr>
         <% } %>

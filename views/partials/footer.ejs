@@ -45,6 +45,9 @@
         <p><strong>Hizmetler:</strong>
           <% allCategories.forEach((category, index) => { %><a href="<%= categoryUrl(category.name) %>"><%= category.name %> Teklifleri</a><%= index < allCategories.length - 1 ? ', ' : '' %><% }) %>
         </p>
+        <p><strong>Çok arananlar:</strong>
+          <% popularJobs.forEach((job, index) => { %><a href="/requests?<%= new URLSearchParams({ category: job.category, search: job.search }) %>"><%= job.label %></a><%= index < popularJobs.length - 1 ? ', ' : '' %><% }) %>
+        </p>
         <p><strong>İller:</strong>
           <% ['İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya', 'Adana', 'Konya', 'Gaziantep', 'Kocaeli', 'Mersin'].forEach(city => { %><a href="<%= cityUrl(city) %>"><%= city %></a>, <% }) %><a href="/iller">tüm iller</a>
         </p>

@@ -18,8 +18,9 @@ const { bidAllowance } = require('../lib/plans');
 const { rateLimit } = require('express-rate-limit');
 const { uploadImages, deleteImages, copyImages, MAX_IMAGES } = require('../middleware/upload');
 const { str, safeNext } = require('../lib/input');
-const { searchPatterns, matchesText, similarityPatterns, rankSimilar } = require('../public/js/search-terms');
-const { openCountsByCategory, uniqueByPhoto, categoryAverages, priceGuide, districtsByCity: loadDistricts, districtCounts } = require('../lib/stats');
+const { searchPatterns, matchesText, similarityPatterns, rankSimilar, didYouMean } = require('../public/js/search-terms');
+const { openCountsByCategory, uniqueByPhoto, categoryAverages, priceGuide, districtsByCity: loadDistricts, districtCounts, searchVocabulary } = require('../lib/stats');
+const { priceBoard } = require('../lib/price-board');
 const { SORT_OPTIONS, liveFilter, readFilters, buildConditions, filtersToQuery, firmsServing, placePrefixSource } = require('../lib/listing');
 const { notify, notifyMany } = require('../lib/notify');
 const mongoose = require('mongoose');
@@ -143,6 +144,12 @@ router.get('/', async (req, res, next) => {
     // Sonuç çıkmazsa sayfa boş kalmasın: uygun kategori önerisi ve son eklenen talepler
     const suggestion = !requests.length && filters.search ? categories.guess(filters.search) : '';
     const fallback = requests.length ? [] : await Request.find(liveFilter()).sort({ createdAt: -1 }).limit(5).lean();
+    // Yazım hatası önerisi ("nakliat" -> "nakliyat"); yalnız öneri sonuç veriyorsa gösterilir.
+    let spellFix = '';
+    if (!requests.length && filters.search) {
+      const fix = didYouMean(filters.search, await searchVocabulary());
+      if (fix && await Request.countDocuments(buildConditions({ ...filters, search: fix }))) spellFix = fix;
+    }
 
     res.render('requests/index', {
       title: filters.category === 'all' ? 'Talepler' : filters.category,
@@ -161,6 +168,7 @@ router.get('/', async (req, res, next) => {
       districtRows,
       cityTotal,
       suggestion,
+      spellFix,
       fallback,
       total,
       page,
@@ -578,7 +586,7 @@ router.get('/:id', async (req, res, next) => {
       return { _id: bid._id, status: bid.status, createdAt: bid.createdAt, company, hidden: true };
     });
 
-    const [similarAll, ownerOpenCount, averages, review, alreadyReported, lastBid, bidder, newerRequest, olderRequest, ownerOthers, favoriteCount] = await Promise.all([
+    const [similarAll, ownerOpenCount, averages, review, alreadyReported, lastBid, bidder, newerRequest, olderRequest, ownerOthers, favoriteCount, board] = await Promise.all([
       Request.find({ ...liveFilter(), category: request.category, _id: { $ne: request._id } })
         .sort({ createdAt: -1 })
         .limit(20)
@@ -598,8 +606,11 @@ router.get('/:id', async (req, res, next) => {
       // Talep sahibinin diğer açık talepleri: firma birkaç işe birlikte teklif verebilir.
       Request.find({ ...liveFilter(), customer: request.customer._id, _id: { $ne: request._id } }).sort({ createdAt: -1 }).limit(3).select('title budget').lean(),
       // Kaç kişi favorilerine ekledi: firmalar için ilgi göstergesi
-      User.countDocuments({ favorites: request._id })
+      User.countDocuments({ favorites: request._id }),
+      priceBoard()
     ]);
+    // Talep fiyat panosundaki bir işe uyuyorsa (boya badana gibi) o işte tekliflerin çoğunun düştüğü aralık
+    const jobPrice = board.find(row => row.category === request.category && matchesText(row.search, [request.title])) || null;
 
     const bidBadges = await badgesFor(allBids.map(bid => bid.company));
     res.render('requests/show', {
@@ -641,6 +652,7 @@ router.get('/:id', async (req, res, next) => {
       ownerOpenCount,
       ownerOthers,
       favoriteCount,
+      jobPrice,
       newerRequest,
       olderRequest,
       canSeeBids,

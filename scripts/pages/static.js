@@ -364,6 +364,18 @@
     });
   }
 
+  // Arama sonuçsuzsa yazım önerisi: sunucudaki sözlük ve kurallarla, öneri sonuç veriyorsa gösterilir.
+  function spellFixFor(data, filters) {
+    if (!filters.search) return '';
+    const words = window.TeklifverSearch;
+    const vocabulary = words.vocabularyOf([
+      ...data.requests.flatMap(item => [item.title, item.description]),
+      ...data.categories.flatMap(category => [category.name, category.keywords, ...(category.subs || []).map(([label]) => label)])
+    ]);
+    const fix = words.didYouMean(filters.search, vocabulary);
+    return fix && data.requests.some(item => matchesRequest(item, { ...filters, search: fix }, data.builtAt)) ? fix : '';
+  }
+
   function renderRequests(data) {
     const filters = readRequestFilters(data);
     const matched = data.requests
@@ -393,8 +405,10 @@
           ` kategorisindeki ${total} açık talebe bakın.`
         ]));
       }
+      const fix = spellFixFor(data, filters);
       const children = [
         element('h2', { textContent: filters.search ? `"${filters.search}" için açık talep bulunamadı` : 'Bu filtrelerle açık talep bulunamadı' }),
+        ...(fix ? [element('p', { className: 'spell-fix' }, ['Bunu mu demek istediniz: ', element('a', { href: requestUrl(filters, { search: fix }) }, [element('b', { textContent: fix })]), '?'])] : []),
         tips
       ];
       if (filters.search) {
