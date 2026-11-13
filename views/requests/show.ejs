@@ -329,6 +329,7 @@
               </div>
             </div>
           </div>
+          <p class="field-hint budget-hint" data-budget-hint-for="editAmount" data-min="<%= (request.budget || {}).min || 0 %>" data-max="<%= (request.budget || {}).max || 0 %>" data-average="<%= averages ? averages.amount : '' %>" hidden></p>
           <div class="field">
             <label class="field-label" for="editDescription">Açıklama</label>
             <textarea class="textarea" id="editDescription" name="description" rows="3" maxlength="3000" required><%= userBid.description %></textarea>
@@ -368,6 +369,7 @@
               </div>
             </div>
           </div>
+          <p class="field-hint budget-hint" data-budget-hint-for="amount" data-min="<%= (request.budget || {}).min || 0 %>" data-max="<%= (request.budget || {}).max || 0 %>" data-average="<%= averages ? averages.amount : '' %>" hidden></p>
           <div class="field">
             <label class="field-label" for="bidDescription">Açıklama
               <% if (lastBidText) { %><button class="link-button" type="button" data-fill-target="bidDescription" data-fill-text="<%= lastBidText %>">Son teklif metnimi kullan</button><% } %>
@@ -422,10 +424,10 @@
         </thead>
         <tbody>
           <% bids.forEach(bid => { %>
-            <tr class="bid-row <%= bid.status === 'accepted' ? 'is-accepted' : '' %> <%= bid.status === 'rejected' ? 'is-rejected' : '' %>">
+            <tr class="bid-row<%= bid.status === 'accepted' ? ' is-accepted' : '' %><%= bid.status === 'rejected' ? ' is-rejected' : '' %><%= bid.isNewBid ? ' is-new' : '' %>" id="teklif-<%= bid._id %>">
               <td style="width:170px">
                 <a class="bid-company" href="/companies/<%= bid.company._id %>"><%= bid.company.companyName || bid.company.name %></a>
-                <% if (bid.company.verified) { %><%- include('../partials/verified') %><% } %>
+                <% if (bid.company.verified) { %><%- include('../partials/verified') %><% } %><% if (bid.isNewBid) { %><span class="label label-new">YENİ</span><% } %>
                 <div class="firm-badges"><%- include('../partials/firm-badges', { badges: bidBadges.get(String(bid.company._id)) }) %></div>
                 <% if (bid.company.ratingCount > 0) { %>
                   <% if (bidSummary && bid.status === 'pending' && bid.company.rating === bidSummary.bestRating) { %><span class="tag-lowest">En yüksek puan</span><% } %>
@@ -454,7 +456,7 @@
                 <% if (bidSummary && bid.status === 'pending' && bid.deliveryTime === bidSummary.fastestTag) { %><div class="tag-lowest">En hızlı</div><% } %>
               </td>
               <% } %>
-              <td class="col-date"><%= formatDate(bid.createdAt) %></td>
+              <td class="col-date"><%- dateCell(bid.createdAt) %></td>
               <td class="col-status"><%- include('../partials/status', { status: bidStatus[bid.status] }) %></td>
               <% if (isOwner && isOpen) { %>
                 <td style="width:130px">

@@ -906,6 +906,36 @@
     }));
   }
 
+  /* Teklif formu: yazılan tutar müşterinin bütçesine (bütçe yoksa kategori ortalamasına) göre nerede? */
+  function initBudgetHint() {
+    $$('[data-budget-hint-for]').forEach(hint => {
+      const field = document.getElementById(hint.dataset.budgetHintFor);
+      if (!field) return;
+      const min = Number(hint.dataset.min) || 0;
+      const max = Number(hint.dataset.max) || 0;
+      const average = Number(hint.dataset.average) || 0;
+      const percent = (value, base) => `%${Math.max(1, Math.round((Math.abs(value - base) / base) * 100))}`;
+      const update = () => {
+        const amount = Number(field.value);
+        let text = '';
+        if (amount > 0 && (min || max)) {
+          if (max && amount > max) text = `Tutarınız müşterinin en fazla bütçesinin ${percent(amount, max)} üstünde.`;
+          else if (min && amount < min) text = `Tutarınız müşterinin en az bütçesinin ${percent(amount, min)} altında.`;
+          else text = 'Tutarınız müşterinin bütçesine uyuyor.';
+        } else if (amount > 0 && average) {
+          text = amount === average
+            ? 'Bu kategorideki ortalama teklif kadar.'
+            : `Bu kategorideki ortalama teklifin ${percent(amount, average)} ${amount > average ? 'üstünde' : 'altında'}.`;
+        }
+        hint.textContent = text;
+        hint.hidden = !text;
+        hint.classList.toggle('is-over', Boolean(max && amount > max));
+      };
+      field.addEventListener('input', update);
+      update();
+    });
+  }
+
   /* Talep formu: ilçe kutusu seçilen ildeki ilçe adlarını önerir (aynı ilçe farklı yazılmasın) */
   function initLocationSuggestions() {
     const city = $('#city');
@@ -1107,6 +1137,7 @@
     initDistrictSelect();
     initLocationSuggestions();
     initFormHelpers();
+    initBudgetHint();
     initCopyLink();
     initShareMenu();
     initThread();

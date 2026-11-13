@@ -24,12 +24,15 @@ router.get('/', isLoggedIn, async (req, res, next) => {
       const myRequests = await Request.find({ customer: user.id }).sort({ createdAt: -1 }).lean();
 
       const bids = await Bid.find({ request: { $in: myRequests.map(r => r._id) } })
-        .select('request status amount')
+        .select('request status amount createdAt')
         .sort({ amount: 1 })
         .lean();
 
       for (const request of myRequests) {
         request.bids = bids.filter(bid => bid.request.equals(request._id));
+        // Talep sahibi talebi en son açtığından sonra gelen bekleyen teklifler
+        const seen = request.ownerSeenAt ? new Date(request.ownerSeenAt) : new Date(0);
+        request.newBids = request.bids.filter(bid => bid.status === 'pending' && new Date(bid.createdAt) > seen).length;
       }
 
       return res.render('dashboard/customer', {

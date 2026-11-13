@@ -156,7 +156,7 @@
                 <div class="listing-sub"><%= job.category %></div>
               </td>
               <td class="col-place"><%= placeLabel(job) %></td>
-              <td class="col-date"><%= formatDate(job.createdAt) %></td>
+              <td class="col-date"><%- dateCell(job.createdAt) %></td>
               <td class="col-status"><%- include('../partials/status', { status: requestStatus[job.status] }) %></td>
             </tr>
           <% }) %>

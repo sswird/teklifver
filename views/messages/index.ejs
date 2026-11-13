@@ -48,7 +48,7 @@
                   <div class="listing-sub"><%= truncate(thread.request.title, 60) %></div>
                 </td>
                 <td class="inbox-last"><%= thread.mine ? 'Siz: ' : '' %><%= thread.last.content ? truncate(thread.last.content, 80) : 'Fotoğraf' %></td>
-                <td class="col-date"><%= formatDate(thread.last.createdAt) %></td>
+                <td class="col-date"><%- dateCell(thread.last.createdAt) %></td>
               </tr>
             <% }) %>
           </tbody>

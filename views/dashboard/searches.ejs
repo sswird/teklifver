@@ -23,7 +23,7 @@
                 <td><a class="listing-title" href="/dashboard/searches/<%= search._id %>/open"><%= search.name %></a></td>
                 <td class="col-bids"><%= search.total %></td>
                 <td class="col-bids"><% if (search.fresh) { %><span class="unread-count"><%= search.fresh %></span><% } else { %>0<% } %></td>
-                <td class="col-date"><%= formatDate(search.createdAt) %></td>
+                <td class="col-date"><%- dateCell(search.createdAt) %></td>
                 <td class="col-status">
                   <form action="/dashboard/searches/<%= search._id %>/delete" method="POST">
                     <button class="btn btn-sm btn-danger-quiet" type="submit">Sil</button>

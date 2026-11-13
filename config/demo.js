@@ -694,6 +694,8 @@ async function createDemoData({ showcase = false } = {}) {
       status,
       acceptedBid: accepted ? accepted._id : undefined,
       bidCount: bidDocs.length,
+      // Sahibi talebe en son yayın süresinin yarısında (en çok 12 saat önce) baktı; sonra gelen teklifler "yeni" görünür. Kapanmış talepte hepsi görülmüş.
+      ownerSeenAt: status === 'open' ? hoursAgo(Math.min(12, listedHours / 2)) : hoursAgo(0),
       viewCount: views,
       deadline: extra.deadline ? daysFromNow(extra.deadline) : undefined,
       discoveryTime: extra.discoveryTime || '',

@@ -77,6 +77,11 @@ const requestSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  // Talep sahibinin talebi en son açtığı an: sonra gelen teklifler "yeni" görünür.
+  ownerSeenAt: {
+    type: Date,
+    default: Date.now
+  },
   viewCount: {
     type: Number,
     default: 0

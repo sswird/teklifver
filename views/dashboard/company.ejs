@@ -63,7 +63,7 @@
                 </td>
                 <td class="col-budget"><%= money(bid.amount) %></td>
                 <td class="col-date"><%= bid.deliveryTime %> gün</td>
-                <td class="col-date"><%= formatDate(bid.createdAt) %></td>
+                <td class="col-date"><%- dateCell(bid.createdAt) %></td>
                 <td class="col-status"><%- include('../partials/status', { status: bidStatus[bid.status] }) %></td>
               </tr>
             <% }) %>

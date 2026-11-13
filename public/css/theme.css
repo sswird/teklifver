@@ -19,6 +19,7 @@
   --accent-line: #e0a800;
   --accent-ink: #1c1e21;
   --link: #0f5bb5;
+  --visited: #6b3fa0;
   --ink: #1c1e21;
   --ink-hover: #3b3f44;
   --on-ink: #fff;
@@ -80,6 +81,7 @@
     --accent-line: #b98d00;
     --accent-ink: #1c1e21;
     --link: #8ab8f5;
+    --visited: #c3a8f0;
     --ink: #e9eaec;
     --ink-hover: #cfd1d5;
     --on-ink: #17191c;

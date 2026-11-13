@@ -29,6 +29,14 @@
         </span>
       </a>
 
+      <% const threadBid = locals.bid; if (threadBid) { const mine = currentUser.role === 'company'; %>
+        <p class="thread-bid">
+          <span><%= mine ? 'Teklifiniz' : 'Firmanın teklifi' %>: <strong><%= money(threadBid.amount) %></strong> · <%= threadBid.deliveryTime %> gün</span>
+          <%- include('../partials/status', { status: bidStatus[threadBid.status] }) %>
+          <a href="/requests/<%= request._id %>#teklif-<%= threadBid._id %>"><%= mine ? 'Teklifinize git' : 'Teklife git' %></a>
+        </p>
+      <% } %>
+
       <div class="thread" id="thread" data-poll="/messages/<%= request._id %>/<%= other._id %>/new" data-last="<%= messages.length ? messages[messages.length - 1]._id : '' %>">
         <p class="thread-empty" <%= messages.length ? 'hidden' : '' %>>Henüz mesaj yok. İlk mesajı siz yazın.</p>
         <% messages.forEach(message => { const mine = message.sender.toString() === currentUser.id; %>

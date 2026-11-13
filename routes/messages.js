@@ -61,16 +61,16 @@ async function loadThread(req) {
   if (companyRole !== 'company') return null;
 
   const companyId = viewerIsOwner ? userId : viewer.id;
-  const [hasBid, hasHistory] = await Promise.all([
-    Bid.exists({ request: requestId, company: companyId }),
+  const [bid, hasHistory] = await Promise.all([
+    Bid.findOne({ request: requestId, company: companyId }).select('amount deliveryTime status').lean(),
     Message.exists(pairFilter(requestId, viewer.id, userId))
   ]);
 
   const allowed = viewerIsOwner
-    ? hasBid || hasHistory
-    : request.status === 'open' || hasBid || hasHistory;
+    ? bid || hasHistory
+    : request.status === 'open' || bid || hasHistory;
 
-  return allowed ? { request, other } : null;
+  return allowed ? { request, other, bid } : null;
 }
 
 function denyThread(req, res) {
@@ -160,6 +160,7 @@ router.get('/:requestId/:userId', isLoggedIn, async (req, res, next) => {
       section: 'messages',
       request: thread.request,
       other: thread.other,
+      bid: thread.bid,
       messages: messages.reverse(),
       maxLength: MAX_MESSAGE_LENGTH
     });

@@ -234,6 +234,26 @@ const idOf = path => path.split('/').pop();
   check("son teklif zamanı gerçek kayıttan", /son teklif <strong>[^<]*(önce|dün)[^<]*<\/strong>/.test(home));
   check("fotoğrafsız ilan kategori adını taşır", /class="no-photo is-placeholder" data-cat="[^"]+"/.test(home));
 
+  // Yeni teklif işareti, konuşmada teklif özeti, teklif formunda bütçe ipucu, iki satırlı tarih, üst bant
+  const fresh = await newRequest(owner, { title: `Balkon duvarı boyanacak ${stamp}`, description: FILLER, category: 'İnşaat & Tadilat', budgetMin: '5000', budgetMax: '8000' });
+  check("teklif formunda bütçe ipucu", /data-budget-hint-for="amount" data-min="5000" data-max="8000"/.test((await get(rival, fresh)).text));
+  await post(rival, '/bids', { requestId: idOf(fresh), amount: '7000', deliveryTime: '4', description: 'Balkon için teklifim' });
+  const newLabel = new RegExp(`href="${fresh}">[^<]+</a>\\s*<span class="label label-new">1 YENİ TEKLİF</span>`);
+  check("panelde yeni teklif işareti", newLabel.test((await get(owner, '/dashboard')).text));
+  const firstLook = (await get(owner, fresh)).text;
+  const freshBid = (firstLook.match(/<tr class="bid-row[^"]*" id="teklif-([a-f0-9]{24})"/) || [])[1];
+  check("talepte yeni teklif etiketlenir", /<tr class="bid-row is-new" id="teklif-[a-f0-9]{24}"/.test(firstLook) && firstLook.includes('<span class="label label-new">YENİ</span>'));
+  const secondLook = (await get(owner, fresh)).text;
+  check("bakınca yeni işareti kalkar", Boolean(freshBid) && !secondLook.includes('bid-row is-new') && !newLabel.test((await get(owner, '/dashboard')).text));
+  const rivalId = (firstLook.match(/href="\/messages\/[a-f0-9]{24}\/([a-f0-9]{24})"/) || [])[1];
+  const ownerThread = (await get(owner, `/messages/${idOf(fresh)}/${rivalId}`)).text;
+  check("konuşmada firmanın teklifi", ownerThread.includes('Firmanın teklifi: <strong>7.000 TL</strong>') && ownerThread.includes(`href="${fresh}#teklif-${freshBid}"`));
+  check("konuşmada firmanın kendi teklifi", (await get(rival, `/messages/${idOf(fresh)}/${ownerId}`)).text.includes('Teklifiniz: <strong>7.000 TL</strong>'));
+  check("tablolarda tarih iki satır", /<td class="col-date">\d{1,2} [^<]+<span class="date-year"> \d{4}<\/span><\/td>/.test(secondLook));
+  const css = (await get(null, '/css/style.css')).text;
+  check("bakılmış talep başlığı mor", css.includes('.listing-table.is-classic a.listing-title:visited'));
+  check("telefonda üst bantta mesaj ve favori gizlenir", /class="topbar-messages" href="\/messages"/.test(secondLook) && css.includes('.topbar-messages, .topbar-favs { display: none; }'));
+
   console.log(`${passed} geçti, ${failures} hata`);
   process.exit(failures ? 1 : 0);
 })().catch(err => {

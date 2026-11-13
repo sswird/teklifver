@@ -1015,6 +1015,8 @@ html[data-theme='dark'] .cat-icon { background: color-mix(in srgb, var(--c) 24%,
   .topbar-register { display: none !important; }
   .topbar-login { min-height: 32px; padding: 0 12px; border: 1px solid rgb(255 255 255 / 0.4); border-radius: var(--radius); font-size: 14px; }
   .topbar .menu-button { max-width: 136px; min-height: 32px; padding: 0 8px 0 10px; border: 1px solid rgb(255 255 255 / 0.4); border-radius: var(--radius); font-size: 14px; }
+  /* Telefonda mesajlar alttaki menüde, favoriler hesap menüsünde: üst bant logoya binmesin. */
+  .topbar-messages, .topbar-favs { display: none; }
   .menu-panel { top: calc(100% + 2px); }
   .mainbar-inner { row-gap: 0; padding-block: 0 10px; }
   .logo { min-height: 56px; font-size: 28px; }
@@ -1226,6 +1228,35 @@ h2 { font: 700 17px/1.3 var(--font); letter-spacing: 0; }
 .quick-dates[hidden] { display: none; }
 /* Yan yana alanlardan biri uzayınca (hızlı seçim satırı) diğerinin kutusu uzamasın */
 .form-step .field-row { align-items: start; }
+
+/* Üst bant: dar ekranda yazılar alt satıra kaymaz; giriş yapılınca ikincil bağlantılar gizlenir */
+.topbar a, .topbar .menu-button, .theme-toggle { white-space: nowrap; }
+@media (min-width: 761px) { .topbar .menu-button { max-width: 200px; } }
+@media (min-width: 761px) and (max-width: 1080px) {
+  .topbar-inner.has-user .topbar-left a:nth-child(n+3) { display: none; }
+}
+@media (min-width: 761px) and (max-width: 900px) {
+  .topbar-inner.has-user .theme-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+
+/* Tablolarda tarih iki satır: gün ay, altında yıl (telefonda yan yana) */
+.listing-table td.col-date .date-year { display: block; }
+@media (max-width: 760px) { .listing-table td.col-date .date-year { display: inline; } }
+
+/* Bakılmış talep başlığı mor görünür */
+.listing-table.is-classic a.listing-title:visited { color: var(--visited); }
+
+/* Teklife bağlantıyla gelinince satır belirgin olur */
+.bid-row { scroll-margin-top: 12px; }
+.bid-row:target > td { background: var(--hover); }
+
+/* Konuşmada teklif özeti */
+.thread-bid { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0; padding: 8px 14px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.thread-bid a { margin-left: auto; }
+
+/* Teklif formu: tutar bütçeye göre */
+.budget-hint { margin-top: -6px; }
+.budget-hint.is-over { color: var(--amber); }
 
 /* Fiyat: süslü etiket yerine kalın yazı */
 .price-tag, .listing-table.is-feed .price-tag { padding: 0; background: none; clip-path: none; color: var(--text); font: 700 15px/1.3 var(--font); }

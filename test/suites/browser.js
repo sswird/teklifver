@@ -428,6 +428,11 @@ const logout = async page => page.clickAndWait('form[action="/logout"] button');
     await page.goto(await page.evaluate("document.querySelector('.listing-title').getAttribute('href')"));
     await page.click('[data-fill-target]');
     check('son teklif metni kullanılır', (await page.evaluate("document.getElementById('bidDescription').value")) === 'Tarayıcıdan teklif');
+    const budgetHint = () => page.evaluate(`(() => { const hint = document.querySelector('[data-budget-hint-for="amount"]'); return hint.hidden ? '' : hint.textContent; })()`);
+    await page.fill('#amount', '20000');
+    check('tutar bütçenin üstündeyse söylenir', (await budgetHint()).includes('%11 üstünde'), await budgetHint());
+    await page.fill('#amount', '10000');
+    check('tutar bütçeye uyuyorsa söylenir', (await budgetHint()).includes('bütçesine uyuyor'), await budgetHint());
 
     await page.goto('/profile');
     await page.fill('#phone', '0555 111 22 33');
@@ -469,6 +474,11 @@ const logout = async page => page.clickAndWait('form[action="/logout"] button');
     await page.goto('/');
     check('mobil alt menü görünür', await page.evaluate(`getComputedStyle(document.querySelector('.bottom-nav')).display !== 'none'`));
     check('mobilde yatay taşma yok', await page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'));
+    check('telefonda üst bant logoya binmez', await page.evaluate(`(() => {
+      const logo = document.querySelector('.logo').getBoundingClientRect();
+      const items = [...document.querySelector('.topbar-inner').children].filter(el => el.getBoundingClientRect().width > 0);
+      return getComputedStyle(document.querySelector('.topbar-messages')).display === 'none' && items.length >= 2 && items.every(el => el.getBoundingClientRect().left >= logo.right);
+    })()`));
     await page.goto('/requests?urgent=on');
     check('telefonda detaylı arama kapalı başlar', await page.evaluate(`!document.getElementById('detayli-arama').open`));
     check('telefonda Filtrele düğmesi etkin filtreyi sayar', await page.evaluate(`getComputedStyle(document.querySelector('.mobile-filter')).display !== 'none' && document.querySelector('.mobile-filter').textContent.includes('(1)')`));

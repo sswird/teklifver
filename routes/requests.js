@@ -470,6 +470,13 @@ router.get('/:id', async (req, res, next) => {
       request.viewCount += 1;
     }
 
+    // Talep sahibi son baktığından sonra gelen teklifleri "yeni" görür; sayfayı açınca işaret kalkar.
+    let seenBefore = null;
+    if (isOwner) {
+      seenBefore = request.ownerSeenAt ? new Date(request.ownerSeenAt) : new Date(0);
+      await Request.updateOne({ _id: request._id }, { $set: { ownerSeenAt: new Date() } }, { timestamps: false });
+    }
+
     const canSeeBids = isOwner || isAdminViewer;
     const bidSort = ['amount', 'days', 'rating'].includes(req.query.bidSort) ? req.query.bidSort : 'amount';
     const allBids = (
@@ -530,7 +537,7 @@ router.get('/:id', async (req, res, next) => {
     // Tutar ve açıklama yalnızca talep sahibine, yöneticiye ve teklifi verene görünür; rakip firmalar görmez.
     const bids = allBids.map(bid => {
       const company = { _id: bid.company._id, name: bid.company.name, companyName: bid.company.companyName, rating: bid.company.rating, ratingCount: bid.company.ratingCount, verified: bid.company.verified };
-      if (canSeeBids || bid === userBid) return { ...bid, company };
+      if (canSeeBids || bid === userBid) return { ...bid, company, isNewBid: Boolean(seenBefore && bid.status === 'pending' && new Date(bid.createdAt) > seenBefore) };
       return { _id: bid._id, status: bid.status, createdAt: bid.createdAt, company, hidden: true };
     });
 
