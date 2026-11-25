@@ -1,0 +1,120 @@
+/* TeklifVer teması: renkler ve ölçüler burada.
+   Koyu üst bant, sarı etiket logo, beyaz çalışma alanı, mavi bağlantılar.
+   Yazı tipi indirilmez: her cihaz kendi yazı tipini kullanır (Windows'ta Segoe UI, Mac'te Helvetica, Android'de Roboto). */
+
+
+:root {
+  --bg: #f1f2f4;
+  --surface: #fff;
+  --text: #1c1e21;
+  --text-soft: #3b3f44;
+  --muted: #5f646b;
+  --line: #d9dce0;
+  --line-soft: #eceef1;
+  --head: #f6f7f8;
+  --hover: #fbf9f0;
+
+  --accent: #ffc61a;
+  --accent-dark: #f2b600;
+  --accent-line: #e0a800;
+  --accent-ink: #1c1e21;
+  --link: #0f5bb5;
+  --visited: #6b3fa0;
+  --ink: #1c1e21;
+  --ink-hover: #3b3f44;
+  --on-ink: #fff;
+
+  --green: #14713a;
+  --amber: #8a5d00;
+  --blue: #0f5bb5;
+  --red: #c4231b;
+  --urgent: #c4231b;
+
+  --topbar: #16181b;
+  --mainbar: #1f2226;
+  --on-dark: #fff;
+  --on-dark-soft: #c6c9ce;
+  --footer-bg: #1f2226;
+  --footer-line: #3a3e44;
+
+  --tag-bg: #fff1b8;
+  --tag-text: #1c1e21;
+
+  --control-bg: #fff;
+  --control-border: #a9aeb5;
+  --selected: #eef3fb;
+  --selected-line: #b6cdeb;
+  --warn-bg: #fff8e1;
+  --warn-line: #ecd9a5;
+  --ok-bg: #edf7f0;
+  --ok-line: #a6d5b5;
+  --ok-text: #14592c;
+  --err-bg: #fdf0ef;
+  --err-line: #ecb9b5;
+  --err-text: #8f1d17;
+  --track: #e4e6e9;
+  --star: #e0a100;
+  --star-empty: #c5c8cc;
+  --shadow: 0 4px 16px rgb(16 20 26 / 0.16);
+
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-head: var(--font);
+  --radius: 4px;
+  color-scheme: light;
+}
+
+/* Siyah tema. Yalnızca ekranda geçerlidir, sayfa yazdırılırken beyaz kalır. */
+@media screen {
+  :root[data-theme='dark'] {
+    --bg: #0f1012;
+    --surface: #17191c;
+    --text: #e9eaec;
+    --text-soft: #cfd1d5;
+    --muted: #a3a7ad;
+    --line: #2f3237;
+    --line-soft: #25272b;
+    --head: #1d1f23;
+    --hover: #1e2024;
+
+    --accent: #ffc61a;
+    --accent-dark: #f2b600;
+    --accent-line: #b98d00;
+    --accent-ink: #1c1e21;
+    --link: #8ab8f5;
+    --visited: #c3a8f0;
+    --ink: #e9eaec;
+    --ink-hover: #cfd1d5;
+    --on-ink: #17191c;
+
+    --green: #63d492;
+    --amber: #e9bc52;
+    --blue: #8ab8f5;
+    --red: #ff9b8f;
+    --urgent: #d9342b;
+
+    --topbar: #000;
+    --mainbar: #0b0b0c;
+    --footer-bg: #0b0b0c;
+    --footer-line: #2f3237;
+
+    --tag-bg: #3a3213;
+    --tag-text: #ffe08a;
+
+    --control-bg: #101114;
+    --control-border: #5c6067;
+    --selected: #1c2a3d;
+    --selected-line: #33506f;
+    --warn-bg: #272012;
+    --warn-line: #57471d;
+    --ok-bg: #11261a;
+    --ok-line: #285c3c;
+    --ok-text: #8fe3b0;
+    --err-bg: #2a1413;
+    --err-line: #6b2f2b;
+    --err-text: #ffb4ab;
+    --track: #303236;
+    --star-empty: #565a60;
+    --shadow: 0 4px 16px rgb(0 0 0 / 0.7);
+    color-scheme: dark;
+  }
+}
