@@ -323,6 +323,11 @@ const idOf = path => path.split('/').pop();
   const soonPath = await newRequest(owner, { title: `Kapı kilidi değişecek ${stamp}`, description: FILLER, category: 'İnşaat & Tadilat', deadline: soon });
   check("son tarihi yaklaşan talebe uyarı", (await get(owner, soonPath)).text.includes('id="son-tarih"') && !(await get(null, soonPath)).text.includes('id="son-tarih"'));
 
+  // Hizmet sayfasında işler ve fiyatlar, talepte bu işi yapan firma sayısı
+  const insaatLanding = (await get(null, '/hizmet/insaat-tadilat')).text;
+  check("hizmet sayfasında sık yaptırılan işler", insaatLanding.includes('Sık Yaptırılan İşler ve Fiyatları') && insaatLanding.includes('Boya badana'));
+  check("talepte bu işi yapan firma sayısı", /<td>Bu İşi Yapan Firmalar<\/td><td><a href="\/companies\?category=[^"]+">\d+ firma<\/a>/.test(boyaPage));
+
   console.log(`${passed} geçti, ${failures} hata`);
   process.exit(failures ? 1 : 0);
 })().catch(err => {

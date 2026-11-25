@@ -588,7 +588,7 @@ router.get('/:id', async (req, res, next) => {
       return { _id: bid._id, status: bid.status, createdAt: bid.createdAt, company, hidden: true };
     });
 
-    const [similarAll, ownerOpenCount, averages, review, alreadyReported, lastBid, bidder, newerRequest, olderRequest, ownerOthers, favoriteCount, board, suitableFirms] = await Promise.all([
+    const [similarAll, ownerOpenCount, averages, review, alreadyReported, lastBid, bidder, newerRequest, olderRequest, ownerOthers, favoriteCount, board, suitableFirms, firmCount] = await Promise.all([
       Request.find({ ...liveFilter(), category: request.category, _id: { $ne: request._id } })
         .sort({ createdAt: -1 })
         .limit(20)
@@ -617,7 +617,9 @@ router.get('/:id', async (req, res, next) => {
           .sort({ rating: -1, ratingCount: -1 })
           .limit(4)
           .lean()
-        : []
+        : [],
+      // Bu işi yapan firma sayısı: kategoride çalışan ve talebin iline hizmet veren
+      User.countDocuments({ role: 'company', suspended: { $ne: true }, categories: request.category, ...firmsServing(request.city) })
     ]);
     // Talep fiyat panosundaki bir işe uyuyorsa (boya badana gibi) o işte tekliflerin çoğunun düştüğü aralık
     const jobPrice = board.find(row => row.category === request.category && matchesText(row.search, [request.title])) || null;
@@ -664,6 +666,7 @@ router.get('/:id', async (req, res, next) => {
       favoriteCount,
       jobPrice,
       suitableFirms,
+      firmCount,
       invitedIds: (request.invitedCompanies || []).map(String),
       newerRequest,
       olderRequest,

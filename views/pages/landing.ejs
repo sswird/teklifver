@@ -49,6 +49,20 @@
         <% } %>
       </section>
 
+      <% if (locals.jobs && jobs.length) { %>
+        <section class="box">
+          <h2 class="box-head">Sık Yaptırılan İşler ve Fiyatları</h2>
+          <p class="box-note">Son altı ayda verilen tekliflerin ortadaki yarısı.</p>
+          <table class="data-table jobs-table">
+            <tbody>
+              <% jobs.forEach(job => { %>
+                <tr><td><a href="/requests?<%= new URLSearchParams({ category: job.category, search: job.search }) %>"><%= job.label %></a></td><td class="num"><strong><%= money(job.low).replace(' TL', '') %> - <%= money(job.high) %></strong></td><td class="num muted"><%= job.count %> teklif</td></tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </section>
+      <% } %>
+
       <% if (factors.length) { %>
         <section class="box">
           <h2 class="box-head">Fiyatı Neler Etkiler?</h2>

@@ -124,6 +124,9 @@
         <tr><td>Durum</td><td><%- include('../partials/status', { status: requestStatus[request.status] }) %></td></tr>
         <tr><td>Teklif Sayısı</td><td><%= bids.length %></td></tr>
         <tr><td>Görüntülenme</td><td><%= request.viewCount %></td></tr>
+        <% if (firmCount) { %>
+          <tr><td>Bu İşi Yapan Firmalar</td><td><a href="/companies?<%= new URLSearchParams({ category: request.category, ...(request.city ? { city: request.city } : {}) }) %>"><%= firmCount %> firma</a><% if (request.city) { %> <span class="muted small">(<%= request.city %> ilinde hizmet veren)</span><% } %></td></tr>
+        <% } %>
         <% if (jobPrice) { %>
           <tr><td>Benzer İşlerde</td><td><strong><%= money(jobPrice.low).replace(' TL', '') %> - <%= money(jobPrice.high) %></strong> <span class="muted small">(<%= jobPrice.label.toLocaleLowerCase('tr-TR') %>, <%= jobPrice.count %> teklif)</span> <a class="small" href="/fiyat-rehberi">Fiyat rehberi</a></td></tr>
         <% } %>
