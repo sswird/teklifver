@@ -120,7 +120,7 @@ router.get('/', async (req, res, next) => {
     const filter = buildConditions(filters);
 
     // Arama ya da filtre varken soldaki kategori sayıları o aramaya göre (kategori seçimi hariç) sayılır.
-    const filtered = ['search', 'city', 'district', 'budgetMin', 'budgetMax', 'period', 'photos', 'noBids', 'urgent'].some(key => filters[key]);
+    const filtered = ['search', 'city', 'district', 'budgetMin', 'budgetMax', 'period', 'photos', 'noBids', 'budgeted', 'urgent'].some(key => filters[key]);
     // İl seçiliyse soldaki ilçe listesi: sayılar ilçe seçimi hariç aynı aramaya göre.
     const cityFilter = filters.city ? buildConditions({ ...filters, district: '' }) : null;
     const [total, counts, menuRows, districtsByCity, districtRows, cityTotal] = await Promise.all([

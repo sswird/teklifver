@@ -65,6 +65,8 @@ router.get('/', isLoggedIn, async (req, res, next) => {
         pendingBids: myBids.filter(b => b.status === 'pending').length,
         acceptedBids: myBids.filter(b => b.status === 'accepted').length,
         rejectedBids: myBids.filter(b => b.status === 'rejected').length,
+        // Sonuçlanan tekliflerde kabul oranı (bekleyenler sayılmaz)
+        winRate: (() => { const decided = myBids.filter(b => ['accepted', 'rejected'].includes(b.status)).length; return decided ? Math.round((myBids.filter(b => b.status === 'accepted').length / decided) * 100) : null; })(),
         totalEarnings: myBids.filter(b => b.status === 'accepted').reduce((sum, b) => sum + b.amount, 0)
       }
     });

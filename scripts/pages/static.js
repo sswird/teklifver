@@ -73,6 +73,7 @@
       period: ['1', '7', '30'].includes(period) ? period : '',
       photos: query.get('photos') === 'on',
       noBids: query.get('noBids') === 'on',
+      budgeted: query.get('budgeted') === 'on',
       urgent: query.get('urgent') === 'on',
       sort: Object.hasOwn(REQUEST_SORTS, sort) ? sort : 'newest',
       view: query.get('view') === 'gallery' ? 'gallery' : 'list',
@@ -90,6 +91,7 @@
     if (filters.period && item.created < builtAt - Number(filters.period) * DAY_MS) return false;
     if (filters.photos && !item.photos) return false;
     if (filters.noBids && item.bids > 0) return false;
+    if (filters.budgeted && !item.min && !item.max) return false;
     if (filters.urgent && !item.urgent) return false;
     if (filters.search) {
       const byNumber = /^\d{6,}$/.test(filters.search) && String(item.no) === filters.search;
@@ -110,6 +112,7 @@
     if (state.period) params.set('period', state.period);
     if (state.photos) params.set('photos', 'on');
     if (state.noBids) params.set('noBids', 'on');
+    if (state.budgeted) params.set('budgeted', 'on');
     if (state.urgent) params.set('urgent', 'on');
     if (state.sort !== 'newest') params.set('sort', state.sort);
     if (state.view !== 'list') params.set('view', state.view);
@@ -133,7 +136,7 @@
   }
 
   const hasActiveFilters = filters => Boolean(filters.search || filters.city || filters.district || filters.budgetMin || filters.budgetMax ||
-    filters.period || filters.photos || filters.noBids || filters.urgent);
+    filters.period || filters.photos || filters.noBids || filters.budgeted || filters.urgent);
 
   // Sunucudaki categories.guess ile aynı kural: en uzun eşleşen anahtar kelime kazanır.
   function guessCategory(data, text) {
@@ -228,7 +231,7 @@
     if (filters.city && filters.district) trail.push([filters.district, null]);
     trail.forEach(([label, state], index) => {
       const last = index === trail.length - 1;
-      const base = { search: '', category: 'all', city: '', district: '', budgetMin: 0, budgetMax: 0, period: '', photos: false, noBids: false, urgent: false, sort: 'newest', view: 'list', perPage: PAGE_SIZE };
+      const base = { search: '', category: 'all', city: '', district: '', budgetMin: 0, budgetMax: 0, period: '', photos: false, noBids: false, budgeted: false, urgent: false, sort: 'newest', view: 'list', perPage: PAGE_SIZE };
       crumbs.append(' › ', last ? element('span', { textContent: label }) : element('a', { href: requestUrl(base, state), textContent: label }));
     });
   }
@@ -257,10 +260,11 @@
       form.elements.period.value = filters.period;
       form.elements.photos.checked = filters.photos;
       form.elements.noBids.checked = filters.noBids;
+      if (form.elements.budgeted) form.elements.budgeted.checked = filters.budgeted;
       if (form.elements.urgent) form.elements.urgent.checked = filters.urgent;
 
       const hasFilters = filters.search || filters.category !== 'all' || filters.city || filters.budgetMin ||
-        filters.budgetMax || filters.period || filters.photos || filters.noBids || filters.urgent || filters.district;
+        filters.budgetMax || filters.period || filters.photos || filters.noBids || filters.budgeted || filters.urgent || filters.district;
       if (hasFilters) {
         const clear = element('a', { className: 'small', href: `${BASE}/requests/`, textContent: 'Filtreleri temizle' });
         const holder = element('div', {}, [clear]);
@@ -281,6 +285,7 @@
       setHidden(sortForm, 'period', filters.period);
       setHidden(sortForm, 'photos', filters.photos ? 'on' : '');
       setHidden(sortForm, 'noBids', filters.noBids ? 'on' : '');
+      setHidden(sortForm, 'budgeted', filters.budgeted ? 'on' : '');
       setHidden(sortForm, 'urgent', filters.urgent ? 'on' : '');
       setHidden(sortForm, 'view', filters.view === 'list' ? '' : filters.view);
       setHidden(sortForm, 'perPage', filters.perPage === PAGE_SIZE ? '' : filters.perPage);
@@ -306,6 +311,7 @@
     if (filters.period) chips.push([filters.period === '1' ? 'Son 24 saat' : `Son ${filters.period} gün`, { period: '' }]);
     if (filters.photos) chips.push(['Fotoğraflı', { photos: false }]);
     if (filters.noBids) chips.push(['Teklif almamış', { noBids: false }]);
+    if (filters.budgeted) chips.push(['Bütçesi belli', { budgeted: false }]);
     if (filters.urgent) chips.push(['Acil', { urgent: false }]);
     box.hidden = chips.length === 0;
     box.replaceChildren(...chips.map(([label, overrides]) => element('a', {
@@ -319,7 +325,7 @@
   function renderFilterButton(filters) {
     const button = $('[data-open-filters]');
     if (!button || !button.lastChild) return;
-    const active = [filters.search, filters.city, filters.district, filters.budgetMin, filters.budgetMax, filters.period, filters.photos, filters.noBids, filters.urgent].filter(Boolean).length;
+    const active = [filters.search, filters.city, filters.district, filters.budgetMin, filters.budgetMax, filters.period, filters.photos, filters.noBids, filters.budgeted, filters.urgent].filter(Boolean).length;
     button.lastChild.textContent = ' Filtrele' + (active ? ` (${active})` : '');
   }
 

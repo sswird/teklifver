@@ -11,7 +11,7 @@
       <div class="summary">
         <div><strong><%= stats.pendingBids %></strong><span>Bekleyen</span></div>
         <div><strong><%= stats.acceptedBids %></strong><span>Kabul edilen</span></div>
-        <div><strong><%= stats.rejectedBids %></strong><span>Reddedilen</span></div>
+        <div><strong><%= stats.rejectedBids %></strong><span>Reddedilen<% if (stats.winRate !== null) { %> · kabul oranı %<%= stats.winRate %><% } %></span></div>
         <div><strong><%= money(stats.totalEarnings) %></strong><span>Kabul edilen tutar</span></div>
       </div>
       <p class="box-note">

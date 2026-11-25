@@ -311,6 +311,11 @@ const idOf = path => path.split('/').pop();
   const rivalPage = (await get(null, `/companies/${rivalId}`)).text;
   check("firma sayfasında son teklif verdiği talepler", rivalPage.includes('Son Teklif Verdiği Talepler') && rivalPage.includes(`href="${fresh}"`) && !rivalPage.includes('7.000 TL'));
 
+  // Bütçesi belli filtresi, firma panelinde kabul oranı
+  const budgeted = (await get(null, '/requests?budgeted=on&perPage=50')).text;
+  check("bütçesi belli filtresi", /class="quick-chip is-active" data-quick="budgeted"/.test(budgeted) && !budgeted.includes('price-tag is-open') && budgeted.includes('class="listing-title"'));
+  check("bütçesiz talep filtresiz listede var", (await get(null, '/requests?perPage=50')).text.includes('price-tag is-open'));
+
   console.log(`${passed} geçti, ${failures} hata`);
   process.exit(failures ? 1 : 0);
 })().catch(err => {
