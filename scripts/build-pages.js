@@ -235,6 +235,9 @@ function makeRewriter(aliases) {
     (match, attribute, value) => `${attribute}="${convert(value)}"`);
 }
 
+// Ön izleme dosyaları içeriğine göre sürüm eki alır: yayından sonra tarayıcı eski kopyayı kullanmasın.
+const fileVersion = rel => crypto.createHash('sha1').update(fs.readFileSync(path.join(ROOT, rel))).digest('hex').slice(0, 10);
+
 function finishPage(html, rewrite) {
   const page = rewrite(html.replace(/<div class="demo-note">[\s\S]*?<\/div>\s*<\/div>/, ''));
 
@@ -242,7 +245,7 @@ function finishPage(html, rewrite) {
     .replace('<html lang="tr">', `<html lang="tr" data-base="${BASE}">`)
     .replace('<meta charset="UTF-8">', '<meta charset="UTF-8">\n  <meta name="robots" content="noindex">')
     .replace(/<script src="[^"]*\/js\/main\.js[^"]*" defer><\/script>/, match =>
-      `<link href="${BASE}/css/static.css" rel="stylesheet">\n  <script src="${BASE}/js/search-terms.js" defer></script>\n  <script src="${BASE}/js/static.js" defer></script>\n  ${match}`)
+      `<link href="${BASE}/css/static.css?v=${fileVersion('scripts/pages/static.css')}" rel="stylesheet">\n  <script src="${BASE}/js/search-terms.js?v=${fileVersion('public/js/search-terms.js')}" defer></script>\n  <script src="${BASE}/js/static.js?v=${fileVersion('scripts/pages/static.js')}" defer></script>\n  ${match}`)
     .replace('<body>', `<body>\n  <div class="preview-bar">Önizleme sürümü: talepler, firmalar ve puanlar örnek veridir. Üyelik, talep verme, teklif ve mesajlaşma kapalıdır.</div>`);
 }
 
