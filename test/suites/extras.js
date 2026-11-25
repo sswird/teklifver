@@ -305,6 +305,12 @@ const idOf = path => path.split('/').pop();
   check("ziyaretçi uygun firmaları görmez", !(await get(null, fresh)).text.includes('uygun-firmalar'));
   check("galeride yer ve teklif sayısı", /class="showcase-meta">[^<]*\d+ teklif<\/div>/.test((await get(null, '/requests?view=gallery')).text));
 
+  // Firmaya "teklif verdiniz" etiketi, firma sayfasında son teklifler
+  check("firma listede teklif verdiği talebi etiketli görür", (await get(rival, `/requests?search=${encodeURIComponent('Balkon duvarı')}`)).text.includes('<span class="label label-bid">TEKLİF VERDİNİZ</span>'));
+  check("ziyaretçi teklif etiketini görmez", !(await get(null, '/requests')).text.includes('label-bid'));
+  const rivalPage = (await get(null, `/companies/${rivalId}`)).text;
+  check("firma sayfasında son teklif verdiği talepler", rivalPage.includes('Son Teklif Verdiği Talepler') && rivalPage.includes(`href="${fresh}"`) && !rivalPage.includes('7.000 TL'));
+
   console.log(`${passed} geçti, ${failures} hata`);
   process.exit(failures ? 1 : 0);
 })().catch(err => {

@@ -213,6 +213,20 @@
             </div>
           </div>
         <% } %>
+        <% if (!bids.length && Date.now() - new Date(request.createdAt).getTime() > 24 * 60 * 60 * 1000) { %>
+          <div class="side-card" id="teklif-gelmedi">
+            <div class="side-card-head">Teklif gelmedi mi?</div>
+            <div class="side-card-body">
+              <ul class="owner-tips">
+                <% if (!hasPhotos) { %><li>Fotoğraf ekleyin; fotoğraflı talepler daha çok teklif alır.</li><% } %>
+                <% if (!request.budget || (!request.budget.min && !request.budget.max)) { %><li>Bütçe yazın; firmalar işin büyüklüğünü anlasın.</li><% } %>
+                <% if (request.description.length < 120) { %><li>Açıklamaya ölçü, malzeme ve zaman ekleyin.</li><% } %>
+                <% if (suitableFirms.length) { %><li><a href="#uygun-firmalar">Uygun firmaları davet edin.</a></li><% } %>
+              </ul>
+              <a class="btn btn-block" href="/requests/<%= request._id %>/edit">Talebi Düzenle</a>
+            </div>
+          </div>
+        <% } %>
       <% } else if (isOwner && request.status === 'in_progress') { %>
         <div class="side-card">
           <div class="side-card-head">İşi Tamamla</div>

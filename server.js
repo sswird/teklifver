@@ -19,6 +19,7 @@ const { seedDemoData, demoAccounts } = require('./config/demo');
 const Request = require('./models/Request');
 const Message = require('./models/Message');
 const Notification = require('./models/Notification');
+const Bid = require('./models/Bid');
 const User = require('./models/User');
 const ads = require('./config/ads');
 const site = require('./config/site');
@@ -297,6 +298,10 @@ async function start() {
         Message.countDocuments({ receiver: id, read: false }),
         Notification.countDocuments({ user: id, read: false })
       ]);
+      // Firma, listelerde teklif verdiği talepleri "TEKLİF VERDİNİZ" etiketiyle görür.
+      if (req.session.user.role === 'company' && req.method === 'GET') {
+        res.locals.myBidIds = new Set((await Bid.distinct('request', { company: id })).map(String));
+      }
       next();
     } catch (err) {
       next(err);

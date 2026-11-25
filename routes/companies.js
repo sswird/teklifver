@@ -132,7 +132,7 @@ router.get('/:id', async (req, res, next) => {
     if (!viewer || viewer.id !== String(company._id)) {
       await User.updateOne({ _id: company._id }, { $inc: { profileViews: 1 } }, { timestamps: false });
     }
-    const [wonBids, stats, reviews, ownRequests, alreadyReported, badgeMap, similarFirms] = await Promise.all([
+    const [wonBids, stats, reviews, ownRequests, alreadyReported, badgeMap, similarFirms, recentBids] = await Promise.all([
       Bid.find({ company: company._id, status: 'accepted' })
         .populate('request', 'no title category status city location images createdAt')
         .sort({ createdAt: -1 })
@@ -158,7 +158,13 @@ router.get('/:id', async (req, res, next) => {
           .sort({ rating: -1, ratingCount: -1 })
           .limit(4)
           .lean()
-        : []
+        : [],
+      // Son teklif verdiği açık talepler: firmanın hangi işlerle ilgilendiği (tutarlar gösterilmez)
+      Bid.find({ company: company._id, status: 'pending' })
+        .populate({ path: 'request', match: liveFilter(), select: 'title category city location createdAt' })
+        .sort({ createdAt: -1 })
+        .limit(12)
+        .lean()
     ]);
     const similarBadges = await badgesFor(similarFirms);
 
@@ -190,6 +196,7 @@ router.get('/:id', async (req, res, next) => {
       similarBadges,
       reviews: reviews.filter(review => review.customer),
       jobs: wonBids.filter(bid => bid.request).map(bid => ({ ...bid.request, wonAmount: bid.amount })),
+      recentBids: recentBids.filter(bid => bid.request).slice(0, 5),
       inviteOptions: ownRequests.filter(item => !(item.invitedCompanies || []).some(id => String(id) === companyId)),
       isOwnPage: Boolean(viewer && viewer.id === companyId),
       reportReasons: COMPANY_REPORT_REASONS,

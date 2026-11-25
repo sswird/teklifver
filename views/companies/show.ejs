@@ -165,6 +165,18 @@
     <% } %>
   </section>
 
+  <% if (recentBids.length) { %>
+    <section class="box">
+      <div class="box-head">Son Teklif Verdiği Talepler</div>
+      <p class="box-note">Teklif tutarları yalnızca talep sahibine görünür.</p>
+      <ul class="recent-bids">
+        <% recentBids.forEach(bid => { %>
+          <li><a href="/requests/<%= bid.request._id %>"><%= bid.request.title %></a> <span><%= bid.request.category %><% if (bid.request.city) { %> · <%= placeLabel(bid.request) %><% } %> · <%= timeAgo(bid.createdAt) %></span></li>
+        <% }) %>
+      </ul>
+    </section>
+  <% } %>
+
   <% if (similarFirms.length) { %>
     <section class="box">
       <div class="box-head">Benzer Firmalar<% if (firstCategory) { %> <a href="/companies?category=<%= encodeURIComponent(firstCategory.name) %>">Tüm <%= firstCategory.name %> firmaları</a><% } %></div>
