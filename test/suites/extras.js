@@ -316,6 +316,13 @@ const idOf = path => path.split('/').pop();
   check("bütçesi belli filtresi", /class="quick-chip is-active" data-quick="budgeted"/.test(budgeted) && !budgeted.includes('price-tag is-open') && budgeted.includes('class="listing-title"'));
   check("bütçesiz talep filtresiz listede var", (await get(null, '/requests?perPage=50')).text.includes('price-tag is-open'));
 
+  // İl seçiminde talep sayısı, rehberde kategori başına firma sayısı, son tarih uyarısı
+  check("il seçiminde talep sayısı", /<option value="İstanbul" >İstanbul \(\d+\)<\/option>/.test((await get(null, '/requests')).text));
+  check("rehberde kategori başına firma sayısı", /<option value="Temizlik" >Temizlik \(\d+\)<\/option>/.test((await get(null, '/companies')).text));
+  const soon = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul' }).format(new Date(Date.now() + 864e5));
+  const soonPath = await newRequest(owner, { title: `Kapı kilidi değişecek ${stamp}`, description: FILLER, category: 'İnşaat & Tadilat', deadline: soon });
+  check("son tarihi yaklaşan talebe uyarı", (await get(owner, soonPath)).text.includes('id="son-tarih"') && !(await get(null, soonPath)).text.includes('id="son-tarih"'));
+
   console.log(`${passed} geçti, ${failures} hata`);
   process.exit(failures ? 1 : 0);
 })().catch(err => {

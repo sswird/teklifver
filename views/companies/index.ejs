@@ -17,7 +17,7 @@
             <select class="select" id="companyCategory" name="category">
               <option value="">Tümü</option>
               <% categories.forEach(item => { %>
-                <option value="<%= item.name %>" <%= category === item.name ? 'selected' : '' %>><%= item.name %></option>
+                <option value="<%= item.name %>" <%= category === item.name ? 'selected' : '' %>><%= item.name %><% if (firmCounts[item.name]) { %> (<%= firmCounts[item.name] %>)<% } %></option>
               <% }) %>
             </select>
           </div>

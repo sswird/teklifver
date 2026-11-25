@@ -213,6 +213,15 @@
             </div>
           </div>
         <% } %>
+        <% if (request.deadline && new Date(request.deadline).getTime() - Date.now() < 3 * 24 * 60 * 60 * 1000) { %>
+          <div class="side-card side-card-warn" id="son-tarih">
+            <div class="side-card-head">Son tarih yaklaşıyor</div>
+            <div class="side-card-body">
+              <p class="small">Talebiniz <%= timeLeft(request.deadline) %> sonra yayından kalkacak. Daha çok teklif istiyorsanız son tarihi uzatın.</p>
+              <a class="btn btn-block" href="/requests/<%= request._id %>/edit#deadline">Son Tarihi Uzat</a>
+            </div>
+          </div>
+        <% } %>
         <% if (!bids.length && Date.now() - new Date(request.createdAt).getTime() > 24 * 60 * 60 * 1000) { %>
           <div class="side-card" id="teklif-gelmedi">
             <div class="side-card-head">Teklif gelmedi mi?</div>

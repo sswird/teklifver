@@ -87,7 +87,7 @@
             <select class="select" id="filterCity" name="city">
               <option value="">Tümü</option>
               <% allCities.forEach(city => { %>
-                <option value="<%= city %>" <%= filters.city === city ? 'selected' : '' %>><%= city %></option>
+                <option value="<%= city %>" <%= filters.city === city ? 'selected' : '' %>><%= city %><% if (cityCounts[city]) { %> (<%= cityCounts[city] %>)<% } %></option>
               <% }) %>
             </select>
           </div>

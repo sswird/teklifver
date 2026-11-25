@@ -19,7 +19,7 @@ const { rateLimit } = require('express-rate-limit');
 const { uploadImages, deleteImages, copyImages, MAX_IMAGES } = require('../middleware/upload');
 const { str, safeNext } = require('../lib/input');
 const { searchPatterns, matchesText, similarityPatterns, rankSimilar, didYouMean } = require('../public/js/search-terms');
-const { openCountsByCategory, uniqueByPhoto, categoryAverages, priceGuide, districtsByCity: loadDistricts, districtCounts, searchVocabulary } = require('../lib/stats');
+const { openCountsByCategory, uniqueByPhoto, categoryAverages, priceGuide, districtsByCity: loadDistricts, districtCounts, searchVocabulary, openCountsByCity } = require('../lib/stats');
 const { priceBoard } = require('../lib/price-board');
 const { SORT_OPTIONS, liveFilter, readFilters, buildConditions, filtersToQuery, firmsServing, placePrefixSource } = require('../lib/listing');
 const { notify, notifyMany } = require('../lib/notify');
@@ -123,7 +123,7 @@ router.get('/', async (req, res, next) => {
     const filtered = ['search', 'city', 'district', 'budgetMin', 'budgetMax', 'period', 'photos', 'noBids', 'budgeted', 'urgent'].some(key => filters[key]);
     // İl seçiliyse soldaki ilçe listesi: sayılar ilçe seçimi hariç aynı aramaya göre.
     const cityFilter = filters.city ? buildConditions({ ...filters, district: '' }) : null;
-    const [total, counts, menuRows, districtsByCity, districtRows, cityTotal] = await Promise.all([
+    const [total, counts, menuRows, districtsByCity, districtRows, cityTotal, cityCounts] = await Promise.all([
       Request.countDocuments(filter),
       openCountsByCategory(),
       filtered
@@ -131,7 +131,8 @@ router.get('/', async (req, res, next) => {
         : null,
       loadDistricts(),
       cityFilter ? districtCounts(cityFilter) : [],
-      cityFilter ? Request.countDocuments(cityFilter) : 0
+      cityFilter ? Request.countDocuments(cityFilter) : 0,
+      openCountsByCity()
     ]);
     const totalPages = Math.max(Math.ceil(total / filters.perPage), 1);
     const page = Math.min(requestedPage, totalPages);
@@ -167,6 +168,7 @@ router.get('/', async (req, res, next) => {
       districtsByCity,
       districtRows,
       cityTotal,
+      cityCounts,
       suggestion,
       spellFix,
       fallback,

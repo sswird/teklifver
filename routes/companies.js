@@ -63,6 +63,8 @@ router.get('/', async (req, res, next) => {
       .lean();
 
     const badgeMap = await badgesFor(companies);
+    // Kategori seçiminde her kategoride kaç firma olduğu
+    const categoryRows = await User.aggregate([{ $match: { role: 'company', suspended: { $ne: true } } }, { $unwind: '$categories' }, { $group: { _id: '$categories', total: { $sum: 1 } } }]);
     const params = new URLSearchParams();
     Object.entries({ search, city, category, minRating, verified: verified ? 'on' : '', sort: sort === 'rating' ? '' : sort })
       .forEach(([key, value]) => { if (value) params.set(key, value); });
@@ -73,6 +75,7 @@ router.get('/', async (req, res, next) => {
       companies,
       badgeMap,
       categories,
+      firmCounts: Object.fromEntries(categoryRows.map(row => [row._id, row.total])),
       search,
       city,
       category,
